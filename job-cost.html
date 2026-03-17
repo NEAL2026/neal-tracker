@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Cost Form — NEAL</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --deep: #1a3a52; --teal: #00aeef; --copper: #bf7825;
+  --ink: #1a2e3e; --sand: #f8f5f0; --sand-mid: #ece8e0;
+  --sand-dark: #d4cfc4; --text-dim: #7a9aaa;
+  --green: #1a6e48; --danger: #a82828;
+}
+body { font-family: Outfit, sans-serif; background: #f0eee8; color: var(--ink); font-size: 13px; }
+
+/* HEADER */
+.hdr { background: var(--deep); padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,.35); }
+.hdr-left { display: flex; align-items: center; gap: 12px; }
+.hdr img { height: 34px; background: white; border-radius: 6px; padding: 3px 6px; }
+.hdr-title .lbl { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,.45); }
+.hdr-title .name { font-family: "Cormorant Garamond", serif; font-size: 18px; font-weight: 700; font-style: italic; color: var(--teal); }
+.hdr-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { padding: 7px 14px; border-radius: 7px; font-family: Outfit, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: .15s; }
+.btn-back { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: white; }
+.btn-save { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); color: white; }
+.btn-print { background: var(--teal); color: white; }
+.btn-tim { background: var(--copper); color: white; }
+
+/* JOB INFO BAR */
+.job-bar { background: white; border-bottom: 2px solid var(--teal); padding: 10px 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+.jf { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 120px; }
+.jf label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); }
+.jf input, .jf select { border: none; border-bottom: 1px solid var(--sand-dark); padding: 4px 0; font-family: Outfit, sans-serif; font-size: 13px; font-weight: 600; color: var(--ink); background: transparent; width: 100%; }
+.jf input:focus, .jf select:focus { outline: none; border-bottom-color: var(--teal); }
+
+/* STATUS BAR */
+.status-bar { background: var(--sand); border-bottom: 1px solid var(--sand-mid); padding: 7px 20px; display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+.status-bar .lbl { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); }
+.status-bar label { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.weather-wrap { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.weather-wrap label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); white-space: nowrap; }
+.weather-wrap input { border: 1px solid var(--sand-dark); border-radius: 6px; padding: 4px 8px; font-family: Outfit, sans-serif; font-size: 12px; width: 220px; }
+
+/* SPECIAL INSTRUCTIONS */
+.special-bar { background: white; padding: 7px 20px; border-bottom: 1px solid var(--sand-mid); display: flex; align-items: flex-start; gap: 10px; }
+.special-bar .lbl { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); white-space: nowrap; padding-top: 5px; }
+.special-bar textarea { flex: 1; border: 1px solid var(--sand-mid); border-radius: 6px; padding: 5px 8px; font-family: Outfit, sans-serif; font-size: 12px; resize: none; }
+
+/* BODY */
+.body { padding: 14px 20px; max-width: 1200px; margin: 0 auto; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* SECTION */
+.sec-hdr { padding: 6px 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; font-size: 10px; color: white; border-radius: 6px 6px 0 0; }
+.sec-teal { background: var(--teal); }
+.sec-gray { background: #555; }
+.sec-green { background: var(--green); }
+.sec-orange { background: #e07820; }
+
+/* MATERIAL TABLES */
+.mat-tbl { width: 100%; border-collapse: collapse; background: white; margin-bottom: 14px; border-radius: 0 0 6px 6px; overflow: hidden; box-shadow: 0 2px 8px rgba(26,58,82,.07); }
+.mat-tbl thead tr { background: rgba(0,174,239,.08); }
+.mat-tbl th { padding: 5px 8px; text-align: left; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--teal); border-bottom: 1px solid var(--sand-mid); }
+.mat-tbl td { padding: 2px 5px; border-bottom: 1px solid var(--sand); }
+.mat-tbl tr:last-child td { border-bottom: none; }
+.mat-tbl td input[type=text], .mat-tbl td input[type=number] { width: 100%; border: none; background: transparent; padding: 5px 3px; font-family: Outfit, sans-serif; font-size: 12px; color: var(--ink); }
+.mat-tbl td input:focus { outline: none; background: rgba(0,174,239,.05); border-radius: 3px; }
+.mat-tbl td input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--teal); cursor: pointer; }
+.mat-tbl td.ctr { text-align: center; vertical-align: middle; }
+
+/* NOTES */
+.notes-area { width: 100%; border: none; border-top: 1px solid var(--sand-mid); background: white; padding: 9px 10px; font-family: Outfit, sans-serif; font-size: 12px; resize: vertical; border-radius: 0 0 6px 6px; box-shadow: 0 2px 8px rgba(26,58,82,.07); margin-bottom: 14px; }
+
+/* SIGN OFF */
+.signoff { background: white; border-radius: 0 0 6px 6px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(26,58,82,.07); margin-bottom: 14px; }
+.signoff .row { display: flex; gap: 18px; margin-bottom: 12px; flex-wrap: wrap; }
+.signoff label { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.signoff .fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.signoff .f label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); display: block; margin-bottom: 3px; }
+.signoff .f input { width: 100%; border: none; border-bottom: 1px solid var(--sand-dark); padding: 4px 0; font-family: Outfit, sans-serif; font-size: 13px; }
+.signoff .f input:focus { outline: none; border-bottom-color: var(--teal); }
+
+/* AUTOCOMPLETE */
+#ac-drop { display: none; position: fixed; background: white; border: 1px solid var(--sand-dark); border-radius: 8px; max-height: 200px; overflow-y: auto; z-index: 99999; box-shadow: 0 8px 24px rgba(0,0,0,.15); min-width: 300px; }
+.ac-item { padding: 7px 11px; cursor: pointer; font-size: 12px; border-bottom: 1px solid var(--sand); display: flex; justify-content: space-between; align-items: center; }
+.ac-item:hover { background: var(--sand); }
+.ac-code { color: var(--text-dim); font-size: 10px; margin-left: 6px; }
+.ac-cat { color: var(--teal); font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+
+/* FOOTER */
+.footer { text-align: center; font-size: 10px; color: var(--text-dim); padding: 14px; border-top: 1px solid var(--sand-mid); margin-top: 14px; }
+
+@media (max-width: 768px) {
+  .two-col { grid-template-columns: 1fr; }
+  .job-bar { gap: 8px; }
+  .hdr-btns .btn-label { display: none; }
+}
+@media print {
+  .hdr, .no-print { display: none !important; }
+  body { background: white; }
+  .mat-tbl td input { border-bottom: 1px solid #ccc; }
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left">
+    <a href="index.html"><img src="data:image/jpeg;base64,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" alt="NEAL"></a>
+    <div class="hdr-title">
+      <div class="lbl">New England Aquatic Landscaping</div>
+      <div class="name">Job Cost & Materials Form 2026</div>
+    </div>
+  </div>
+  <div class="hdr-btns no-print">
+    <button class="btn btn-back" onclick="window.location='index.html'">← Dashboard</button>
+    <button class="btn btn-save" onclick="saveForm(event)">💾 Save</button>
+    <button class="btn btn-print" onclick="printFieldRef()">🖨 Field Reference</button>
+    <button class="btn btn-tim" onclick="sendToTim()">✉ Send to Tim</button>
+  </div>
+</div>
+
+<div class="job-bar">
+  <div class="jf" style="min-width:90px;max-width:110px"><label>Job #</label><input id="jc-number" placeholder="J-2026-001"></div>
+  <div class="jf" style="flex:2"><label>Customer Name</label><input id="jc-client" placeholder="Client name"></div>
+  <div class="jf" style="min-width:140px"><label>Feature Type</label>
+    <select id="jc-type"><option value="">— Select —</option><option>Ecosystem Pond</option><option>Pondless Waterfall</option><option>Stream</option><option>Wetland Filter</option><option>Fountain</option><option>Fire Feature</option><option>Repair / Renovation</option><option>Other</option></select>
+  </div>
+  <div class="jf" style="min-width:100px"><label>Size</label><input id="jc-size" placeholder="e.g. 12x16"></div>
+  <div class="jf" style="min-width:120px"><label>Start Date</label><input type="date" id="jc-start"></div>
+  <div class="jf" style="min-width:120px"><label>Target Complete</label><input type="date" id="jc-end"></div>
+</div>
+
+<div class="status-bar">
+  <span class="lbl">Status:</span>
+  <label><input type="radio" name="jc-status" value="In Progress" checked> In Progress</label>
+  <label><input type="radio" name="jc-status" value="Punch List"> Punch List</label>
+  <label><input type="radio" name="jc-status" value="Complete"> Complete</label>
+  <div class="weather-wrap">
+    <label>Weather / Site Conditions:</label>
+    <input id="jc-weather" placeholder="e.g. Clear, dry — clay soil">
+  </div>
+</div>
+
+<div class="special-bar">
+  <span class="lbl">Special Instructions</span>
+  <textarea id="jc-special" rows="2" placeholder="Client requests, special notes, concerns..."></textarea>
+</div>
+
+<div class="body">
+<div class="two-col">
+
+<!-- LEFT -->
+<div>
+
+<div class="sec-hdr sec-teal">Liner &amp; Underlayment</div>
+<table class="mat-tbl">
+  <thead><tr><th style="width:40%">Product</th><th>Product #</th><th>Size</th><th>Sq Ft</th></tr></thead>
+  <tbody id="s-liner">
+    <tr><td><input type="text" class="ps" placeholder="Pond Liner"></td><td><input type="text" class="pc"></td><td><input type="text" placeholder="size"></td><td><input type="text" placeholder="sqft"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Stream Liner"></td><td><input type="text" class="pc"></td><td><input type="text" placeholder="size"></td><td><input type="text" placeholder="sqft"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Basin Liner"></td><td><input type="text" class="pc"></td><td><input type="text" placeholder="size"></td><td><input type="text" placeholder="sqft"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="HD Under Liner"></td><td><input type="text" class="pc"></td><td><input type="text" placeholder="size"></td><td><input type="text" placeholder="sqft"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Rock Pad"></td><td><input type="text" class="pc"></td><td><input type="text" placeholder="size"></td><td><input type="text" placeholder="sqft"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Gravel Barrier"></td><td><input type="text" class="pc"></td><td><input type="text" placeholder="size"></td><td><input type="text" placeholder="sqft"></td></tr>
+  </tbody>
+</table>
+
+<div class="sec-hdr sec-teal">Filtration</div>
+<table class="mat-tbl">
+  <thead><tr><th style="width:55%">Product</th><th>Product #</th><th style="width:55px">Qty</th></tr></thead>
+  <tbody id="s-filt">
+    <tr><td><input type="text" class="ps" placeholder="BioFalls"></td><td><input type="text" class="pc"></td><td><input type="number" min="0" placeholder="qty"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Additional..."></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Skimmer"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Spillway"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Pressure Filter"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="BioBalls"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Additional..."></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Additional..."></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+  </tbody>
+</table>
+
+<div class="sec-hdr sec-teal">Pondless | Wetland | Intake Bay</div>
+<table class="mat-tbl">
+  <thead><tr><th style="width:55%">Product</th><th>Product #</th><th style="width:55px">Qty</th></tr></thead>
+  <tbody id="s-pond">
+    <tr><td><input type="text" class="ps" placeholder="Vault"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Extension"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Snorkel"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Centipede"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="AquaBlox"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Additional..."></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+  </tbody>
+</table>
+
+<div class="sec-hdr sec-teal">Plumbing</div>
+<table class="mat-tbl">
+  <thead><tr><th style="width:55%">Product</th><th>Product #</th><th style="width:55px">Qty</th></tr></thead>
+  <tbody id="s-plumb">
+    <tr><td><input type="text" placeholder="Pipe"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Check Valve"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Pump"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" placeholder="Fittings"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" placeholder="Additional..."></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" placeholder="Additional..."></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" placeholder="Additional..."></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+  </tbody>
+</table>
+
+<div class="sec-hdr sec-gray">Field Notes — Plumbing</div>
+<textarea class="notes-area" id="n-plumb" rows="3" placeholder="Plumbing field notes..."></textarea>
+
+</div><!-- end left -->
+
+<!-- RIGHT -->
+<div>
+
+<div class="sec-hdr sec-teal">Install Items</div>
+<table class="mat-tbl">
+  <thead><tr><th style="width:55%">Product</th><th>Product #</th><th style="width:55px">Qty</th></tr></thead>
+  <tbody id="s-install">
+    <tr><td><input type="text" class="ps" placeholder="Waterfall Foam"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Silicone"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Glue"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Cover Tape"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Seam Tape"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Primer"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Other..."></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+  </tbody>
+</table>
+
+<div class="sec-hdr sec-teal">Illumination</div>
+<table class="mat-tbl">
+  <thead><tr><th style="width:55%">Product</th><th>Product #</th><th style="width:55px">Qty</th></tr></thead>
+  <tbody id="s-light">
+    <tr><td><input type="text" class="ps" placeholder="Lights"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Lights"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Lights"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Transformer"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Home-Run Wire"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Smart Color Hub"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Extension Cable"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Splitters"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Additional..."></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+  </tbody>
+</table>
+
+<div class="sec-hdr sec-teal">Hard Goods</div>
+<table class="mat-tbl">
+  <thead><tr><th style="width:35%">Product</th><th>Delivery Ticket #</th><th>Unit</th><th style="width:55px">Qty</th></tr></thead>
+  <tbody id="s-hard">
+    <tr><td><input type="text" placeholder="Boulders"></td><td><input type="text" placeholder="ticket #"></td><td><input type="text" placeholder="tons"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" placeholder='3/4" Gravel'></td><td><input type="text" placeholder="ticket #"></td><td><input type="text" placeholder="tons"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" placeholder='1-2" Gravel'></td><td><input type="text" placeholder="ticket #"></td><td><input type="text" placeholder="tons"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" placeholder="LG River Jax"></td><td><input type="text" placeholder="ticket #"></td><td><input type="text" placeholder="tons"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" placeholder="Cobbles"></td><td><input type="text" placeholder="ticket #"></td><td><input type="text" placeholder="tons"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" placeholder="Stacked Slate"></td><td><input type="text" placeholder="ticket #"></td><td><input type="text" placeholder="sqft"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" placeholder="Top Soil"></td><td><input type="text" placeholder="ticket #"></td><td><input type="text" placeholder="yards"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" placeholder="Pool Sand"></td><td><input type="text" placeholder="ticket #"></td><td><input type="text" placeholder="bags"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" placeholder="Other..."></td><td><input type="text" placeholder="ticket #"></td><td><input type="text"></td><td><input type="number" min="0"></td></tr>
+  </tbody>
+</table>
+
+<div class="sec-hdr sec-teal">Add Ons</div>
+<table class="mat-tbl">
+  <thead><tr><th style="width:55%">Product</th><th>Product #</th><th style="width:55px">Qty</th></tr></thead>
+  <tbody id="s-addon">
+    <tr><td><input type="text" class="ps" placeholder="Auto Fill"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Auto Doser"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Copper Ionizer"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Fish Cave"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Jets / Bridge / Plants / Fish..."></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Smart Control"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+  </tbody>
+</table>
+
+<div class="sec-hdr sec-teal">Fountainscapes, Fire &amp; Other</div>
+<table class="mat-tbl">
+  <thead><tr><th style="width:55%">Product</th><th>Product #</th><th style="width:55px">Qty</th></tr></thead>
+  <tbody id="s-other">
+    <tr><td><input type="text" class="ps" placeholder="Fountainscape"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Fire Feature"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Water Treatments"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" class="ps" placeholder="Aeration"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" placeholder="Equipment Rental"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" placeholder="Disposal / Haul Away"></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+    <tr><td><input type="text" placeholder="Additional..."></td><td><input type="text" class="pc"></td><td><input type="number" min="0"></td></tr>
+  </tbody>
+</table>
+
+<div class="sec-hdr sec-gray">Field Notes — Other</div>
+<textarea class="notes-area" id="n-other" rows="3" placeholder="Additional field notes..."></textarea>
+
+</div><!-- end right -->
+</div><!-- end two-col -->
+
+<div class="sec-hdr sec-orange">Materials Left on Site</div>
+<textarea class="notes-area" id="n-leftover" rows="3" placeholder="List any materials remaining on site..."></textarea>
+
+<div class="sec-hdr sec-gray">Important Notes | Up-Sells | Follow-Up</div>
+<div style="background:white;border-radius:0 0 6px 6px;padding:12px 14px;box-shadow:0 2px 8px rgba(26,58,82,.07);margin-bottom:14px">
+  <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:3px">Notes:</div>
+  <textarea class="notes-area" id="n-notes" rows="2" placeholder="Important notes..." style="box-shadow:none;border-radius:0;margin-bottom:10px"></textarea>
+  <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:3px">Up-Sells / Follow-Up Items:</div>
+  <textarea class="notes-area" id="n-upsells" rows="2" placeholder="Up-sell opportunities or follow-up items..." style="box-shadow:none;border-radius:0;margin-bottom:0"></textarea>
+</div>
+
+<div class="sec-hdr sec-green">Job Completion Sign-Off</div>
+<div class="signoff">
+  <div class="row">
+    <label><input type="radio" name="jc-final" value="In Progress" checked> In Progress</label>
+    <label><input type="radio" name="jc-final" value="Punch List"> Punch List / Return Visit Needed</label>
+    <label><input type="radio" name="jc-final" value="Complete"> ✅ Job Complete</label>
+  </div>
+  <div class="fields">
+    <div class="f"><label>Date Completed</label><input type="date" id="jc-done-date"></div>
+    <div class="f"><label>Completed By</label><input id="jc-done-by" placeholder="Sean Sawicki"></div>
+    <div class="f"><label>Reviewed By</label><input id="jc-reviewed" placeholder="Name"></div>
+  </div>
+</div>
+
+<div class="no-print" style="display:flex;gap:10px;justify-content:flex-end;margin-bottom:14px">
+  <button class="btn btn-save" style="color:var(--ink);border:1px solid var(--sand-dark);background:white" onclick="saveForm(event)">💾 Save Progress</button>
+  <button class="btn btn-print" onclick="printFieldRef()">🖨 Print Field Reference (Techs)</button>
+  <button class="btn btn-tim" onclick="sendToTim()">✉ Send to Tim</button>
+</div>
+
+<div class="footer">New England Aquatic Landscaping &middot; 774-437-1160 &middot; iloveponds.com &middot; Confidential</div>
+</div>
+
+<div id="ac-drop"></div>
+
+<script>
+var AQUASCAPE_PRODUCTS = [{"n": "ULTRAKLEAN 3500 POND FILTER ELECTRONIC CONTROL BOARD & BALLAST KIT", "c": "0742575950570", "cat": "Filter-UV Clarifier"}, {"n": "PROFESSIONAL BLACK WATERFALL FOAM", "c": "827807300962", "cat": "Installation Tools"}, {"n": "POND AERATOR PRO - 8\" AERATION DISC", "c": "827807610016", "cat": "Aeration"}, {"n": "PATH AND AREA 3-WATT LED BULB", "c": "0742575840673", "cat": "Lighting"}, {"n": "SLUDGE & FILTER CLEANER PROFESSIONAL GRADE - 1 GAL / 3.78 L", "c": "0827807304083", "cat": "Water Treatments"}, {"n": "RAPID CLEAR FLOCCULANT PROFESSIONAL GRADE - 1 GAL / 3.78 L", "c": "0827807304120", "cat": "Water Treatments"}, {"n": "CLEAR FOR PONDS - 1 GAL / 3.78 L", "c": "0742575960685", "cat": "Water Treatments"}, {"n": "ONCE-A-YEAR POND PLANT FERTILIZER CAPSULES (QTY 12)", "c": "0742575890111", "cat": "Plant Care"}, {"n": "CHECK VALVE DUAL UNION 2.0 - 2\"", "c": "0827807480268", "cat": "Plumbing-Check Valves"}, {"n": "POLY PIPE - 1/4\" X 100' (30.48 M)", "c": "0827807150000", "cat": "Plumbing-Pipe/Tubing"}, {"n": "WEIGHTED AERATION TUBING - 3/8\" X 100' (30.5 M)", "c": "61014", "cat": "Aeration"}, {"n": "DOME TOP PATH AND AREA LANDSCAPE LIGHT", "c": "84064", "cat": "Lighting"}, {"n": "COLOR-CHANGING LIGHT EXTENSION CABLE - 25' (7.62 M)", "c": "0742575840697", "cat": "Lighting"}, {"n": "TRANSFORMER 60-WATT LOW VOLTAGE WITH PHOTOCELL", "c": "0742575990705", "cat": "Power"}, {"n": "PREMIUM COLOR ENHANCING FISH FOOD-SMALL PELLETS - 1.1 LB / 500 G", "c": "98873", "cat": "Fish Care"}, {"n": "U-SHAPED GROUND STAKES (QTY 100)", "c": "74008", "cat": "Seasonal"}, {"n": "WIDE-ANGLE LIGHT 8-WATT", "c": "742575840772", "cat": "Lighting"}, {"n": "ULTRAKLEAN 2000/3500 POND FILTER VALVE KIT", "c": "074257595103", "cat": "Filter-UV Clarifier"}, {"n": "BIOBALLS BIOLOGICAL FILTER MEDIA (QTY 1000)", "c": "56014", "cat": "Filter-Media"}, {"n": "SMART POND DOSING SYSTEM XT", "c": "40040", "cat": "Water Treatment-Dosing System"}, {"n": "COARSE FILTER MEDIA ROLL - 2\" THICK - 10' L X 56\" W (305 X 142 CM)", "c": "99323", "cat": "Filter-Media"}, {"n": "POND SLUDGE REMOVER PACKS (QTY 72)", "c": "742575960821", "cat": "Water Treatments"}, {"n": "BENEFICIAL BACTERIA CONCENTRATE PROFESSIONAL GRADE - 9 LB / 4.08 KG", "c": "0827807304076", "cat": "Water Treatments"}, {"n": "LAKE PHOSPHATE BINDER PACKS (QTY 192)", "c": "40024", "cat": "Water Treatments"}, {"n": "CHECK VALVE DUAL UNION 2.0 - 2\" FPT X 2\" SLIP", "c": "0742575880587", "cat": "Plumbing-Check Valves"}, {"n": "COLOR-CHANGING LIGHT SMART CONTROL HUB", "c": "0742575840741", "cat": "Lighting"}, {"n": "COLOR-CHANGING LIGHT SPLITTER 3-WAY", "c": "0742575840628", "cat": "Lighting"}, {"n": "COLOR-CHANGING LIGHT SPLITTER 6-WAY", "c": "0742575840680", "cat": "Lighting"}, {"n": "ONCE-A-YEAR POND PLANT FERTILIZER - 7 LB / 3 KG", "c": "0742575989174", "cat": "Plant Care"}, {"n": "Box of Shop Rags", "c": "0660708582026", "cat": "Consumable"}, {"n": "Install Atlantic-Oase 300 watt deicer", "c": "X003E4OPOR", "cat": "Seasonal"}, {"n": "ECOBLAST CONTACT GRANULAR ALGAECIDE - 38.4 OZ / 1.1 KG", "c": "0827807293127", "cat": "Water Treatments"}, {"n": "WATERFALL & ROCK CLEANER PROFESSIONAL GRADE - 9 LB / 4.08 KG", "c": "0827807304137", "cat": "Water Treatments"}, {"n": "SMART POND DOSING SYSTEM XT-CONTROLLER ADD ON KIT", "c": "0827807400426", "cat": "Water Treatment-Dosing System"}, {"n": "SUBMERSIBLE POND THERMOMETER", "c": "0742575740003", "cat": "Miscellaneous Group"}, {"n": "POND & DEBRIS CLARIFIER PROFESSIONAL GRADE - 1 GAL / 3.78 L", "c": "0827807400105", "cat": "Water Treatments"}, {"n": "POND DETOXIFIER PROFESSIONAL GRADE - 1 GAL / 3.78 L", "c": "0827807304106", "cat": "Water Treatments"}, {"n": "WETLAND POND & LAKE BACTERIA PROFESSIONAL GRADE - 1 GAL / 3.78 L", "c": "0742575988979", "cat": "Water Treatments"}, {"n": "PREVENT FOR FOUNTAINS AND WATERFALLS - 1 GAL / 3.78 L", "c": "0742575960760", "cat": "Water Treatments"}, {"n": "AMMONIA NEUTRALIZER PROFESSIONAL GRADE - 1 GAL / 3.78 L", "c": "0827807400129", "cat": "Water Treatments"}, {"n": "COLD WATER BENEFICIAL BACTERIA PROFESSIONAL GRADE - 1 GAL / 3.78 L", "c": "0742575988955", "cat": "Water Treatments"}, {"n": "SLD 4000-7000 ADJUSTABLE FLOW POND PUMP", "c": "0827807450360", "cat": "Pumps"}, {"n": "ECOWAVE 5000 POND PUMP", "c": "0742575911342", "cat": "Pumps"}, {"n": "ULTRA 1500 WATER PUMP", "c": "0742575910093", "cat": "Pumps"}, {"n": "SLD 2000-5000 ADJUSTABLE FLOW POND PUMP", "c": "0827807450469", "cat": "Pumps"}, {"n": "ULTRA 1100 WATER PUMP", "c": "0742575910086", "cat": "Pumps"}, {"n": "SMART POND THERMOMETER WITH TRANSFORMER", "c": "0742575740133", "cat": "Smart Technology"}, {"n": "ULCER & BACTERIAL TREATMENT - 8.8 OZ / 250 G", "c": "0742575810386", "cat": "Fish Care"}, {"n": "FUNGUS TREATMENT - 8 OZ / 236 ML", "c": "0742575810867", "cat": "Fish Care"}, {"n": "ECOWAVE 2000 POND PUMP", "c": "0742575911311", "cat": "Pumps"}, {"n": "ADJUSTABLE FLOW PUMP EXTENSION CORD", "c": "0827807450483", "cat": "Power"}, {"n": "POND POWERHEAD", "c": "0742575911427", "cat": "Miscellaneous Group"}, {"n": "SMART PUMP RECEIVER LARGE", "c": "0827807450650", "cat": "Smart Technology"}, {"n": "TRANSFORMER 150-WATT LOW VOLTAGE WITH PHOTOCELL", "c": "0827807010021", "cat": "Power"}, {"n": "TRANSFORMER 6-WATT LOW VOLTAGE QUICK-CONNECT", "c": "0742575983752", "cat": "Power"}, {"n": "TRANSFORMER 20-WATT LOW VOLTAGE QUICK-CONNECT", "c": "0742575984858", "cat": "Power"}, {"n": "QUICKFIX POND GUMMY", "c": "0742575960838", "cat": "Water Treatments"}, {"n": "LOW SUCTION INTAKE ATTACHMENT", "c": "0742575911175", "cat": "Pump Parts"}, {"n": "SMART PUMP RECEIVER", "c": "0827807450643", "cat": "Smart Technology"}, {"n": "COMPACT WATER FILL VALVE", "c": "0742575880068", "cat": "Plumbing-Water Fill Valves"}, {"n": "IONGEN G2 CONTROL PANEL WITH 12-VOLT TRANSFORMER", "c": "0742575950174", "cat": "Filter-Iongen"}, {"n": "IONGEN G2 PROBE - EPA REGISTERED", "c": "0742575950280", "cat": "Filter-Iongen"}, {"n": "SMART CONTROL PLUG", "c": "0742575820019", "cat": "Smart Technology"}, {"n": "LOW VOLTAGE SPLITTER 6-WAY", "c": "0742575840222", "cat": ""}, {"n": "LOW VOLTAGE SPLITTER 3-WAY", "c": "0742575984896", "cat": "Lighting"}, {"n": "BENEFICIAL BACTERIA CONCENTRATE - 4.4 OZ / 125 G", "c": "0742575989259", "cat": "Water Treatments"}, {"n": "COLD WATER BENEFICIAL BACTERIA - 16 OZ / 473 ML", "c": "742575988931", "cat": "Water Treatments"}, {"n": "COLD WATER BENEFICIAL BACTERIA - 32 OZ / 946 ML", "c": "0742575988948", "cat": "Water Treatments"}, {"n": "PROTECT FOR PONDS - 1 GAL / 3.78 L", "c": "0742575960722", "cat": "Water Treatments"}, {"n": "MAINTAIN FOR PONDS SL - 32 OZ / 946 ML", "c": "0742575960906", "cat": "Water Treatments"}, {"n": "PROTECT FOR PONDS XT - 64 OZ / 1.89 L", "c": "0827807400549", "cat": "Water Treatments"}, {"n": "ULTRAKLEAN 3500 POND FILTER 28-WATT HIGH-OUTPUT UV BULB", "c": "95031", "cat": "Filter-UV Clarifier"}, {"n": "BIOFALLS FILTER MEDIA NET", "c": "29069", "cat": "Filter-Media"}, {"n": "SIGNATURE SERIES 2500 BIOFALLS FILTER", "c": "09020", "cat": "Filter-Biofalls"}, {"n": "FOUNTAIN COVER SPHERE - 18\" DIA (46 CM)", "c": "78431", "cat": "Decorative-Misc"}, {"n": "STACKED SLATE SPHERE - 32\" DIA (81 CM)", "c": "78288", "cat": "Decorative-Misc"}, {"n": "PRO AIR 20 - AERATION COMPRESSOR", "c": "61017", "cat": "Aeration"}, {"n": "AQUABASIN 45", "c": "78224", "cat": "Aquabasin"}, {"n": "AQUASCAPE FLEXIBLE PVC PIPE - 2\" X 50' (15.24 M)", "c": "0827807290249", "cat": "Plumbing-Pipe/Tubing"}, {"n": "AQUASCAPE FLEXIBLE PVC PIPE - 1-1/2\" X 50' (15.24 M)", "c": "0827807290225", "cat": "Plumbing-Pipe/Tubing"}, {"n": "AQUASCAPE FLEXIBLE PVC PIPE - 2\" X 25' (7.62 M)", "c": "29023", "cat": "Plumbing-Pipe/Tubing"}, {"n": "AQUASCAPE FLEXIBLE PVC PIPE - 3\" X 50' (15.24 M)", "c": "0827807290256", "cat": "Plumbing-Pipe/Tubing"}, {"n": "AQUASCAPE FLEXIBLE PVC PIPE - 1\" X 50' (15.24 M)", "c": "48015", "cat": "Plumbing-Pipe/Tubing"}, {"n": "AQUASCAPE ROCK PAD - 15' X 150' (4.6 M X 45.7 M) - ROLL", "c": "25001", "cat": "Underlayment"}, {"n": "AQUASCAPE HEAVY-DUTY POND UNDERLAYMENT - 15' X 300' - ROLL", "c": "42154", "cat": "Underlayment"}, {"n": "AQUASCAPE FLEXIBLE PVC PIPE - 1-1/2\" X 25' (7.62 M)", "c": "29021", "cat": "Plumbing-Pipe/Tubing"}, {"n": "AQUASCAPE STANDARD POND UNDERLAYMENT - 15' X 300' - ROLL", "c": "42155", "cat": "Underlayment"}, {"n": "FLEXIBLE LIGHT STAND - FOR USE WITH UNIVERSAL MOUNT ADAPTER", "c": "0742575840819", "cat": "Lighting"}, {"n": "LAKE SLUDGE REMOVER PACKS (QTY 1,152)", "c": "0827807400198", "cat": "Water Treatments"}, {"n": "CLEAN FOR FOUNTAINS AND WATERFALLS SL - 32 OZ / 946 ML", "c": "0742575960951", "cat": "Water Treatments"}, {"n": "3X MAINTAIN FOR PONDS XT - 1 GAL / 3.78 L", "c": "0827807400334", "cat": "Water Treatments"}, {"n": "ACTIVATED POND CARBON - 2.2 LB / 1KG", "c": "0742575800004", "cat": "Water Treatments"}, {"n": "SAB STREAM & POND CLEANER - 7 LB / 3.2 KG", "c": "0742575988962", "cat": "Water Treatments"}, {"n": "LAKE FLOCCULANT CLARIFIER - 1 GAL / 3.78 L", "c": "0827807400235", "cat": "Water Treatments"}, {"n": "CLEAR FOR PONDS SL - 32 OZ / 946 ML", "c": "0742575960913", "cat": "Water Treatments"}, {"n": "CLEAN FOR PONDS SL - 32 OZ / 946 ML", "c": "0742575960920", "cat": "Water Treatments"}, {"n": "CLEAN FOR PONDS XT - 64 OZ / 1.89 L", "c": "0827807400525", "cat": "Water Treatments"}, {"n": "3X CLEAN FOR PONDS XT - 64 OZ / 1.89 L", "c": "0827807400365", "cat": "Water Treatments"}, {"n": "3X MAINTAIN FOR PONDS XT - 64 OZ / 1.89 L", "c": "0827807400327", "cat": "Water Treatments"}, {"n": "MAINTAIN FOR PONDS XT - 64 OZ / 1.89 L", "c": "0827807400488", "cat": "Water Treatments"}, {"n": "CLEAR FOR PONDS XT - 64 OZ / 1.89 L", "c": "0827807400501", "cat": "Water Treatments"}, {"n": "3X CLEAR FOR PONDS XT - 64 OZ / 1.89 L", "c": "0827807400341", "cat": "Water Treatments"}, {"n": "BENEFICIAL BACTERIA CONCENTRATE - 1.1 LB / 500 G", "c": "0742575989495", "cat": "Water Treatments"}, {"n": "CLEAR FOR PONDS - 32 OZ / 946 ML", "c": "0742575960678", "cat": "Water Treatments"}, {"n": "POND FOAM FREE - 8 OZ / 236 ML", "c": "0742575989099", "cat": "Water Treatments"}, {"n": "POND DETOXIFIER - 16 OZ / 473 ML", "c": "0742575988771", "cat": "Water Treatments"}, {"n": "POND STARTER BACTERIA PROFESSIONAL GRADE - 1 GAL / 3.78 L", "c": "0827807400112", "cat": "Water Treatments"}, {"n": "LARGE SNORKEL VAULT AND CAP", "c": "29064", "cat": "Filter-Pondless/Wetland"}, {"n": "LAKE PHOSPHATE BINDER PACKS (QTY 1,152)", "c": "827807400266", "cat": "Water Treatments"}, {"n": "POND PLANT POTTING MEDIA - 215 CU IN /.0035 CBM", "c": "89002", "cat": "Plant Care"}, {"n": "SIGNATURE SERIES 400 POND SKIMMER WEIR DOOR", "c": "43005", "cat": "Filter-Skimmer"}, {"n": "BIOBALLS BIOLOGICAL FILTER MEDIA (QTY 100)", "c": "98464", "cat": "Filter-Media"}, {"n": "RAPID CLEAR FINE FILTER PADS", "c": "80001", "cat": "Filter-Media"}, {"n": "FOUNTAIN BOWL BIOLOGICAL FILTER KIT - 40\" DIA (102 CM)", "c": "80017", "cat": "Filter-Kits"}, {"n": "FOUNTAIN BOWL - GREEN SLATE - 40\" DIA (102 CM)", "c": "78400", "cat": "Decorative-Misc"}, {"n": "KH/ALKALINITY TEST KIT", "c": "742575960197", "cat": "Water Treatments"}, {"n": "CU/COPPER TEST KIT", "c": "96020", "cat": "Water Treatments"}, {"n": "BULK PROTECTIVE POND NETTING 30' X 100' (9.1 X 30.5 M)", "c": "74003", "cat": "Seasonal"}, {"n": "BULK PROTECTIVE POND NETTING 20' X 100' (6.1 X 30.5 M)", "c": "74002", "cat": "Seasonal"}, {"n": "AQUAFORCE 2700 SOLIDS-HANDLING POND PUMP", "c": "91012", "cat": "Pumps"}, {"n": "20' X 50' - 45 MIL FISH-SAFE EPDM LINER ROLL", "c": "29196", "cat": "Liner-EPDM"}, {"n": "15' X 50' - 45 MIL FISH-SAFE EPDM LINER ROLL", "c": "29192", "cat": "Liner-EPDM"}, {"n": "EPDM SURFACE PREP - 1 QT / 946 ML", "c": "54021", "cat": "Liner-Accessories"}, {"n": "EPDM TAPE PRIMER PLUS - 1 QT / 946 ML", "c": "54022", "cat": "Liner-Accessories"}, {"n": "CHRISTY'S RED HOT BLUE GLUE", "c": "29969", "cat": "Installation Tools"}, {"n": "PROFESSIONAL GRADE POND SKIMMER NET", "c": "50001", "cat": "Tools"}, {"n": "PREMIUM COLD WATER FISH FOOD-SMALL PELLETS - 1.1 LB / 500 G", "c": "742575988702", "cat": "Fish Care"}, {"n": "SIGNATURE SERIES 1000 POND SKIMMER", "c": "43022", "cat": "Filter-Skimmer"}, {"n": "ULTRAKLEAN 3500 POND FILTER", "c": "95054", "cat": "Filter-UV Clarifier"}, {"n": "PONDLESS WATERFALL VAULT EXTENSION", "c": "49001", "cat": "Filter-Pondless/Wetland"}, {"n": "PONDLESS WATERFALL VAULT", "c": "49000", "cat": "Filter-Pondless/Wetland"}, {"n": "POND DE-ICER (300-WATT)", "c": "827807390000", "cat": "Seasonal"}, {"n": "DOSING SYSTEM SL", "c": "96085", "cat": "Water Treatment-Dosing System"}, {"n": "FLEXIBLE PVC PIPE - 3/4\" X 50'", "c": "", "cat": "Plumbing-Pipe/Tubing"}, {"n": "3-way Black Outlet Splitter", "c": "IT-043", "cat": "General"}, {"n": "Gas Can", "c": "IT-029", "cat": "General"}, {"n": "Heat Gun", "c": "IT-010", "cat": "Power Tool"}, {"n": "Kneeling Pad", "c": "IT-049", "cat": "General"}, {"n": "Large Husky Hangall", "c": "IT-037", "cat": "General"}, {"n": "Medium Husky Hangall", "c": "IT-038", "cat": "General"}, {"n": "Large Channel Locks", "c": "IT-002", "cat": "General"}, {"n": "Poly Tube White Connectors", "c": "IT-046", "cat": "Plumbing"}, {"n": "PRAZIQUANTEL TREATMENT - 8 OZ / 236 ML", "c": "81041", "cat": "Fish Care"}, {"n": "Green EZ Pro Pump", "c": "PT-001", "cat": "Power Tool"}, {"n": "Hole Saw Bits", "c": "PT-008", "cat": "Power Tool"}, {"n": "STIHL BR 600 Leaf Blower", "c": "PT-006", "cat": "Power Tool"}, {"n": "Sawzall Blades", "c": "PT-005", "cat": "Power Tool"}, {"n": "Milwaukee Sawzall", "c": "PT-004", "cat": "Power Tool"}, {"n": "Milwaukee Power Tool Batteries", "c": "PT-010", "cat": "Power Tool"}, {"n": "Milwaukee Power Drill", "c": "PT-003", "cat": "Power Tool"}, {"n": "Milwaukee Impact Driver", "c": "PT-002", "cat": "Power Tool"}, {"n": "Milwaukee Battery Charger", "c": "PT-011", "cat": "Power Tool"}, {"n": "Drill Bits Box", "c": "PT-007", "cat": "Power Tool"}, {"n": "Angle Grinder", "c": "PT-009", "cat": "Power Tool"}, {"n": "PARASITE & ICH TREATMENT - 8 OZ / 236 ML", "c": "81039", "cat": "Fish Care"}, {"n": "Metal Mallet", "c": "IT-007", "cat": "General"}, {"n": "Pruning Shears", "c": "IT-008", "cat": "General"}, {"n": "Outlet Tester", "c": "IT-013", "cat": "General"}, {"n": "Multi Meter", "c": "IT-012", "cat": "General"}, {"n": "Razor Knife", "c": "IT-003", "cat": "General"}, {"n": "RIGID 16 Gal Shop Vac", "c": "PT-013", "cat": "General"}, {"n": "Roll of Trash Bags", "c": "IT-011", "cat": "General"}, {"n": "Rubber Mallet", "c": "IT-006", "cat": "General"}, {"n": "Ryobi 2900 PSI Pressure Washer", "c": "PT-012", "cat": "General"}, {"n": "Scrub Brush", "c": "IT-040", "cat": "General"}, {"n": "Scissors", "c": "IT-009", "cat": "General"}, {"n": "Silicone Gun", "c": "IT-017", "cat": "General"}, {"n": "Pipe Snake", "c": "PM-003", "cat": "Plumbing"}, {"n": "Pipe Dope", "c": "PM-001", "cat": "Plumbing"}, {"n": "Pipe Cutter", "c": "PM-002", "cat": "Plumbing"}, {"n": "Clear Autofill Case", "c": "IT-056", "cat": "General"}, {"n": "Crimp Clamp Tool", "c": "IT-042", "cat": "General"}, {"n": "Brass Spigot Splitter", "c": "IT-057", "cat": "General"}, {"n": "Bullet Level", "c": "IT-032", "cat": "General"}, {"n": "Dykes", "c": "IT-005", "cat": "General"}, {"n": "2' Level", "c": "IT-030", "cat": "General"}, {"n": "4' Level", "c": "IT-031", "cat": "General"}, {"n": "Small Husky Reseal Kit Bag", "c": "IT-044", "cat": "General"}, {"n": "Wood Stake For Post", "c": "IT-001", "cat": "General"}, {"n": "Speedout Bits", "c": "IT-045", "cat": "General"}, {"n": "Step Bit", "c": "IT-047", "cat": "General"}, {"n": "Transit Stick", "c": "IT-051", "cat": "General"}, {"n": "Transit", "c": "IT-052", "cat": "General"}, {"n": "Zip Ties", "c": "IT-050", "cat": "General"}, {"n": "Small Husky Hangall", "c": "IT-039", "cat": "General"}, {"n": "Small Channel Locks", "c": "IT-004", "cat": "General"}, {"n": "Sillcock Key", "c": "IT-019", "cat": "General"}, {"n": "Magic Lube", "c": "CS-003", "cat": "Consumable"}, {"n": "Glue Opener", "c": "CS-007", "cat": "Consumable"}, {"n": "Lighter Fluid", "c": "CS-004", "cat": "Consumable"}, {"n": "Purple Primer", "c": "CS-002", "cat": "Consumable"}, {"n": "Box of Razor Blades", "c": "", "cat": "Consumable"}, {"n": "Folding Hand Saw", "c": "HT-001", "cat": "Hand Tool"}, {"n": "Hearing Protection", "c": "SF-006", "cat": "Safety"}, {"n": "Eye Protection", "c": "SF-007", "cat": "Safety"}, {"n": "Box of Rubber Gloves", "c": "SF-002", "cat": "Safety"}, {"n": "25' Tape Measure", "c": "HT-005", "cat": "Hand Tool"}, {"n": "100' Tape Measure", "c": "HT-004", "cat": "Hand Tool"}, {"n": "Garden Rake", "c": "HT-007", "cat": "Hand Tool"}, {"n": "Screwdriver", "c": "HT-003", "cat": "Hand Tool"}, {"n": "Squeegee", "c": "HT-009", "cat": "Hand Tool"}, {"n": "Spade Shovel", "c": "HT-006", "cat": "Hand Tool"}, {"n": "Flat Shovel", "c": "HT-008", "cat": "Hand Tool"}, {"n": "Trowel", "c": "HT-002", "cat": "Hand Tool"}, {"n": "Tamp", "c": "", "cat": "Hand Tool"}, {"n": "Various Wire Nuts", "c": "EL-008", "cat": "Electrical"}, {"n": "Wire Strippers", "c": "EL-001", "cat": "Electrical"}, {"n": "Small Husky Light Bag", "c": "EL-007", "cat": "Electrical"}, {"n": "Wire Nut Pouches", "c": "EL-009", "cat": "Electrical"}, {"n": "Spool of Homerun Wire", "c": "EL-002", "cat": "Electrical"}, {"n": "FILL VALVE GARDEN HOSE SPIGOT X 1/4\" QUICK-CONNECT", "c": "07000", "cat": "Plumbing-Water Fill Valves"}, {"n": "TRANSFORMER 60-WATT LOW VOLTAGE QUICK-CONNECT", "c": "742575984865", "cat": "Power"}, {"n": "3-PL MECHANICAL SEAL KIT", "c": "45059", "cat": "Pump Parts"}, {"n": "EXT PUMP 2\"-3\" PLUMBING KIT", "c": "48027", "cat": "Pump Parts"}, {"n": "FOUNTAIN COVER SPHERE - 32\" DIA (81 CM)", "c": "78376", "cat": "Decorative-Misc"}, {"n": "FOUNTAIN COVER SPHERE - 24\" DIA (61 CM)", "c": "78375", "cat": "Decorative-Misc"}, {"n": "FOUNTAIN COVER URN - 24\" H (61 CM)", "c": "78430", "cat": "Decorative-Misc"}, {"n": "SMART POND THERMOMETER", "c": "74012", "cat": "Smart Technology"}, {"n": "BULK PROTECTIVE POND NETTING 10' X 100' (3.05 X 30.5 M)", "c": "74007", "cat": "Seasonal"}, {"n": "SMART POND DOSING SYSTEM XT / DOSING SYSTEM SL-PUMP CARTRIDGE", "c": "40041", "cat": "Water Treatment-Dosing System"}, {"n": "SIGNATURE SERIES 1000 POND SKIMMER DEBRIS BASKET (NO HANDLE)", "c": "43009", "cat": "Filter-Skimmer"}, {"n": "SIGNATURE SERIES 400 POND SKIMMER", "c": "43021", "cat": "Filter-Skimmer"}, {"n": "SIGNATURE SERIES 1000 / 6.0 / 8.0 POND SKIMMER FILTER MAT", "c": "56000", "cat": "Filter-Skimmer"}, {"n": "SIGNATURE SERIES 8.0 / CLASSIC LARGE POND SKIMMER WEIR", "c": "29258", "cat": "Filter-Skimmer"}, {"n": "SIGNATURE SERIES 6.0 POND SKIMMER WEIR - 6\"", "c": "29530", "cat": "Filter-Skimmer"}, {"n": "SIGNATURE SERIES 1000 POND SKIMMER WEIR DOOR", "c": "43013", "cat": "Filter-Skimmer"}, {"n": "ADJUSTABLE FLOW PUMP REMOTE", "c": "45041", "cat": "Smart Technology"}, {"n": "HEAVY-DUTY AQUATIC PLANT POT 20\" DIA (50.8 CM)", "c": "47005", "cat": "Plant Care"}, {"n": "HEAVY-DUTY AQUATIC PLANT POT 16\" DIA (40.6 CM)", "c": "47004", "cat": "Plant Care"}, {"n": "FLOATING PLANT ISLAND", "c": "89006", "cat": "Plant Care"}, {"n": "AQUAGARDEN MINI POND KIT - MOCHA", "c": "78325", "cat": "Miscellaneous Group"}, {"n": "SIGNATURE SERIES 6000 BIOFALLS FILTER MAT", "c": "29318", "cat": "Filter-Media"}, {"n": "WATERFALL SPILLWAY 12\" W (31 CM)", "c": "77023", "cat": "Miscellaneous Group"}, {"n": "WATERFALL SPILLWAY 22\" W (56 CM)", "c": "77000", "cat": "Miscellaneous Group"}, {"n": "10' X 50' - 45 MIL FISH-SAFE EPDM LINER ROLL", "c": "29188", "cat": "Liner-EPDM"}, {"n": "25' X 50' - 45 MIL FISH-SAFE EPDM LINER ROLL", "c": "29200", "cat": "Liner-EPDM"}, {"n": "EPDM ONE-SIDED COVER TAPE - 6\" X 25' (15 CM X 7.6 M)", "c": "22003", "cat": "Liner-Accessories"}, {"n": "EPDM DOUBLE-SIDED SEAM TAPE - 3\" X 25' (7 CM X 7.6 M)", "c": "22017", "cat": "Liner-Accessories"}, {"n": "EPDM TAPE PRIMER - 1 QT / 946 ML", "c": "0827807540085", "cat": "Liner-Accessories"}, {"n": "COLOR-CHANGING LIGHT REMOTE", "c": "84073", "cat": "Lighting"}, {"n": "HAT TOP PATH AND AREA LANDSCAPE LIGHT", "c": "84063", "cat": "Lighting"}, {"n": "COLOR-CHANGING WIDE-ANGLE LIGHT 11-WATT", "c": "742575840765", "cat": "Lighting"}, {"n": "COLOR-CHANGING SPOTLIGHT - 8-WATT", "c": "742575840604", "cat": "Lighting"}, {"n": "LIGHT STAKE - FOR USE WITH UNIVERSAL MOUNT ADAPTER", "c": "84080", "cat": "Lighting"}, {"n": "WATERFALL FOAM DISPENSING GUN", "c": "54003", "cat": "Installation Tools"}, {"n": "SILICONE SEALANT TUBE-BLACK - 10.1 OZ / 316 ML", "c": "827807291864", "cat": "Installation Tools"}, {"n": "SNORKEL VAULT AND LID V2 W/END CAP FOR CENTIPEDE", "c": "51007", "cat": "Filter-Pondless/Wetland"}, {"n": "SNORKEL VAULT EXTENSION V2", "c": "51008", "cat": "Filter-Pondless/Wetland"}, {"n": "CENTIPEDE MODULE V2", "c": "51010", "cat": "Filter-Pondless/Wetland"}, {"n": "SUBMERSIBLE POND FILTER", "c": "742575951102", "cat": "Filter-Misc"}, {"n": "FOUNTAIN BOWL BIOLOGICAL FILTER KIT - 32\" DIA (81 CM)", "c": "80016", "cat": "Filter-Kits"}, {"n": "FOUNTAIN BOWL BIOLOGICAL FILTER KIT - 33\" SQ (84 CM)", "c": "80019", "cat": "Filter-Kits"}, {"n": "FOUNTAIN BOWL BIOLOGICAL FILTER KIT - 27\" SQ (69 CM)", "c": "80018", "cat": "Filter-Kits"}, {"n": "SIGNATURE SERIES 6000 BIOFALLS FILTER WITH 2\" BULKHEAD", "c": "29319", "cat": "Filter-Biofalls"}, {"n": "SIGNATURE SERIES 6000 BIOFALLS FILTER WITH 3\" BULKHEAD", "c": "29384", "cat": "Filter-Biofalls"}, {"n": "COARSE FILTER MEDIA ROLL - 1.25\" THICK - 10' L X 56\" W (305 X 142 CM)", "c": "99321", "cat": "Filter-Media"}, {"n": "SIGNATURE SERIES 2500 BIOFALLS FILTER MAT", "c": "29010", "cat": "Filter-Media"}, {"n": "FAUX BASALT COLUMN SET OF 3", "c": "78367", "cat": "Decorative-Misc"}, {"n": "FAUX BASALT COLUMN SET OF 5", "c": "78368", "cat": "Decorative-Misc"}, {"n": "FOUNTAIN BOWL - GREEN SLATE - 60\" DIA (152 CM)", "c": "78402", "cat": "Decorative-Misc"}, {"n": "FOUNTAIN BOWL - GREEN SLATE - 50\" DIA (127 CM)", "c": "78401", "cat": "Decorative-Misc"}, {"n": "FOUNTAIN COVER SPILLWAY BASIN - 40\" DIA (102 CM)", "c": "78382", "cat": "Decorative-Misc"}, {"n": "FOUNTAIN BOWL - GREEN SLATE - 32\" DIA (81 CM)", "c": "78399", "cat": "Decorative-Misc"}, {"n": "FOUNTAIN COVER URN - 45\" H (114 CM)", "c": "78379", "cat": "Decorative-Misc"}, {"n": "AQUABLOX LARGE WATER STORAGE MODULE", "c": "29492", "cat": "Aquablox"}, {"n": "AQUABASIN 30", "c": "78223", "cat": "Aquabasin"}, {"n": "LAKE BACTERIA PACKS (QTY 192)", "c": "827807400150", "cat": "Water Treatments"}, {"n": "ALGAECIDE - 2.5 GAL / 9.46 L", "c": "96053", "cat": "Water Treatments"}, {"n": "ALGAECIDE - 1 GAL / 3.78 L", "c": "96026", "cat": "Water Treatments"}, {"n": "POND STARTER BACTERIA - 32 OZ / 946 ML", "c": "96015", "cat": "Water Treatments"}, {"n": "POND STARTER BACTERIA - 16 OZ / 473 ML", "c": "96014", "cat": "Water Treatments"}, {"n": "POND STARTER BACTERIA - 8 OZ / 236 ML", "c": "96013", "cat": "Water Treatments"}, {"n": "BENEFICIAL BACTERIA - 1 GAL / 3.78 L", "c": "98885", "cat": "Water Treatments"}, {"n": "BENEFICIAL BACTERIA - 32 OZ / 946 ML", "c": "98888", "cat": "Water Treatments"}, {"n": "BENEFICIAL BACTERIA - 16 OZ / 473 ML", "c": "98887", "cat": "Water Treatments"}, {"n": "MAINTAIN FOR PONDS - 1 GAL / 3.78L", "c": "96060", "cat": "Water Treatments"}, {"n": "CLEAN FOR PONDS - 8 OZ / 236 ML", "c": "96061", "cat": "Water Treatments"}, {"n": "MAINTAIN FOR PONDS - 32 OZ / 946 ML", "c": "96059", "cat": "Water Treatments"}, {"n": "MAINTAIN FOR PONDS - 8 OZ / 236 ML", "c": "96057", "cat": "Water Treatments"}, {"n": "LAKE TREATMENT BOOSTER PACKS (QTY 1,152)", "c": "827807400297", "cat": "Water Treatments"}, {"n": "SAB STREAM & POND CLEANER PROFESSIONAL GRADE - 9 LB / 4.08 KG", "c": "827807304090", "cat": "Water Treatments"}, {"n": "POND STARTER BACTERIA - 1 GAL / 3.78 L", "c": "96008", "cat": "Water Treatments"}, {"n": "PRO AIR 60 - AERATION COMPRESSOR", "c": "827807610160", "cat": "Aeration"}, {"n": "RUBBER MEMBRANE AERATION DIFFUSER", "c": "61010", "cat": "Aeration"}, {"n": "PRO AIR 60 POND AERATION KIT", "c": "61008", "cat": "Aeration"}, {"n": "ULTRAKLEAN 2000 POND FILTER ELECTRONIC CONTROL BOARD & BALLAST KIT", "c": "95056", "cat": "Filter-UV Clarifier"}, {"n": "ULTRAKLEAN 2000 POND FILTER 14-WATT HIGH-OUTPUT UV BULB", "c": "95030", "cat": "Filter-UV Clarifier"}, {"n": "ECOWAVE 4000 POND PUMP", "c": "91133", "cat": "Pumps"}, {"n": "EXT 18000-3P POND PUMP", "c": "45052", "cat": "Pumps"}, {"n": "12-PN 10,000 SOLIDS-HANDLING POND PUMP", "c": "30391", "cat": "Pumps"}, {"n": "8-PN 5500 SOLIDS-HANDLING POND PUMP", "c": "29495", "cat": "Pumps"}, {"n": "SLD 5000-9000 ADJUSTABLE FLOW POND PUMP", "c": "45037", "cat": "Pumps"}, {"n": "AQUAFORCE 1800 SOLIDS-HANDLING POND PUMP", "c": "91112", "cat": "Pumps"}, {"n": "HEAVY-DUTY POND SKIMMER NET WITH EXTENDABLE HANDLE", "c": "98562", "cat": "Tools"}, {"n": "HEAVY-DUTY POND NET WITH EXTENDABLE HANDLE", "c": "98560", "cat": "Tools"}, {"n": "PROFESSIONAL GRADE POND NET", "c": "50000", "cat": "Tools"}, {"n": "Miscelaneous Fittings", "c": "PM-004", "cat": "Plumbing"}, {"n": "POND SHARK PRO", "c": "74005", "cat": "Tools"}, {"n": "Y 3/8\" BARB", "c": "74001", "cat": ""}, {"n": "WEIGHTED AERATION TUBING - 3/8\" X 25' (7.62 M)", "c": "78380", "cat": ""}, {"n": "3/8\" BRASS 4-WAY SPLITTER CAP", "c": "58110", "cat": ""}, {"n": "White River Waders", "c": "", "cat": "Tools"}, {"n": "Tub of Carbon", "c": "CS-001", "cat": "Consumable"}, {"n": "Tool Bucket/Bag", "c": "", "cat": "Tools"}, {"n": "Tool Bucket", "c": "EQ-006", "cat": "Equipment"}, {"n": "Thermal Imaging Camera", "c": "", "cat": "Tools"}, {"n": "Sawzall", "c": "", "cat": "Tools"}, {"n": "Reamer Bit Set", "c": "DB-05", "cat": "Tools"}, {"n": "Pressure Washer Gun and Nozzle", "c": "PT-014", "cat": "General"}, {"n": "Power Tool Batteries", "c": "", "cat": "Tools"}, {"n": "Power Drill", "c": "", "cat": "Tools"}, {"n": "Pair of Muck Boots", "c": "SF-001", "cat": "Safety"}, {"n": "Pair of Long Yellow Gloves", "c": "SF-003", "cat": "Safety"}, {"n": "Impact Driver", "c": "", "cat": "Tools"}, {"n": "Foam Gun", "c": "IT-018", "cat": "General"}, {"n": "Fish Holding Tank Aerator Bag", "c": "EQ-007", "cat": "Equipment"}, {"n": "Fertilizer w/ Container", "c": "CS-009", "cat": "Consumable"}, {"n": "COLLAPSIBLE FISH TANK - 500 GALLONS / 1890 L", "c": "", "cat": "Tools"}, {"n": "Coffee Filters w/ Container", "c": "CS-010", "cat": "Consumable"}, {"n": "Cleanout Buckets", "c": "EQ-001", "cat": "Equipment"}, {"n": "Bucket of Soil", "c": "EQ-008", "cat": "Equipment"}, {"n": "Bucket of Gravel", "c": "EQ-009", "cat": "Equipment"}, {"n": "Brass Autofill Fitting", "c": "PM-005", "cat": "Plumbing"}, {"n": "Black Spraypaint", "c": "IT-048", "cat": "General"}, {"n": "Battery Charger", "c": "", "cat": "Tools"}, {"n": "Bag of Salt", "c": "", "cat": "Tools"}, {"n": "API Test Kit", "c": "", "cat": "Tools"}, {"n": "50' Garden Hose", "c": "EQ-013", "cat": "Equipment"}, {"n": "50' Extension Cord", "c": "EQ-011", "cat": "Equipment"}, {"n": "500 Gal Tank", "c": "EQ-002", "cat": "Equipment"}, {"n": "4' Section of 2\" Flex PVC", "c": "IT-055", "cat": "General"}, {"n": "4' Section of 1.5\" Flex PVC", "c": "IT-054", "cat": "General"}, {"n": "3 Way Extension Cord Splitter", "c": "EQ-004", "cat": "Equipment"}, {"n": "3\" Channel Locks", "c": "", "cat": "Tools"}, {"n": "2' Cleanout Hoses", "c": "EQ-014", "cat": "Equipment"}, {"n": "1.5' Cleanout Hoses", "c": "EQ-015", "cat": "Equipment"}, {"n": "100' Garden Hose", "c": "EQ-012", "cat": "Equipment"}, {"n": "100' Extension Cord", "c": "EQ-010", "cat": "Equipment"}, {"n": "1000 Gal Tank", "c": "EQ-003", "cat": "Equipment"}, {"n": "COLOR-CHANGING SPOTLIGHT - 4.5-WATT", "c": "84059", "cat": "Lighting"}, {"n": "COLOR-CHANGING WATERFALL LIGHT - 2-WATT", "c": "742575840574", "cat": "Lighting"}, {"n": "SPOTLIGHT - 1-WATT", "c": "84031", "cat": "Lighting"}, {"n": "SPOTLIGHT - 3-WATT", "c": "84033", "cat": "Lighting"}, {"n": "COLOR-CHANGING LIGHT EXTENSION CABLE 5-OUTLETS - 25' (7.62 M)", "c": "84070", "cat": "Lighting"}, {"n": "BULKHEAD FITTING 1-1/2\" FPT", "c": "99126", "cat": "Plumbing-Fittings"}, {"n": "BULKHEAD FITTING 1-1/4\" FPT", "c": "99125", "cat": "Plumbing-Fittings"}, {"n": "BULKHEAD FITTING 1\" FPT", "c": "99124", "cat": "Plumbing-Fittings"}, {"n": "BULKHEAD FITTING 3/4\" FPT", "c": "99123", "cat": "Plumbing-Fittings"}, {"n": "PREMIUM COLD WATER FISH FOOD-LARGE PELLETS - 4.4 LB / 2 KG", "c": "98872", "cat": "Fish Care"}, {"n": "LARGE CENTIPEDE MODULE", "c": "29065", "cat": "Filter-Pondless/Wetland"}, {"n": "PVC MALE ADAPTER 3\" MPT X 3\" SLIP", "c": "436-030", "cat": "Plumbing-Fittings"}, {"n": "PVC ELBOW 90 DEG 3\" SLIP", "c": "406-030", "cat": "Plumbing-Fittings"}, {"n": "PVC MALE ADAPTER 1-1/2\" MPT X 1-1/2\" SLIP", "c": "99143", "cat": "Plumbing-Fittings"}, {"n": "PVC MALE ADAPTER 2\" MPT X 2\" SLIP", "c": "436-020", "cat": "Plumbing-Fittings"}, {"n": "PVC TEE 2\" SLIP", "c": "401-020", "cat": "Plumbing-Fittings"}, {"n": "PVC UNION 1-1/2\" SLIP", "c": "497-015", "cat": "Plumbing-Fittings"}, {"n": "PVC REDUCER BUSHING 3\" SPGT X 2\" SLIP", "c": "429-338", "cat": "Plumbing-Fittings"}, {"n": "PVC REDUCER BUSHING 2\" SPGT X 1-1/2\" SLIP", "c": "437-251", "cat": "Plumbing-Fittings"}, {"n": "PVC ELBOW 90 DEG 2\" SLIP", "c": "406-020", "cat": "Plumbing-Fittings"}, {"n": "PVC ELBOW 90 DEG 1-1/2\" SLIP", "c": "406-015", "cat": "Plumbing-Fittings"}, {"n": "PVC TEE 1-1/2\" SLIP", "c": "401-015", "cat": "Plumbing-Fittings"}, {"n": "BULKHEAD FITTING 2\" FPT", "c": "29103", "cat": "Plumbing-Fittings"}, {"n": "BULKHEAD FITTING 3\" FPT", "c": "29104", "cat": "Plumbing-Fittings"}, {"n": "PVC 1.5\u201d 45", "c": "417-015", "cat": "Plumbing-Fittings"}, {"n": "PVC 1.5\u201d Ball Valve", "c": "PVBVS150", "cat": "Plumbing-Fittings"}, {"n": "PVC 2\u201d 45", "c": "417-020", "cat": "Plumbing-Fittings"}, {"n": "PVC 2\u201d Ball Valve", "c": "PVBVS200", "cat": "Plumbing-Fittings"}, {"n": "PVC 2\" Cross \u201cX\u201d", "c": "420-020", "cat": "Plumbing-Fittings"}, {"n": "PVC 2\" Threaded 90", "c": "412-020", "cat": "Plumbing-Fittings"}, {"n": "PVC COUPLING 1-1/2\"", "c": "429-015", "cat": "Plumbing-Fittings"}, {"n": "PVC 3\" Ball Valve", "c": "PVBVS300", "cat": "Plumbing-Fittings"}, {"n": "PVC 3\u201d 45", "c": "427-030", "cat": "Plumbing-Fittings"}, {"n": "3\u201d PVC Schedule 40 Coupling", "c": "429-030", "cat": "Plumbing-Fittings"}, {"n": "2\" PVC Schedule 40 Coupling", "c": "429-020", "cat": "Plumbing-Fittings"}, {"n": "1-1/2\" PVC SCH 40 Male Adapter", "c": "436-015", "cat": "Plumbing-Fittings"}, {"n": "VALVE GATE 2\" SLIP", "c": "99208", "cat": "Plumbing-Fittings"}, {"n": "Respirator", "c": "SF-005", "cat": "Safety"}, {"n": "Container of Ear Plugs", "c": "SF-004", "cat": "Safety"}, {"n": "PVC STREET 90 2\u201d", "c": "409-020", "cat": "Plumbing-Fittings"}, {"n": "PVC STREET 90 1-1/2\u201d", "c": "409-015", "cat": "Plumbing-Fittings"}, {"n": "PVC MALE ADAPTER 3\" SLIP X 2\" MPT", "c": "436-253", "cat": "Plumbing-Fittings"}, {"n": "50' WIDE CUSTOM CUT 45 MIL FISH-SAFE EPDM LINER - PER FOOT", "c": "29587", "cat": "Liner-EPDM"}, {"n": "40' WIDE CUSTOM CUT 45 MIL FISH-SAFE EPDM LINER - PER FOOT", "c": "29585", "cat": "Liner-EPDM"}, {"n": "30' WIDE CUSTOM CUT 45 MIL FISH-SAFE EPDM LINER - PER FOOT", "c": "29583", "cat": "Liner-EPDM"}, {"n": "25' WIDE CUSTOM CUT 45 MIL FISH-SAFE EPDM LINER - PER FOOT", "c": "29582", "cat": "Liner-EPDM"}, {"n": "20' WIDE CUSTOM CUT 45 MIL FISH-SAFE EPDM LINER - PER FOOT", "c": "29581", "cat": "Liner-EPDM"}, {"n": "15' WIDE CUSTOM CUT 45 MIL FISH-SAFE EPDM LINER - PER FOOT", "c": "29580", "cat": "Liner-EPDM"}, {"n": "10' WIDE CUSTOM CUT 45 MIL FISH-SAFE EPDM LINER - PER FOOT", "c": "29579", "cat": "Liner-EPDM"}, {"n": "5' WIDE CUSTOM CUT 45 MIL FISH-SAFE EPDM LINER - PER FOOT", "c": "42024", "cat": "Liner-EPDM"}, {"n": "30' X 50' - 45 MIL FISH-SAFE EPDM LINER ROLL", "c": "29202", "cat": "Liner-EPDM"}, {"n": "EPDM LINER PATCH", "c": "22018", "cat": "Liner-EPDM"}, {"n": "RUBBER BULKHEAD 3\"", "c": "77032", "cat": "Plumbing-Fittings"}, {"n": "RUBBER BULKHEAD 3/4\"", "c": "77028", "cat": "Plumbing-Fittings"}, {"n": "RUBBER BULKHEAD 1\"", "c": "77029", "cat": "Plumbing-Fittings"}, {"n": "PVC COUPLING 1\" FPT", "c": "99177", "cat": "Plumbing-Fittings"}, {"n": "PVC COUPLING 1-1/4\" FPT", "c": "99178", "cat": "Plumbing-Fittings"}, {"n": "PVC COUPLING 1-1/2\" FPT", "c": "99179", "cat": "Plumbing-Fittings"}, {"n": "PVC MALE ADAPTER 1-1/4\" MPT", "c": "99141", "cat": "Plumbing-Fittings"}, {"n": "PVC MALE ADAPTER 1-1/4\" MPT X 1-1/2\" SLIP", "c": "99142", "cat": "Plumbing-Fittings"}, {"n": "PVC MALE ADAPTER 1-1/2\" MPT X 2\" SLIP", "c": "99144", "cat": "Plumbing-Fittings"}, {"n": "PVC MALE ADAPTER 2\" MPT X 1-1/2\" SLIP", "c": "29157", "cat": "Plumbing-Fittings"}, {"n": "PVC TEE 3\" SLIP", "c": "401-030", "cat": "Plumbing-Fittings"}, {"n": "PVC REDUCER BUSHING 3\" MPT X 2\" FPT", "c": "29526", "cat": "Plumbing-Fittings"}, {"n": "VALVE PRESSURE RELIEF 2\" MPT", "c": "29160", "cat": "Plumbing-Fittings"}, {"n": "RUBBER COUPLING 2\"", "c": "29265", "cat": "Plumbing-Fittings"}, {"n": "RUBBER REDUCER COUPLING 3\" X 2\"", "c": "29084", "cat": "Plumbing-Fittings"}, {"n": "REDUCING BUSHING 1/2\" MPT X 3/8\" FPT", "c": "99133", "cat": "Plumbing-Fittings"}, {"n": "REDUCING BUSHING 3/4\" MPT X 1/2\" FPT", "c": "99134", "cat": "Plumbing-Fittings"}, {"n": "REDUCING BUSHING 1\" MPT X 3/4\" FPT", "c": "99136", "cat": "Plumbing-Fittings"}, {"n": "REDUCING BUSHING 1-1/4\" MPT X 1\" FPT", "c": "99137", "cat": "Plumbing-Fittings"}, {"n": "REDUCING BUSHING 1-1/2\" MPT X 1\" FPT", "c": "99138", "cat": "Plumbing-Fittings"}, {"n": "REDUCING BUSHING 1-1/2\" MPT X 1-1/4\" FPT", "c": "99139", "cat": "Plumbing-Fittings"}, {"n": "REDUCING BUSHING 2\" MPT X 1-1/2\" FPT", "c": "99140", "cat": "Plumbing-Fittings"}, {"n": "SMART PUMP RECEIVER CONVERSION PLUG MALE X MALE", "c": "45062", "cat": "Smart Technology"}, {"n": "SMART CONTROL CONVERSION PLUG", "c": "45040", "cat": "Smart Technology"}, {"n": "FOUNTAIN COVER URN - 56\" H (142 CM)", "c": "78380", "cat": ""}, {"n": "RUBBER BULKHEAD 1-1/2\"", "c": "77030", "cat": "Plumbing-Fittings"}, {"n": "RUBBER BULKHEAD 2\"", "c": "77031", "cat": "Plumbing-Fittings"}, {"n": "PVC UNION 2\" Slip", "c": "PVUS200", "cat": "Plumbing-Fittings"}, {"n": "PREMIUM COLOR ENHANCING FISH FOOD-SMALL PELLETS - 2.2 LB / 1 KG", "c": "98874", "cat": "Fish Care"}, {"n": "LARGE SNORKEL VAULT CAP", "c": "29235", "cat": "Filter-Pondless/Wetland"}, {"n": "CENTIPEDE MODULE END CAP", "c": "29067", "cat": "Filter-Pondless/Wetland"}, {"n": "HALF CENTIPEDE MODULE", "c": "29066", "cat": "Filter-Pondless/Wetland"}, {"n": "FOUNTAIN BOWL FILTER MAT - FITS 33\" SQ (84 CM)", "c": "80011", "cat": "Filter-Media"}, {"n": "FOUNTAIN BOWL FILTER MAT - FITS 27\" SQ (69 CM)", "c": "80010", "cat": "Filter-Media"}, {"n": "FOUNTAIN BOWL FILTER MAT - FITS 40\" DIA (102 CM)", "c": "80009", "cat": "Filter-Media"}, {"n": "FOUNTAIN BOWL FILTER MAT - FITS 32\" DIA (81 CM)", "c": "80008", "cat": "Filter-Media"}, {"n": "STACKED SLATE URN - 33.5\" H (85 CM)", "c": "98939", "cat": "Decorative-Misc"}, {"n": "STACKED SLATE SPHERE - 6' DIA (1.8 M)", "c": "78428", "cat": "Decorative-Misc"}, {"n": "STACKED SLATE SPHERE - 18\" DIA (46 CM)", "c": "78358", "cat": "Decorative-Misc"}, {"n": "PRO AIR-CHECK VALVE", "c": "61003", "cat": "Aeration"}, {"n": "2-OUTLET POND AERATION KIT", "c": "75000", "cat": "Aeration"}, {"n": "Name", "c": "", "cat": "N/A"}, {"n": "1-1/2\" FPT BACKWASH CAP FOR ULTRAKLEAN PRESSURE FILTER/ULTRAKLEAR UVC", "c": "58110", "cat": ""}];
+var TIM_EMAIL = 'Tim@Iloveponds.com';
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxJo-zKm7nQ6q02ayzpO-duQ3mFDPNOUQhrIanGun3WrQXaXfxqYhjTaJlB1bEvIzN25g/exec';
+var LABOR_RATE = 150, LABOR_OT = 225;
+var currentJobId = null, activeInput = null;
+
+// ── LOAD JOB ─────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function() {
+  var params = new URLSearchParams(window.location.search);
+  var id = params.get('id');
+  if (id) { currentJobId = id; loadJob(id); }
+
+  // Wire autocomplete
+  document.querySelectorAll('input.ps').forEach(function(inp) {
+    inp.addEventListener('input',  function() { acShow(this); });
+    inp.addEventListener('focus',  function() { acShow(this); });
+  });
+  document.addEventListener('click', function(e) {
+    if (!e.target.classList.contains('ps') && !e.target.closest('#ac-drop')) acHide();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') acHide();
+  });
+});
+
+function loadJob(id) {
+  try {
+    var jobs = JSON.parse(localStorage.getItem('neal-jobs') || '[]');
+    var job = jobs.find(function(j) { return j.id === id; });
+    if (!job) return;
+    var set = function(el, v) { var e = document.getElementById(el); if (e && v !== undefined && v !== null) e.value = v; };
+    set('jc-number', job.number);
+    set('jc-client', job.client);
+    set('jc-size', job.size);
+    set('jc-start', job.start);
+    set('jc-end', job.end);
+    set('jc-weather', job.weather);
+    set('jc-special', job.special);
+    if (job.jobType) { var t = document.getElementById('jc-type'); if (t) t.value = job.jobType; }
+    document.title = 'Job Cost — ' + job.name;
+    // Load saved form data
+    var saved = localStorage.getItem('jcform-' + id);
+    if (saved) restoreForm(JSON.parse(saved));
+  } catch(e) {}
+}
+
+// ── AUTOCOMPLETE ─────────────────────────────────────────────────────────────
+function acShow(input) {
+  activeInput = input;
+  var q = input.value.toLowerCase().trim();
+  var drop = document.getElementById('ac-drop');
+  if (!q || q.length < 2) { acHide(); return; }
+  var hits = AQUASCAPE_PRODUCTS.filter(function(p) {
+    return p.n.toLowerCase().includes(q) || p.c.toLowerCase().includes(q);
+  }).slice(0, 12);
+  if (!hits.length) { acHide(); return; }
+  drop.innerHTML = hits.map(function(p) {
+    return '<div class="ac-item" onmousedown="acSelect(' + JSON.stringify(p.n) + ',' + JSON.stringify(p.c) + ')">'
+      + '<span>' + p.n + '<span class="ac-code">#' + p.c + '</span></span>'
+      + '<span class="ac-cat">' + p.cat + '</span></div>';
+  }).join('');
+  var r = input.getBoundingClientRect();
+  drop.style.left = r.left + 'px';
+  drop.style.top = (r.bottom + window.scrollY) + 'px';
+  drop.style.width = Math.max(r.width, 300) + 'px';
+  drop.style.display = 'block';
+}
+function acHide() { document.getElementById('ac-drop').style.display = 'none'; }
+function acSelect(name, code) {
+  if (!activeInput) return;
+  activeInput.value = name;
+  var td = activeInput.closest('td');
+  if (td) {
+    var next = td.nextElementSibling;
+    if (next) { var ci = next.querySelector('.pc'); if (ci) ci.value = code; }
+  }
+  acHide();
+  activeInput = null;
+}
+
+// ── COLLECT / SAVE / RESTORE ──────────────────────────────────────────────────
+var SECTIONS = ['s-liner','s-filt','s-pond','s-plumb','s-install','s-light','s-hard','s-addon','s-other'];
+var SEC_NAMES = {
+  's-liner':'Liner & Underlayment','s-filt':'Filtration','s-pond':'Pondless / Wetland / Intake Bay',
+  's-plumb':'Plumbing','s-install':'Install Items','s-light':'Illumination',
+  's-hard':'Hard Goods','s-addon':'Add Ons','s-other':'Fountainscapes / Fire / Other'
+};
+
+function collectTopFields() {
+  var d = {};
+  ['jc-number','jc-client','jc-size','jc-start','jc-end','jc-weather','jc-special',
+   'jc-done-date','jc-done-by','jc-reviewed','n-plumb','n-other','n-leftover','n-notes','n-upsells'].forEach(function(id) {
+    var e = document.getElementById(id); if (e) d[id] = e.value;
+  });
+  var s = document.querySelector('input[name="jc-status"]:checked');
+  d['jc-status'] = s ? s.value : 'In Progress';
+  var f = document.querySelector('input[name="jc-final"]:checked');
+  d['jc-final'] = f ? f.value : 'In Progress';
+  var t = document.getElementById('jc-type'); if (t) d['jc-type'] = t.value;
+  return d;
+}
+
+function collectSections() {
+  var d = {};
+  SECTIONS.forEach(function(sid) {
+    var tb = document.getElementById(sid); if (!tb) return;
+    d[sid] = Array.from(tb.querySelectorAll('tr')).map(function(tr) {
+      return Array.from(tr.querySelectorAll('input')).map(function(inp) {
+        return inp.type === 'checkbox' ? inp.checked : inp.value;
+      });
+    });
+  });
+  return d;
+}
+
+function collectMaterials() {
+  var items = [];
+  SECTIONS.forEach(function(sid) {
+    var tb = document.getElementById(sid); if (!tb) return;
+    var secName = SEC_NAMES[sid];
+    Array.from(tb.querySelectorAll('tr')).forEach(function(tr) {
+      var inputs = tr.querySelectorAll('input[type=text],input[type=number]');
+      var name = inputs[0] ? inputs[0].value.trim() : '';
+      if (!name) return;
+      var code = inputs[1] ? inputs[1].value.trim() : '';
+      var v3 = inputs[2] ? inputs[2].value.trim() : '';
+      var v4 = inputs[3] ? inputs[3].value.trim() : '';
+      items.push({ section: secName, name: name, code: code, col3: v3, col4: v4 });
+    });
+  });
+  return items;
+}
+
+function saveForm(evt) {
+  var top = collectTopFields();
+  var secs = collectSections();
+  var all = Object.assign({}, top, { sections: secs });
+  var key = 'jcform-' + (currentJobId || 'unsaved');
+  localStorage.setItem(key, JSON.stringify(all));
+  if (currentJobId) {
+    try {
+      var jobs = JSON.parse(localStorage.getItem('neal-jobs') || '[]');
+      var job = jobs.find(function(j) { return j.id === currentJobId; });
+      if (job) {
+        job.formSaved = new Date().toISOString();
+        job.formStatus = top['jc-final'];
+        if (top['jc-final'] === 'Complete' && !job.completedAt) {
+          job.completedAt = new Date().toISOString();
+          job.status = 'Complete';
+        }
+        localStorage.setItem('neal-jobs', JSON.stringify(jobs));
+      }
+    } catch(e) {}
+  }
+  if (evt) {
+    var btn = evt.target;
+    var orig = btn.textContent;
+    btn.textContent = '✅ Saved!';
+    setTimeout(function() { btn.textContent = orig; }, 1500);
+  }
+}
+
+function restoreForm(data) {
+  ['jc-number','jc-client','jc-size','jc-start','jc-end','jc-weather','jc-special',
+   'jc-done-date','jc-done-by','jc-reviewed','n-plumb','n-other','n-leftover','n-notes','n-upsells'].forEach(function(id) {
+    var e = document.getElementById(id); if (e && data[id] !== undefined) e.value = data[id];
+  });
+  if (data['jc-type']) { var t = document.getElementById('jc-type'); if (t) t.value = data['jc-type']; }
+  if (data['jc-status']) { var r = document.querySelector('input[name="jc-status"][value="' + data['jc-status'] + '"]'); if (r) r.checked = true; }
+  if (data['jc-final']) { var r2 = document.querySelector('input[name="jc-final"][value="' + data['jc-final'] + '"]'); if (r2) r2.checked = true; }
+  if (data.sections) {
+    SECTIONS.forEach(function(sid) {
+      if (!data.sections[sid]) return;
+      var tb = document.getElementById(sid); if (!tb) return;
+      var rows = tb.querySelectorAll('tr');
+      data.sections[sid].forEach(function(rowData, ri) {
+        if (!rows[ri]) return;
+        var inputs = rows[ri].querySelectorAll('input');
+        rowData.forEach(function(val, ii) {
+          if (!inputs[ii]) return;
+          if (inputs[ii].type === 'checkbox') inputs[ii].checked = val;
+          else inputs[ii].value = val;
+        });
+      });
+    });
+  }
+}
+
+// ── PRINT FIELD REFERENCE (NO FINANCIALS) ────────────────────────────────────
+function printFieldRef() {
+  var top = collectTopFields();
+  var client = document.getElementById('jc-client').value || 'Client';
+  var number = document.getElementById('jc-number').value || '';
+  var type = document.getElementById('jc-type').value || '';
+  var size = document.getElementById('jc-size').value || '';
+  var start = document.getElementById('jc-start').value || '';
+  var end = document.getElementById('jc-end').value || '';
+  var special = document.getElementById('jc-special').value || '';
+  var notes = document.getElementById('n-notes').value || '';
+  var leftover = document.getElementById('n-leftover').value || '';
+  var mats = collectMaterials();
+
+  // Site data from job
+  var site = {};
+  if (currentJobId) {
+    try { var j = JSON.parse(localStorage.getItem('neal-jobs') || '[]').find(function(j) { return j.id === currentJobId; }); if (j && j.site) site = j.site; } catch(e) {}
+  }
+
+  var matHTML = '';
+  var curSec = '';
+  mats.forEach(function(m) {
+    if (m.section !== curSec) {
+      if (curSec) matHTML += '</tbody></table>';
+      curSec = m.section;
+      matHTML += '<div style="background:#1a3a52;color:white;padding:5px 10px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-top:10px">' + m.section + '</div>';
+      matHTML += '<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:#f0f4f7"><th style="padding:4px 8px;text-align:left;border-bottom:1px solid #ddd;color:#7a9aaa">Product</th><th style="padding:4px 8px;text-align:left;border-bottom:1px solid #ddd;color:#7a9aaa">Product #</th><th style="padding:4px 8px;text-align:left;border-bottom:1px solid #ddd;color:#7a9aaa">Qty / Size</th></tr></thead><tbody>';
+    }
+    matHTML += '<tr><td style="padding:4px 8px;border-bottom:1px solid #f0f0f0">' + m.name + '</td><td style="padding:4px 8px;color:#666;border-bottom:1px solid #f0f0f0">' + (m.code||'—') + '</td><td style="padding:4px 8px;border-bottom:1px solid #f0f0f0">' + (m.col3||m.col4||'—') + '</td></tr>';
+  });
+  if (curSec) matHTML += '</tbody></table>';
+
+  var siteHTML = '';
+  if (Object.keys(site).some(function(k) { return site[k]; })) {
+    var rows = [
+      ['Gate Code / Access', site.gate],['Driveway Surface', site.driveway],
+      ['Max Equip Width', site.equipWidth ? site.equipWidth + ' ft' : null],
+      ['Staging Area', site.staging],['Access Route', site.accessRoute],
+      ['Obstacles', site.obstacles],['Utilities', site.utilities],
+      ['Soil Type', site.soil],['Client Goals', site.goals],['Concerns', site.concerns]
+    ].filter(function(r) { return r[1]; });
+    if (rows.length) {
+      siteHTML = '<div style="background:#1a3a52;color:white;padding:5px 10px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-top:12px">Site Information</div>';
+      siteHTML += '<table style="width:100%;border-collapse:collapse;font-size:11px;border:1px solid #ddd"><tbody>';
+      rows.forEach(function(r) {
+        siteHTML += '<tr><td style="padding:4px 8px;font-weight:700;width:35%;background:#f8f9fa;border-bottom:1px solid #eee">' + r[0] + '</td><td style="padding:4px 8px;border-bottom:1px solid #eee">' + r[1] + '</td></tr>';
+      });
+      siteHTML += '</tbody></table>';
+    }
+  }
+
+  var win = window.open('', '_blank');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Field Reference — ' + client + '</title>'
+    + '<style>body{font-family:Arial,sans-serif;font-size:12px;color:#1a2e3e;margin:0;padding:24px;max-width:800px}'
+    + '.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;border:1px solid #ddd;border-radius:6px;padding:12px;background:#f8f9fa;margin-bottom:14px}'
+    + '.cell .lbl{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#aaa;margin-bottom:2px}'
+    + '.cell .val{font-size:14px;font-weight:700;color:#1a3a52}'
+    + '@media print{button{display:none}}</style>'
+    + '</head><body>'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'
+    + '<div><h1 style="font-size:20px;font-weight:700;color:#1a3a52;margin:0 0 3px">Field Reference — ' + client + '</h1>'
+    + '<div style="font-size:10px;color:#aaa;letter-spacing:1px;text-transform:uppercase">New England Aquatic Landscaping · iloveponds.com · Confidential</div></div>'
+    + '<button onclick="window.print()" style="padding:7px 14px;background:#1a3a52;color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px">🖨 Print PDF</button>'
+    + '</div>'
+    + '<div class="grid">'
+    + '<div class="cell"><div class="lbl">Job #</div><div class="val">' + (number||'—') + '</div></div>'
+    + '<div class="cell"><div class="lbl">Feature</div><div class="val">' + (type||'—') + '</div></div>'
+    + '<div class="cell"><div class="lbl">Size</div><div class="val">' + (size||'—') + '</div></div>'
+    + '<div class="cell"><div class="lbl">Dates</div><div class="val" style="font-size:11px">' + (start||'—') + ' → ' + (end||'—') + '</div></div>'
+    + '</div>'
+    + (special ? '<div style="background:#fff8e8;border:1px solid #f0d080;border-radius:6px;padding:9px 12px;margin-bottom:12px;font-size:11px"><strong>Special Instructions:</strong> ' + special + '</div>' : '')
+    + siteHTML
+    + matHTML
+    + (leftover ? '<div style="background:#fff3e0;border:1px solid #f0a060;border-radius:6px;padding:9px 12px;margin-top:12px"><strong>Materials Left on Site:</strong><br>' + leftover + '</div>' : '')
+    + (notes ? '<div style="background:#f0f4f7;border-radius:6px;padding:9px 12px;margin-top:12px;font-size:11px"><strong>Notes:</strong> ' + notes + '</div>' : '')
+    + '<div style="font-size:9px;color:#aaa;margin-top:18px;padding-top:8px;border-top:1px solid #eee;text-align:center">New England Aquatic Landscaping · 774-437-1160 · iloveponds.com · FOR FIELD USE ONLY — NO FINANCIAL DATA</div>'
+    + '</body></html>');
+  win.document.close();
+}
+
+// ── SEND TO TIM ───────────────────────────────────────────────────────────────
+function sendToTim() {
+  var final = document.querySelector('input[name="jc-final"]:checked');
+  if (!final || final.value !== 'Complete') {
+    if (!confirm('Job is not marked Complete. Send report anyway?')) return;
+  }
+
+  saveForm();
+
+  var client = document.getElementById('jc-client').value || '';
+  var number = document.getElementById('jc-number').value || '';
+  var type = document.getElementById('jc-type').value || '';
+  var size = document.getElementById('jc-size').value || '';
+  var start = document.getElementById('jc-start').value || '';
+  var end = document.getElementById('jc-end').value || '';
+  var doneBy = document.getElementById('jc-done-by').value || 'Sean Sawicki';
+  var notes = document.getElementById('n-notes').value || '';
+  var upsells = document.getElementById('n-upsells').value || '';
+  var leftover = document.getElementById('n-leftover').value || '';
+  var submittedAt = new Date().toLocaleString();
+  var mats = collectMaterials();
+
+  // Pull labor from job
+  var contract = 0, laborCost = 0, regHrs = 0, otHrs = 0, logHTML = '';
+  if (currentJobId) {
+    try {
+      var jobs = JSON.parse(localStorage.getItem('neal-jobs') || '[]');
+      var job = jobs.find(function(j) { return j.id === currentJobId; });
+      if (job) {
+        contract = job.contract || 0;
+        if (job.log && job.log.length) {
+          job.log.forEach(function(l) {
+            regHrs += (l.regular||0); otHrs += (l.ot||0);
+          });
+          laborCost = regHrs * LABOR_RATE + otHrs * LABOR_OT;
+          logHTML = job.log.map(function(l) {
+            var cost = (l.regular||0)*LABOR_RATE + (l.ot||0)*LABOR_OT;
+            return '<tr><td style="padding:5px 8px;border-bottom:1px solid #f0ece4">' + l.date + '</td>'
+              + '<td style="padding:5px 8px;border-bottom:1px solid #f0ece4">' + l.crew + '</td>'
+              + '<td style="padding:5px 8px;border-bottom:1px solid #f0ece4;text-align:center">' + (l.regular||0) + '</td>'
+              + '<td style="padding:5px 8px;border-bottom:1px solid #f0ece4;text-align:center">' + (l.ot||0) + '</td>'
+              + '<td style="padding:5px 8px;border-bottom:1px solid #f0ece4;color:#bf7825;font-weight:700">$' + cost.toFixed(2) + '</td>'
+              + '<td style="padding:5px 8px;border-bottom:1px solid #f0ece4;font-size:11px">' + (l.materials||'—') + '</td></tr>';
+          }).join('');
+          // Update job
+          job.submittedToTim = new Date().toISOString();
+          job.status = 'Complete';
+          localStorage.setItem('neal-jobs', JSON.stringify(jobs));
+        }
+      }
+    } catch(e) {}
+  }
+
+  var gp = contract > 0 ? ((contract - laborCost) / contract * 100) : 0;
+  var gpColor = gp >= 60 ? '#1a6e48' : gp >= 50 ? '#bf7825' : '#a82828';
+
+  var matHTML = ''; var curSec = '';
+  mats.forEach(function(m) {
+    if (m.section !== curSec) {
+      if (curSec) matHTML += '</tbody></table>';
+      curSec = m.section;
+      matHTML += '<div style="background:#1a3a52;color:white;padding:5px 10px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-top:10px">' + m.section + '</div>';
+      matHTML += '<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:#f0f4f7"><th style="padding:4px 8px;text-align:left;border-bottom:1px solid #ddd;color:#7a9aaa">Product</th><th style="padding:4px 8px;color:#7a9aaa;border-bottom:1px solid #ddd">Product #</th><th style="padding:4px 8px;color:#7a9aaa;border-bottom:1px solid #ddd">Qty/Size</th></tr></thead><tbody>';
+    }
+    matHTML += '<tr><td style="padding:4px 8px;border-bottom:1px solid #f0f0f0">' + m.name + '</td><td style="padding:4px 8px;color:#666;border-bottom:1px solid #f0f0f0">' + (m.code||'—') + '</td><td style="padding:4px 8px;border-bottom:1px solid #f0f0f0">' + (m.col3||m.col4||'—') + '</td></tr>';
+  });
+  if (curSec) matHTML += '</tbody></table>';
+
+  var bonusBadge = gp >= 60 ? '<div style="background:#e5f5ec;border:1px solid #a8d9bc;border-radius:6px;padding:10px 14px;margin:12px 0;color:#1a6e48;font-weight:700;font-size:14px">✅ BONUS ELIGIBLE — Gross profit ' + gp.toFixed(1) + '% (≥60%)</div>' : '';
+
+  var reportHTML = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Job Cost Report — ' + client + '</title>'
+    + '<style>body{font-family:Arial,sans-serif;font-size:12px;color:#1a2e3e;margin:0;padding:32px;max-width:850px}'
+    + 'h2{font-size:13px;color:#1a3a52;margin:16px 0 5px;border-bottom:2px solid #00aeef;padding-bottom:3px}'
+    + '.card-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}'
+    + '.card{background:#f4f7f9;border-radius:6px;padding:10px 12px;border:1px solid #e0e8ee}'
+    + '.card .lbl{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#aaa;margin-bottom:3px}'
+    + '.card .val{font-size:20px;font-weight:700;color:#1a3a52}'
+    + 'table{width:100%;border-collapse:collapse}'
+    + 'th{background:#1a3a52;color:rgba(255,255,255,.7);padding:6px 10px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase}'
+    + 'td{padding:5px 10px;border-bottom:1px solid #f0ece4}'
+    + '.ts{font-size:10px;color:#aaa;margin-top:20px;padding-top:10px;border-top:1px solid #eee;text-align:center}'
+    + '@media print{button{display:none}}</style>'
+    + '</head><body>'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+    + '<div><h1 style="font-size:22px;font-weight:700;color:#1a3a52;margin:0 0 4px">Job Cost Report</h1>'
+    + '<div style="font-size:13px;color:#555;margin-bottom:4px">' + client + (number ? ' · Job #' + number : '') + (type ? ' · ' + type : '') + (size ? ' · ' + size : '') + '</div>'
+    + '<div style="font-size:11px;color:#aaa">' + (start||'—') + (end ? ' → ' + end : '') + '</div></div>'
+    + '<button onclick="window.print()" style="padding:7px 14px;background:#1a3a52;color:white;border:none;border-radius:6px;cursor:pointer">🖨 Print PDF</button>'
+    + '</div>'
+    + bonusBadge
+    + '<div class="card-row">'
+    + '<div class="card"><div class="lbl">Contract Value</div><div class="val">$' + contract.toFixed(2) + '</div></div>'
+    + '<div class="card"><div class="lbl">Labor Cost</div><div class="val" style="color:#bf7825">$' + laborCost.toFixed(2) + '</div></div>'
+    + '<div class="card"><div class="lbl">Gross Profit</div><div class="val" style="color:' + gpColor + '">' + gp.toFixed(1) + '%</div></div>'
+    + '<div class="card"><div class="lbl">Total Hours</div><div class="val">' + (regHrs + otHrs) + 'h</div></div>'
+    + '</div>'
+    + (logHTML ? '<h2>Labor Log</h2><table><thead><tr><th>Date</th><th>Crew</th><th>Reg Hrs</th><th>OT Hrs</th><th>Labor $</th><th>Materials Used</th></tr></thead><tbody>' + logHTML + '<tr style="background:#f4f7f9;font-weight:700"><td colspan="2">TOTALS</td><td style="text-align:center">' + regHrs + '</td><td style="text-align:center">' + otHrs + '</td><td style="color:#bf7825">$' + laborCost.toFixed(2) + '</td><td></td></tr></tbody></table>' : '')
+    + (matHTML ? '<h2>Materials Used</h2>' + matHTML : '')
+    + (notes ? '<h2>Important Notes</h2><p style="font-size:12px">' + notes + '</p>' : '')
+    + (upsells ? '<h2>Up-Sells / Follow-Up</h2><p style="font-size:12px">' + upsells + '</p>' : '')
+    + (leftover ? '<h2>Materials Left on Site</h2><p style="font-size:12px">' + leftover + '</p>' : '')
+    + '<div class="ts">Submitted by ' + doneBy + ' · ' + submittedAt + '<br>New England Aquatic Landscaping · 774-437-1160 · iloveponds.com</div>'
+    + '</body></html>';
+
+  var win = window.open('', '_blank');
+  win.document.write(reportHTML);
+  win.document.close();
+
+  // Fire Apps Script
+  if (APPS_SCRIPT_URL) {
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'sendJobReport', to: TIM_EMAIL,
+        subject: 'Job Cost Report — ' + client + (number ? ' [' + number + ']' : ''),
+        html: reportHTML, submittedAt: submittedAt
+      })
+    });
+  }
+
+  alert('✅ Report opened!\n\nTimestamp: ' + submittedAt + '\n\nThis is your proof of on-time submission.');
+}
+</script>
+</body>
+</html>

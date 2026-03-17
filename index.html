@@ -1128,6 +1128,46 @@ body.dark-mode .quick-log-item { background: #162840; }
   .stat-card:hover { transform: none; box-shadow: var(--shadow); }
 }
 
+
+/* ── PRODUCT AUTOCOMPLETE ── */
+.prod-autocomplete-wrap { position: relative; }
+.prod-autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--sand-dark);
+  border-radius: 0 0 8px 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 9999;
+  box-shadow: var(--shadow-md);
+}
+body.dark-mode .prod-autocomplete-list { background: #0f2235; border-color: #1f3a52; }
+.prod-autocomplete-item {
+  padding: 9px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  border-bottom: 1px solid var(--sand-mid);
+}
+.prod-autocomplete-item:last-child { border-bottom: none; }
+.prod-autocomplete-item:hover { background: var(--sand); }
+body.dark-mode .prod-autocomplete-item:hover { background: #162840; }
+.prod-autocomplete-item .prod-code { color: var(--text-dim); font-size: 11px; margin-left: 6px; }
+.prod-autocomplete-item .prod-cat { color: var(--teal); font-size: 10px; float: right; }
+
+
+/* ── JOB FILTER BUTTONS ── */
+.job-filter-btn {
+  padding: 7px 14px; border-radius: 20px; font-family: Outfit, sans-serif;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  border: 1px solid var(--sand-dark); background: white; color: var(--text-dim);
+  transition: all .15s;
+}
+.job-filter-btn:hover { border-color: var(--teal); color: var(--teal); }
+.job-filter-btn.active { background: var(--deep); color: white; border-color: var(--deep); }
+
 </style>
 </head>
 <body>
@@ -1145,9 +1185,9 @@ body.dark-mode .quick-log-item { background: #162840; }
   </div>
   <div class="header-right">
     <a href="leaderboard.html" style="text-decoration:none"><button class="dark-toggle" title="View Leaderboard" style="font-size:13px;letter-spacing:0.5px;font-weight:700;padding:5px 14px">🏆 Leaderboard</button></a>
-    <button class="dark-toggle" id="dark-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">🌙</button>
     <div class="user-pill" id="header-user" style="display:none"></div>
     <button class="btn btn-ghost-header" id="logout-btn" style="display:none" onclick="logout()">Sign Out</button>
+    <button class="dark-toggle" id="dark-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">🌙</button>
   </div>
 </header>
 
@@ -1211,7 +1251,7 @@ body.dark-mode .quick-log-item { background: #162840; }
   <div style="background:white;border-radius:14px;padding:40px 36px;width:100%;max-width:400px;box-shadow:0 8px 40px rgba(0,0,0,0.4)">
     <div style="text-align:center;margin-bottom:24px">
       <div style="font-size:40px;margin-bottom:10px">🔐</div>
-      <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--ink)">Set Your PIN</div>
+      <div style="font-family:Cormorant Garamond,serif;font-size:24px;font-weight:700;color:var(--ink)">Set Your PIN</div>
       <div style="font-size:13px;color:var(--text-dim);margin-top:6px">Welcome! Please set a personal PIN to secure your account.</div>
     </div>
     <div id="pin-change-alert"></div>
@@ -1282,6 +1322,27 @@ body.dark-mode .quick-log-item { background: #162840; }
             </div>
             <div class="amount" id="commission-preview-amount">$0.00</div>
           </div>
+          <div id="upsell-conditions" style="display:none;background:var(--sand);border-radius:8px;padding:14px 16px;margin-bottom:12px">
+            <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px">⚠️ Required Conditions</div>
+            <div id="condition-paid" style="display:none;margin-bottom:8px">
+              <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer">
+                <input type="checkbox" id="chk-paid" style="width:16px;height:16px;cursor:pointer">
+                <span>I confirm the client's invoice has been paid</span>
+              </label>
+            </div>
+            <div id="condition-callback" style="display:none;margin-bottom:8px">
+              <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer">
+                <input type="checkbox" id="chk-callback" style="width:16px;height:16px;cursor:pointer">
+                <span>No callbacks from this client in the last 30 days</span>
+              </label>
+            </div>
+            <div id="condition-profit" style="display:none">
+              <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer">
+                <input type="checkbox" id="chk-profit" style="width:16px;height:16px;cursor:pointer">
+                <span>I confirm this job has 50%+ gross profit</span>
+              </label>
+            </div>
+          </div>
           <button class="btn btn-primary" onclick="logUpsell()" style="padding:10px 24px">+ Add Upsell</button>
         </div>
       </div>
@@ -1343,6 +1404,7 @@ body.dark-mode .quick-log-item { background: #162840; }
         <button class="tab" onclick="showManagerTab('review')">Review Claims</button>
         <button class="tab" onclick="showManagerTab('reports')">Reports</button>
         <button class="tab" onclick="showManagerTab('config')">Setup</button>
+        <button class="tab" id="super-admin-tab" style="display:none;background:linear-gradient(135deg,rgba(191,120,37,0.2),rgba(191,120,37,0.05));border-color:rgba(191,120,37,0.4);color:var(--copper)" onclick="showManagerTab('superadmin')">⭐ My Dashboard</button>
       </div>
 
       <!-- OVERVIEW -->
@@ -1392,6 +1454,108 @@ body.dark-mode .quick-log-item { background: #162840; }
             <tbody id="mgr-all-table"></tbody>
           </table>
         </div>
+      </div>
+
+      <!-- SUPER ADMIN -->
+      <div id="mgr-tab-superadmin" class="hidden">
+        <div class="page-title-row" style="margin-bottom:16px">
+          <div class="page-title" style="font-style:italic">⭐ Sean's Dashboard</div>
+          <div style="font-size:13px;color:var(--text-dim)">Super Admin View</div>
+        </div>
+
+        <!-- DAILY DIGEST BANNER -->
+        <div id="sa-digest-banner" style="margin-bottom:18px"></div>
+
+        <!-- INNER TABS -->
+        <div class="tabs" style="margin-bottom:20px">
+          <button class="tab active" onclick="showSATab('overview')" id="sa-tab-btn-overview">📊 Overview</button>
+          <button class="tab" onclick="showSATab('jobs')" id="sa-tab-btn-jobs">🏗️ Job Tracker</button>
+          <button class="tab" onclick="showSATab('calendar')" id="sa-tab-btn-calendar">📅 Calendar</button>
+          <button class="tab" onclick="showSATab('reports')" id="sa-tab-btn-reports">📋 Reports</button>
+        </div>
+
+        <!-- SA OVERVIEW TAB -->
+        <div id="sa-tab-overview">
+        <!-- STAT CARDS ROW -->
+        <div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px" id="sa-stats-row"></div>
+
+        <!-- REPORTS SECTION -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+          <div class="chart-card">
+            <div class="chart-title">📈 Revenue by Month (This Year)</div>
+            <div id="sa-revenue-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">💰 Commissions Paid by Month</div>
+            <div id="sa-commission-chart"></div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+          <div class="chart-card">
+            <div class="chart-title">🏆 Top Earners — All Time</div>
+            <div id="sa-top-earners"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">🎣 Best Selling Products — All Time</div>
+            <div id="sa-top-products"></div>
+          </div>
+        </div>
+
+        </div><!-- end sa-tab-overview -->
+
+        <!-- SA JOB TRACKER TAB -->
+        <div id="sa-tab-jobs" class="hidden">
+
+          <!-- SUMMARY CARDS -->
+          <div id="job-summary-cards" style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px"></div>
+
+          <!-- FILTER TABS + NEW JOB -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="job-filter-btn active" data-filter="all"     onclick="setJobFilter('all')">All Jobs</button>
+              <button class="job-filter-btn"         data-filter="scheduled" onclick="setJobFilter('scheduled')">🟣 Scheduled</button>
+              <button class="job-filter-btn"         data-filter="active"  onclick="setJobFilter('active')">🔵 In Progress</button>
+              <button class="job-filter-btn"         data-filter="prepped" onclick="setJobFilter('prepped')">📋 Form Filled</button>
+              <button class="job-filter-btn"         data-filter="overdue" onclick="setJobFilter('overdue')">🔴 Overdue</button>
+              <button class="job-filter-btn"         data-filter="hold"    onclick="setJobFilter('hold')">⏸ On Hold</button>
+              <button class="job-filter-btn"         data-filter="done"    onclick="setJobFilter('done')">✅ Complete</button>
+            </div>
+            <button class="btn btn-primary" onclick="openNewJobModal()">+ New Job</button>
+          </div>
+
+          <div id="job-tracker-list"></div>
+        </div>
+
+        <!-- SA CALENDAR TAB -->
+        <div id="sa-tab-calendar" class="hidden">
+          <div id="sa-calendar-root"></div>
+        </div>
+
+        <!-- SA REPORTS TAB -->
+        <div id="sa-tab-reports" class="hidden">
+        <!-- MONTHLY REPORT GENERATOR -->
+        <div class="form-section" style="margin-bottom:20px">
+          <div class="page-title" style="font-size:18px;margin-bottom:16px">📋 Generate Monthly Report</div>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <select id="sa-report-month" style="min-width:160px"></select>
+            <button class="btn btn-primary" onclick="generateMonthlyReport()">Generate Report</button>
+            <button class="btn btn-outline" onclick="emailMonthlyReport()">✉ Email to Boss</button>
+          </div>
+          <div id="sa-report-output" style="margin-top:20px"></div>
+        </div>
+
+        <!-- EMPLOYEE YEAR IN REVIEW -->
+        <div class="form-section">
+          <div class="page-title" style="font-size:18px;margin-bottom:16px">👤 Employee Year in Review</div>
+          <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+            <select id="sa-employee-select" style="min-width:180px"></select>
+            <select id="sa-year-select" style="min-width:120px"></select>
+            <button class="btn btn-primary" onclick="generateEmployeeReview()">Generate</button>
+          </div>
+          <div id="sa-employee-output"></div>
+        </div>
+        </div><!-- end sa-tab-reports -->
       </div>
 
       <!-- REVIEW -->
@@ -1472,6 +1636,21 @@ body.dark-mode .quick-log-item { background: #162840; }
         <div class="field"></div>
       </div>
     </div>
+    <div style="border-top:1px solid var(--sand-mid);margin:16px 0;padding-top:16px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px">Commission Conditions</div>
+      <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;margin-bottom:8px">
+        <input type="checkbox" id="prod-req-paid" style="width:16px;height:16px;cursor:pointer">
+        <span>Client invoice must be paid before claiming</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;margin-bottom:8px">
+        <input type="checkbox" id="prod-req-callback" style="width:16px;height:16px;cursor:pointer">
+        <span>No callbacks in last 30 days required</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="prod-req-profit" style="width:16px;height:16px;cursor:pointer">
+        <span>Must confirm 50%+ gross profit (construction/big repair)</span>
+      </label>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
       <button class="btn btn-primary" onclick="saveProduct()">Save Product</button>
@@ -1549,6 +1728,235 @@ body.dark-mode .quick-log-item { background: #162840; }
     </div>
   </div>
 
+  <div id="modal-new-job" class="modal hidden" style="max-width:700px;max-height:92vh">
+    <div class="modal-title">New Construction Job</div>
+    <div class="tabs" style="margin-bottom:16px">
+      <button class="tab active" onclick="showJobTab('info')" id="jt-info">Job Info</button>
+      <button class="tab" onclick="showJobTab('site')" id="jt-site">Site Assessment</button>
+      <button class="tab" onclick="showJobTab('materials')" id="jt-materials">Materials</button>
+    </div>
+
+    <!-- JOB INFO TAB -->
+    <div id="job-tab-info">
+      <div class="field-row">
+        <div class="field"><label>Job Name</label><input type="text" id="job-name" placeholder="e.g. Smith Pond Build"></div>
+        <div class="field"><label>Job #</label><input type="text" id="job-number" placeholder="e.g. J-2026-001"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Customer Name</label><input type="text" id="job-client" placeholder="Client name"></div>
+        <div class="field"><label>Feature Type</label><select id="job-type"><option value="">— Select —</option><option>Ecosystem Pond</option><option>Pondless Waterfall</option><option>Stream</option><option>Wetland Filter</option><option>Fountain</option><option>Fire Feature</option><option>Repair/Renovation</option><option>Other</option></select></div>
+      </div>
+      <div class="field"><label>Project Address</label><input type="text" id="job-address" placeholder="123 Main St, Town, MA"></div>
+      <div class="field-row">
+        <div class="field"><label>Phone</label><input type="text" id="job-phone" placeholder="(774) 555-0000"></div>
+        <div class="field"><label>Size</label><input type="text" id="job-size" placeholder="e.g. 12x16, 8ft pondless"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Start Date</label><input type="date" id="job-start"></div>
+        <div class="field"><label>Target Completion</label><input type="date" id="job-end"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Contract Value ($)</label><input type="number" id="job-contract" placeholder="0.00" min="0" step="0.01"></div>
+        <div class="field"><label>Est. Labor Hours</label><input type="number" id="job-est-hours" placeholder="0" min="0"></div>
+      </div>
+      <div class="field"><label>Special Instructions / Client Requests</label><textarea id="job-special" rows="2" style="width:100%;padding:10px;border:1px solid var(--sand-dark);border-radius:6px;font-family:Outfit,sans-serif;font-size:14px;resize:vertical" placeholder="Client requests, special notes..."></textarea></div>
+      <div class="field"><label>Weather / Site Conditions</label><input type="text" id="job-weather" placeholder="e.g. Wet spring, clay soil"></div>
+    </div>
+
+    <!-- SITE ASSESSMENT TAB -->
+    <div id="job-tab-site" class="hidden">
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal);margin-bottom:12px">Site Access & Equipment</div>
+      <div class="field-row">
+        <div class="field"><label>Gate Code / Access Info</label><input type="text" id="site-gate" placeholder="Code or instructions"></div>
+        <div class="field"><label>Driveway Surface</label><input type="text" id="site-driveway" placeholder="e.g. Paved, Gravel"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Max Equip Width (ft)</label><input type="number" id="site-equip-width" placeholder="0"></div>
+        <div class="field"><label>Staging Area</label><input type="text" id="site-staging" placeholder="e.g. Side yard"></div>
+      </div>
+      <div class="field"><label>Access Route / Entry Point</label><input type="text" id="site-access-route" placeholder="Describe access route"></div>
+      <div class="field"><label>Access Obstacles / Concerns</label><input type="text" id="site-obstacles" placeholder="e.g. Low branches, tight gate"></div>
+
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal);margin:16px 0 12px">Utilities</div>
+      <div class="field-row">
+        <div class="field"><label>Dig Safe Called?</label><select id="site-digsafe"><option value="">— Select —</option><option>Yes</option><option>No — Homeowner responsible</option><option>No utilities in work area</option></select></div>
+        <div class="field"><label>Ticket #</label><input type="text" id="site-ticket" placeholder="Dig Safe ticket #"></div>
+      </div>
+      <div class="field"><label>Utility Notes</label><input type="text" id="site-utilities" placeholder="e.g. Electric runs along west fence, gas marked with flags"></div>
+
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal);margin:16px 0 12px">Soil & Measurements</div>
+      <div class="field-row">
+        <div class="field"><label>Soil Type</label><select id="site-soil"><option value="">— Select —</option><option>Loam</option><option>Clay</option><option>Sandy</option><option>Rocky</option><option>Mixed</option></select></div>
+        <div class="field"><label>Rock / Ledge Depth</label><input type="text" id="site-rock-depth" placeholder="e.g. 18 inches"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Dist to Power (ft)</label><input type="number" id="site-dist-power" placeholder="0"></div>
+        <div class="field"><label>Dist to Water (ft)</label><input type="number" id="site-dist-water" placeholder="0"></div>
+        <div class="field"><label>Dist to House (ft)</label><input type="number" id="site-dist-house" placeholder="0"></div>
+      </div>
+      <div class="field"><label>Slope / Grade / Drainage Notes</label><input type="text" id="site-slope" placeholder="e.g. Slight slope toward house, good drainage"></div>
+
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal);margin:16px 0 12px">Client Notes</div>
+      <div class="field"><label>Budget Discussed</label><select id="site-budget-discussed"><option value="">— Select —</option><option>Yes</option><option>No</option></select></div>
+      <div class="field"><label>Client Goals / Wish List</label><textarea id="site-goals" rows="2" style="width:100%;padding:10px;border:1px solid var(--sand-dark);border-radius:6px;font-family:Outfit,sans-serif;font-size:14px;resize:vertical" placeholder="What does the client want?"></textarea></div>
+      <div class="field"><label>Concerns / Special Requests</label><textarea id="site-concerns" rows="2" style="width:100%;padding:10px;border:1px solid var(--sand-dark);border-radius:6px;font-family:Outfit,sans-serif;font-size:14px;resize:vertical" placeholder="Any concerns or special requests?"></textarea></div>
+    </div>
+
+    <!-- MATERIALS TAB -->
+    <div id="job-tab-materials" class="hidden" style="font-size:12px">
+
+      <!-- LINER & UNDERLAYMENT -->
+      <div style="background:var(--teal);color:white;padding:6px 10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:10px;margin-bottom:0">Liner & Underlayment</div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:12px">
+        <thead><tr style="background:rgba(0,174,239,0.1)"><th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--text-dim);font-weight:700;letter-spacing:1px">PRODUCT</th><th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--text-dim);font-weight:700;letter-spacing:1px">PRODUCT #</th><th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--text-dim);font-weight:700;letter-spacing:1px">SIZE</th><th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--text-dim);font-weight:700;letter-spacing:1px">SQ FT</th><th style="padding:5px 8px;font-size:10px;color:var(--text-dim)">DEL?</th></tr></thead>
+        <tbody id="mat-liner">
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" data-section="liner" placeholder="Pond Liner" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="size"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="sqft"></td><td style="padding:3px 4px;text-align:center"><input type="checkbox"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" data-section="liner" placeholder="Stream Liner" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="size"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="sqft"></td><td style="padding:3px 4px;text-align:center"><input type="checkbox"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" data-section="liner" placeholder="Basin Liner" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="size"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="sqft"></td><td style="padding:3px 4px;text-align:center"><input type="checkbox"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" data-section="liner" placeholder="HD Under Liner" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="size"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="sqft"></td><td style="padding:3px 4px;text-align:center"><input type="checkbox"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" data-section="liner" placeholder="Rock Pad" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="size"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="sqft"></td><td style="padding:3px 4px;text-align:center"><input type="checkbox"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" data-section="liner" placeholder="Gravel Barrier" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="size"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="sqft"></td><td style="padding:3px 4px;text-align:center"><input type="checkbox"></td></tr>
+        </tbody>
+      </table>
+
+      <!-- FILTRATION -->
+      <div style="background:var(--teal);color:white;padding:6px 10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:10px;margin-bottom:0">Filtration</div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:12px">
+        <thead><tr style="background:rgba(0,174,239,0.1)"><th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--text-dim);font-weight:700;width:50%">PRODUCT</th><th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--text-dim);font-weight:700">PRODUCT #</th><th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--text-dim);font-weight:700">QTY</th></tr></thead>
+        <tbody id="mat-filtration">
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="BioFalls" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Skimmer" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Spillway" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Pressure Filter" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="BioBalls" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Additional..." style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Additional..." style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+        </tbody>
+      </table>
+
+      <!-- PONDLESS / WETLAND -->
+      <div style="background:var(--teal);color:white;padding:6px 10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:10px;margin-bottom:0">Pondless | Wetland | Intake Bay</div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:12px">
+        <tbody id="mat-pondless">
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Vault" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Extension" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Snorkel" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Centipede" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="AquaBlox" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Additional..." style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+        </tbody>
+      </table>
+
+      <!-- PLUMBING -->
+      <div style="background:var(--teal);color:white;padding:6px 10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:10px;margin-bottom:0">Plumbing</div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:12px">
+        <tbody id="mat-plumbing">
+          <tr><td style="padding:3px 4px"><input class="mat-input" placeholder="Pipe" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Check Valve" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Pump" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input" placeholder="Fittings" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input" placeholder="Additional..." style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input" placeholder="Additional..." style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+        </tbody>
+      </table>
+
+      <!-- INSTALL ITEMS -->
+      <div style="background:var(--teal);color:white;padding:6px 10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:10px;margin-bottom:0">Install Items</div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:12px">
+        <tbody id="mat-install">
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Waterfall Foam" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Silicone" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Glue" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Cover Tape / Seam Tape" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Other..." style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+        </tbody>
+      </table>
+
+      <!-- ILLUMINATION -->
+      <div style="background:var(--teal);color:white;padding:6px 10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:10px;margin-bottom:0">Illumination</div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:12px">
+        <tbody id="mat-lighting">
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Lights" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Lights" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Transformer" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Home-Run Wire" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Smart Color Hub" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Additional..." style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+        </tbody>
+      </table>
+
+      <!-- HARD GOODS -->
+      <div style="background:var(--teal);color:white;padding:6px 10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:10px;margin-bottom:0">Hard Goods</div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:12px">
+        <thead><tr style="background:rgba(0,174,239,0.1)"><th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--text-dim);font-weight:700;width:40%">PRODUCT</th><th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--text-dim);font-weight:700">DELIVERY TICKET #</th><th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--text-dim);font-weight:700">UNIT</th><th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--text-dim);font-weight:700">QTY</th></tr></thead>
+        <tbody id="mat-hardgoods">
+          <tr><td style="padding:3px 4px"><input class="mat-input" placeholder="Boulders" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="ticket #"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="tons/bags/sqft"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input" placeholder="3/4&quot; Gravel" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="ticket #"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="tons/bags/sqft"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input" placeholder="1-2&quot; Gravel" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="ticket #"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="tons/bags/sqft"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input" placeholder="LG River Jax" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="ticket #"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="tons/bags/sqft"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input" placeholder="Cobbles" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="ticket #"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="tons/bags/sqft"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input" placeholder="Top Soil" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="ticket #"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="tons/bags/sqft"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input" placeholder="Pool Sand" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="ticket #"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="tons/bags/sqft"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input" placeholder="Other..." style="width:100%"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="ticket #"></td><td style="padding:3px 4px"><input class="mat-input" style="width:100%" placeholder="tons/bags/sqft"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+        </tbody>
+      </table>
+
+      <!-- ADD ONS -->
+      <div style="background:var(--teal);color:white;padding:6px 10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:10px;margin-bottom:0">Add Ons</div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:12px">
+        <tbody id="mat-addons">
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Auto Fill" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Auto Doser" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Copper Ionizer" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Fish Cave" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Bridge / Jets / Fish / Plants..." style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+          <tr><td style="padding:3px 4px"><input class="mat-input prod-search" placeholder="Smart Control" style="width:100%"></td><td style="padding:3px 4px"><input class="mat-code" style="width:100%" placeholder="#"></td><td style="padding:3px 4px"><input class="mat-qty" style="width:60px" placeholder="qty" type="number" min="0"></td></tr>
+        </tbody>
+      </table>
+
+      <!-- FIELD NOTES -->
+      <div style="background:#555;color:white;padding:6px 10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:10px;margin-bottom:4px">Field Notes</div>
+      <textarea id="mat-field-notes" rows="3" style="width:100%;padding:8px 10px;border:1px solid var(--sand-dark);border-radius:0 0 6px 6px;font-family:Outfit,sans-serif;font-size:13px;resize:vertical;margin-bottom:12px" placeholder="Field notes, materials left on site, important notes, up-sells, follow-up items..."></textarea>
+
+      <!-- COMPLETION -->
+      <div style="background:#2e7d32;color:white;padding:6px 10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:10px;margin-bottom:8px">Job Completion Sign-Off</div>
+      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="radio" name="job-status-radio" value="In Progress"> In Progress</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="radio" name="job-status-radio" value="Punch List"> Punch List / Return Visit Needed</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="radio" name="job-status-radio" value="Complete"> Job Complete</label>
+      </div>
+      <div style="margin-top:8px">
+        <input type="text" id="mat-completed-by" placeholder="Completed by" style="width:200px;margin-right:8px">
+        <input type="text" id="mat-reviewed-by" placeholder="Reviewed by" style="width:200px">
+      </div>
+
+      <!-- AUTOCOMPLETE DROPDOWN CONTAINER -->
+      <div id="mat-autocomplete" style="display:none;position:fixed;background:white;border:1px solid var(--sand-dark);border-radius:8px;max-height:200px;overflow-y:auto;z-index:99999;box-shadow:var(--shadow-md);min-width:300px"></div>
+    </div>
+
+    <div class="modal-footer" style="margin-top:20px">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewJob()">Create Job</button>
+    </div>
+  </div>
+
+  <div id="modal-log-hours" class="modal hidden" style="max-width:480px">
+    <div class="modal-title">Log Labor Hours</div>
+    <input type="hidden" id="log-hours-job-id">
+    <div class="field"><label>Date</label><input type="date" id="log-hours-date"></div>
+    <div class="field"><label>Crew Members on Site</label><input type="text" id="log-hours-crew" placeholder="e.g. Sean, Mike, Jake"></div>
+    <div class="field-row">
+      <div class="field"><label>Regular Hours</label><input type="number" id="log-hours-regular" placeholder="0" min="0" step="0.5"></div>
+      <div class="field"><label>Overtime Hours</label><input type="number" id="log-hours-ot" placeholder="0" min="0" step="0.5"></div>
+    </div>
+    <div class="field"><label>Materials Used</label><input type="text" id="log-hours-materials" placeholder="e.g. 50ft liner, pump model X..."></div>
+    <div class="field"><label>Notes / Progress</label><input type="text" id="log-hours-notes" placeholder="What was completed today?"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveLogEntry()">Save Entry</button>
+    </div>
+  </div>
+
   <div id="modal-edit-manager" class="modal hidden">
     <div class="modal-title">Edit Manager</div>
     <input type="hidden" id="edit-mgr-id">
@@ -1583,6 +1991,8 @@ body.dark-mode .quick-log-item { background: #162840; }
 </div>
 
 <script>
+var AQUASCAPE_PRODUCTS = [{"n": "ULTRAKLEAN 3500 POND FILTER ELECTRONIC CONTROL BOARD & BALLAST KIT", "c": "0742575950570", "cat": "Filter-UV Clarifier"}, {"n": "PROFESSIONAL BLACK WATERFALL FOAM", "c": "827807300962", "cat": "Installation Tools"}, {"n": "POND AERATOR PRO - 8\" AERATION DISC", "c": "827807610016", "cat": "Aeration"}, {"n": "PATH AND AREA 3-WATT LED BULB", "c": "0742575840673", "cat": "Lighting"}, {"n": "SLUDGE & FILTER CLEANER PROFESSIONAL GRADE - 1 GAL / 3.78 L", "c": "0827807304083", "cat": "Water Treatments"}, {"n": "RAPID CLEAR FLOCCULANT PROFESSIONAL GRADE - 1 GAL / 3.78 L", "c": "0827807304120", "cat": "Water Treatments"}, {"n": "CLEAR FOR PONDS - 1 GAL / 3.78 L", "c": "0742575960685", "cat": "Water Treatments"}, {"n": "ONCE-A-YEAR POND PLANT FERTILIZER CAPSULES (QTY 12)", "c": "0742575890111", "cat": "Plant Care"}, {"n": "CHECK VALVE DUAL UNION 2.0 - 2\"", "c": "0827807480268", "cat": "Plumbing-Check Valves"}, {"n": "POLY PIPE - 1/4\" X 100' (30.48 M)", "c": "0827807150000", "cat": "Plumbing-Pipe/Tubing"}, {"n": "WEIGHTED AERATION TUBING - 3/8\" X 100' (30.5 M)", "c": "61014", "cat": "Aeration"}, {"n": "DOME TOP PATH AND AREA LANDSCAPE LIGHT", "c": "84064", "cat": "Lighting"}, {"n": "COLOR-CHANGING LIGHT EXTENSION CABLE - 25' (7.62 M)", "c": "0742575840697", "cat": "Lighting"}, {"n": "TRANSFORMER 60-WATT LOW VOLTAGE WITH PHOTOCELL", "c": "0742575990705", "cat": "Power"}, {"n": "PREMIUM COLOR ENHANCING FISH FOOD-SMALL PELLETS - 1.1 LB / 500 G", "c": "98873", "cat": "Fish Care"}, {"n": "U-SHAPED GROUND STAKES (QTY 100)", "c": "74008", "cat": "Seasonal"}, {"n": "WIDE-ANGLE LIGHT 8-WATT", "c": "742575840772", "cat": "Lighting"}, {"n": "ULTRAKLEAN 2000/3500 POND FILTER VALVE KIT", "c": "074257595103", "cat": "Filter-UV Clarifier"}, {"n": "BIOBALLS BIOLOGICAL FILTER MEDIA (QTY 1000)", "c": "56014", "cat": "Filter-Media"}, {"n": "SMART POND DOSING SYSTEM XT", "c": "40040", "cat": "Water Treatment-Dosing System"}, {"n": "COARSE FILTER MEDIA ROLL - 2\" THICK - 10' L X 56\" W (305 X 142 CM)", "c": "99323", "cat": "Filter-Media"}, {"n": "POND SLUDGE REMOVER PACKS (QTY 72)", "c": "742575960821", "cat": "Water Treatments"}, {"n": "BENEFICIAL BACTERIA CONCENTRATE PROFESSIONAL GRADE - 9 LB / 4.08 KG", "c": "0827807304076", "cat": "Water Treatments"}, {"n": "LAKE PHOSPHATE BINDER PACKS (QTY 192)", "c": "40024", "cat": "Water Treatments"}, {"n": "CHECK VALVE DUAL UNION 2.0 - 2\" FPT X 2\" SLIP", "c": "0742575880587", "cat": "Plumbing-Check Valves"}, {"n": "COLOR-CHANGING LIGHT SMART CONTROL HUB", "c": "0742575840741", "cat": "Lighting"}, {"n": "COLOR-CHANGING LIGHT SPLITTER 3-WAY", "c": "0742575840628", "cat": "Lighting"}, {"n": "COLOR-CHANGING LIGHT SPLITTER 6-WAY", "c": "0742575840680", "cat": "Lighting"}, {"n": "ONCE-A-YEAR POND PLANT FERTILIZER - 7 LB / 3 KG", "c": "0742575989174", "cat": "Plant Care"}, {"n": "Box of Shop Rags", "c": "0660708582026", "cat": "Consumable"}, {"n": "Install Atlantic-Oase 300 watt deicer", "c": "X003E4OPOR", "cat": "Seasonal"}, {"n": "ECOBLAST CONTACT GRANULAR ALGAECIDE - 38.4 OZ / 1.1 KG", "c": "0827807293127", "cat": "Water Treatments"}, {"n": "WATERFALL & ROCK CLEANER PROFESSIONAL GRADE - 9 LB / 4.08 KG", "c": "0827807304137", "cat": "Water Treatments"}, {"n": "SMART POND DOSING SYSTEM XT-CONTROLLER ADD ON KIT", "c": "0827807400426", "cat": "Water Treatment-Dosing System"}, {"n": "SUBMERSIBLE POND THERMOMETER", "c": "0742575740003", "cat": "Miscellaneous Group"}, {"n": "POND & DEBRIS CLARIFIER PROFESSIONAL GRADE - 1 GAL / 3.78 L", "c": "0827807400105", "cat": "Water Treatments"}, {"n": "POND DETOXIFIER PROFESSIONAL GRADE - 1 GAL / 3.78 L", "c": "0827807304106", "cat": "Water Treatments"}, {"n": "WETLAND POND & LAKE BACTERIA PROFESSIONAL GRADE - 1 GAL / 3.78 L", "c": "0742575988979", "cat": "Water Treatments"}, {"n": "PREVENT FOR FOUNTAINS AND WATERFALLS - 1 GAL / 3.78 L", "c": "0742575960760", "cat": "Water Treatments"}, {"n": "AMMONIA NEUTRALIZER PROFESSIONAL GRADE - 1 GAL / 3.78 L", "c": "0827807400129", "cat": "Water Treatments"}, {"n": "COLD WATER BENEFICIAL BACTERIA PROFESSIONAL GRADE - 1 GAL / 3.78 L", "c": "0742575988955", "cat": "Water Treatments"}, {"n": "SLD 4000-7000 ADJUSTABLE FLOW POND PUMP", "c": "0827807450360", "cat": "Pumps"}, {"n": "ECOWAVE 5000 POND PUMP", "c": "0742575911342", "cat": "Pumps"}, {"n": "ULTRA 1500 WATER PUMP", "c": "0742575910093", "cat": "Pumps"}, {"n": "SLD 2000-5000 ADJUSTABLE FLOW POND PUMP", "c": "0827807450469", "cat": "Pumps"}, {"n": "ULTRA 1100 WATER PUMP", "c": "0742575910086", "cat": "Pumps"}, {"n": "SMART POND THERMOMETER WITH TRANSFORMER", "c": "0742575740133", "cat": "Smart Technology"}, {"n": "ULCER & BACTERIAL TREATMENT - 8.8 OZ / 250 G", "c": "0742575810386", "cat": "Fish Care"}, {"n": "FUNGUS TREATMENT - 8 OZ / 236 ML", "c": "0742575810867", "cat": "Fish Care"}, {"n": "ECOWAVE 2000 POND PUMP", "c": "0742575911311", "cat": "Pumps"}, {"n": "ADJUSTABLE FLOW PUMP EXTENSION CORD", "c": "0827807450483", "cat": "Power"}, {"n": "POND POWERHEAD", "c": "0742575911427", "cat": "Miscellaneous Group"}, {"n": "SMART PUMP RECEIVER LARGE", "c": "0827807450650", "cat": "Smart Technology"}, {"n": "TRANSFORMER 150-WATT LOW VOLTAGE WITH PHOTOCELL", "c": "0827807010021", "cat": "Power"}, {"n": "TRANSFORMER 6-WATT LOW VOLTAGE QUICK-CONNECT", "c": "0742575983752", "cat": "Power"}, {"n": "TRANSFORMER 20-WATT LOW VOLTAGE QUICK-CONNECT", "c": "0742575984858", "cat": "Power"}, {"n": "QUICKFIX POND GUMMY", "c": "0742575960838", "cat": "Water Treatments"}, {"n": "LOW SUCTION INTAKE ATTACHMENT", "c": "0742575911175", "cat": "Pump Parts"}, {"n": "SMART PUMP RECEIVER", "c": "0827807450643", "cat": "Smart Technology"}, {"n": "COMPACT WATER FILL VALVE", "c": "0742575880068", "cat": "Plumbing-Water Fill Valves"}, {"n": "IONGEN G2 CONTROL PANEL WITH 12-VOLT TRANSFORMER", "c": "0742575950174", "cat": "Filter-Iongen"}, {"n": "IONGEN G2 PROBE - EPA REGISTERED", "c": "0742575950280", "cat": "Filter-Iongen"}, {"n": "SMART CONTROL PLUG", "c": "0742575820019", "cat": "Smart Technology"}, {"n": "LOW VOLTAGE SPLITTER 6-WAY", "c": "0742575840222", "cat": ""}, {"n": "LOW VOLTAGE SPLITTER 3-WAY", "c": "0742575984896", "cat": "Lighting"}, {"n": "BENEFICIAL BACTERIA CONCENTRATE - 4.4 OZ / 125 G", "c": "0742575989259", "cat": "Water Treatments"}, {"n": "COLD WATER BENEFICIAL BACTERIA - 16 OZ / 473 ML", "c": "742575988931", "cat": "Water Treatments"}, {"n": "COLD WATER BENEFICIAL BACTERIA - 32 OZ / 946 ML", "c": "0742575988948", "cat": "Water Treatments"}, {"n": "PROTECT FOR PONDS - 1 GAL / 3.78 L", "c": "0742575960722", "cat": "Water Treatments"}, {"n": "MAINTAIN FOR PONDS SL - 32 OZ / 946 ML", "c": "0742575960906", "cat": "Water Treatments"}, {"n": "PROTECT FOR PONDS XT - 64 OZ / 1.89 L", "c": "0827807400549", "cat": "Water Treatments"}, {"n": "ULTRAKLEAN 3500 POND FILTER 28-WATT HIGH-OUTPUT UV BULB", "c": "95031", "cat": "Filter-UV Clarifier"}, {"n": "BIOFALLS FILTER MEDIA NET", "c": "29069", "cat": "Filter-Media"}, {"n": "SIGNATURE SERIES 2500 BIOFALLS FILTER", "c": "09020", "cat": "Filter-Biofalls"}, {"n": "FOUNTAIN COVER SPHERE - 18\" DIA (46 CM)", "c": "78431", "cat": "Decorative-Misc"}, {"n": "STACKED SLATE SPHERE - 32\" DIA (81 CM)", "c": "78288", "cat": "Decorative-Misc"}, {"n": "PRO AIR 20 - AERATION COMPRESSOR", "c": "61017", "cat": "Aeration"}, {"n": "AQUABASIN 45", "c": "78224", "cat": "Aquabasin"}, {"n": "AQUASCAPE FLEXIBLE PVC PIPE - 2\" X 50' (15.24 M)", "c": "0827807290249", "cat": "Plumbing-Pipe/Tubing"}, {"n": "AQUASCAPE FLEXIBLE PVC PIPE - 1-1/2\" X 50' (15.24 M)", "c": "0827807290225", "cat": "Plumbing-Pipe/Tubing"}, {"n": "AQUASCAPE FLEXIBLE PVC PIPE - 2\" X 25' (7.62 M)", "c": "29023", "cat": "Plumbing-Pipe/Tubing"}, {"n": "AQUASCAPE FLEXIBLE PVC PIPE - 3\" X 50' (15.24 M)", "c": "0827807290256", "cat": "Plumbing-Pipe/Tubing"}, {"n": "AQUASCAPE FLEXIBLE PVC PIPE - 1\" X 50' (15.24 M)", "c": "48015", "cat": "Plumbing-Pipe/Tubing"}, {"n": "AQUASCAPE ROCK PAD - 15' X 150' (4.6 M X 45.7 M) - ROLL", "c": "25001", "cat": "Underlayment"}, {"n": "AQUASCAPE HEAVY-DUTY POND UNDERLAYMENT - 15' X 300' - ROLL", "c": "42154", "cat": "Underlayment"}, {"n": "AQUASCAPE FLEXIBLE PVC PIPE - 1-1/2\" X 25' (7.62 M)", "c": "29021", "cat": "Plumbing-Pipe/Tubing"}, {"n": "AQUASCAPE STANDARD POND UNDERLAYMENT - 15' X 300' - ROLL", "c": "42155", "cat": "Underlayment"}, {"n": "FLEXIBLE LIGHT STAND - FOR USE WITH UNIVERSAL MOUNT ADAPTER", "c": "0742575840819", "cat": "Lighting"}, {"n": "LAKE SLUDGE REMOVER PACKS (QTY 1,152)", "c": "0827807400198", "cat": "Water Treatments"}, {"n": "CLEAN FOR FOUNTAINS AND WATERFALLS SL - 32 OZ / 946 ML", "c": "0742575960951", "cat": "Water Treatments"}, {"n": "3X MAINTAIN FOR PONDS XT - 1 GAL / 3.78 L", "c": "0827807400334", "cat": "Water Treatments"}, {"n": "ACTIVATED POND CARBON - 2.2 LB / 1KG", "c": "0742575800004", "cat": "Water Treatments"}, {"n": "SAB STREAM & POND CLEANER - 7 LB / 3.2 KG", "c": "0742575988962", "cat": "Water Treatments"}, {"n": "LAKE FLOCCULANT CLARIFIER - 1 GAL / 3.78 L", "c": "0827807400235", "cat": "Water Treatments"}, {"n": "CLEAR FOR PONDS SL - 32 OZ / 946 ML", "c": "0742575960913", "cat": "Water Treatments"}, {"n": "CLEAN FOR PONDS SL - 32 OZ / 946 ML", "c": "0742575960920", "cat": "Water Treatments"}, {"n": "CLEAN FOR PONDS XT - 64 OZ / 1.89 L", "c": "0827807400525", "cat": "Water Treatments"}, {"n": "3X CLEAN FOR PONDS XT - 64 OZ / 1.89 L", "c": "0827807400365", "cat": "Water Treatments"}, {"n": "3X MAINTAIN FOR PONDS XT - 64 OZ / 1.89 L", "c": "0827807400327", "cat": "Water Treatments"}, {"n": "MAINTAIN FOR PONDS XT - 64 OZ / 1.89 L", "c": "0827807400488", "cat": "Water Treatments"}, {"n": "CLEAR FOR PONDS XT - 64 OZ / 1.89 L", "c": "0827807400501", "cat": "Water Treatments"}, {"n": "3X CLEAR FOR PONDS XT - 64 OZ / 1.89 L", "c": "0827807400341", "cat": "Water Treatments"}, {"n": "BENEFICIAL BACTERIA CONCENTRATE - 1.1 LB / 500 G", "c": "0742575989495", "cat": "Water Treatments"}, {"n": "CLEAR FOR PONDS - 32 OZ / 946 ML", "c": "0742575960678", "cat": "Water Treatments"}, {"n": "POND FOAM FREE - 8 OZ / 236 ML", "c": "0742575989099", "cat": "Water Treatments"}, {"n": "POND DETOXIFIER - 16 OZ / 473 ML", "c": "0742575988771", "cat": "Water Treatments"}, {"n": "POND STARTER BACTERIA PROFESSIONAL GRADE - 1 GAL / 3.78 L", "c": "0827807400112", "cat": "Water Treatments"}, {"n": "LARGE SNORKEL VAULT AND CAP", "c": "29064", "cat": "Filter-Pondless/Wetland"}, {"n": "LAKE PHOSPHATE BINDER PACKS (QTY 1,152)", "c": "827807400266", "cat": "Water Treatments"}, {"n": "POND PLANT POTTING MEDIA - 215 CU IN /.0035 CBM", "c": "89002", "cat": "Plant Care"}, {"n": "SIGNATURE SERIES 400 POND SKIMMER WEIR DOOR", "c": "43005", "cat": "Filter-Skimmer"}, {"n": "BIOBALLS BIOLOGICAL FILTER MEDIA (QTY 100)", "c": "98464", "cat": "Filter-Media"}, {"n": "RAPID CLEAR FINE FILTER PADS", "c": "80001", "cat": "Filter-Media"}, {"n": "FOUNTAIN BOWL BIOLOGICAL FILTER KIT - 40\" DIA (102 CM)", "c": "80017", "cat": "Filter-Kits"}, {"n": "FOUNTAIN BOWL - GREEN SLATE - 40\" DIA (102 CM)", "c": "78400", "cat": "Decorative-Misc"}, {"n": "KH/ALKALINITY TEST KIT", "c": "742575960197", "cat": "Water Treatments"}, {"n": "CU/COPPER TEST KIT", "c": "96020", "cat": "Water Treatments"}, {"n": "BULK PROTECTIVE POND NETTING 30' X 100' (9.1 X 30.5 M)", "c": "74003", "cat": "Seasonal"}, {"n": "BULK PROTECTIVE POND NETTING 20' X 100' (6.1 X 30.5 M)", "c": "74002", "cat": "Seasonal"}, {"n": "AQUAFORCE 2700 SOLIDS-HANDLING POND PUMP", "c": "91012", "cat": "Pumps"}, {"n": "20' X 50' - 45 MIL FISH-SAFE EPDM LINER ROLL", "c": "29196", "cat": "Liner-EPDM"}, {"n": "15' X 50' - 45 MIL FISH-SAFE EPDM LINER ROLL", "c": "29192", "cat": "Liner-EPDM"}, {"n": "EPDM SURFACE PREP - 1 QT / 946 ML", "c": "54021", "cat": "Liner-Accessories"}, {"n": "EPDM TAPE PRIMER PLUS - 1 QT / 946 ML", "c": "54022", "cat": "Liner-Accessories"}, {"n": "CHRISTY'S RED HOT BLUE GLUE", "c": "29969", "cat": "Installation Tools"}, {"n": "PROFESSIONAL GRADE POND SKIMMER NET", "c": "50001", "cat": "Tools"}, {"n": "PREMIUM COLD WATER FISH FOOD-SMALL PELLETS - 1.1 LB / 500 G", "c": "742575988702", "cat": "Fish Care"}, {"n": "SIGNATURE SERIES 1000 POND SKIMMER", "c": "43022", "cat": "Filter-Skimmer"}, {"n": "ULTRAKLEAN 3500 POND FILTER", "c": "95054", "cat": "Filter-UV Clarifier"}, {"n": "PONDLESS WATERFALL VAULT EXTENSION", "c": "49001", "cat": "Filter-Pondless/Wetland"}, {"n": "PONDLESS WATERFALL VAULT", "c": "49000", "cat": "Filter-Pondless/Wetland"}, {"n": "POND DE-ICER (300-WATT)", "c": "827807390000", "cat": "Seasonal"}, {"n": "DOSING SYSTEM SL", "c": "96085", "cat": "Water Treatment-Dosing System"}, {"n": "FLEXIBLE PVC PIPE - 3/4\" X 50'", "c": "", "cat": "Plumbing-Pipe/Tubing"}, {"n": "3-way Black Outlet Splitter", "c": "IT-043", "cat": "General"}, {"n": "Gas Can", "c": "IT-029", "cat": "General"}, {"n": "Heat Gun", "c": "IT-010", "cat": "Power Tool"}, {"n": "Kneeling Pad", "c": "IT-049", "cat": "General"}, {"n": "Large Husky Hangall", "c": "IT-037", "cat": "General"}, {"n": "Medium Husky Hangall", "c": "IT-038", "cat": "General"}, {"n": "Large Channel Locks", "c": "IT-002", "cat": "General"}, {"n": "Poly Tube White Connectors", "c": "IT-046", "cat": "Plumbing"}, {"n": "PRAZIQUANTEL TREATMENT - 8 OZ / 236 ML", "c": "81041", "cat": "Fish Care"}, {"n": "Green EZ Pro Pump", "c": "PT-001", "cat": "Power Tool"}, {"n": "Hole Saw Bits", "c": "PT-008", "cat": "Power Tool"}, {"n": "STIHL BR 600 Leaf Blower", "c": "PT-006", "cat": "Power Tool"}, {"n": "Sawzall Blades", "c": "PT-005", "cat": "Power Tool"}, {"n": "Milwaukee Sawzall", "c": "PT-004", "cat": "Power Tool"}, {"n": "Milwaukee Power Tool Batteries", "c": "PT-010", "cat": "Power Tool"}, {"n": "Milwaukee Power Drill", "c": "PT-003", "cat": "Power Tool"}, {"n": "Milwaukee Impact Driver", "c": "PT-002", "cat": "Power Tool"}, {"n": "Milwaukee Battery Charger", "c": "PT-011", "cat": "Power Tool"}, {"n": "Drill Bits Box", "c": "PT-007", "cat": "Power Tool"}, {"n": "Angle Grinder", "c": "PT-009", "cat": "Power Tool"}, {"n": "PARASITE & ICH TREATMENT - 8 OZ / 236 ML", "c": "81039", "cat": "Fish Care"}, {"n": "Metal Mallet", "c": "IT-007", "cat": "General"}, {"n": "Pruning Shears", "c": "IT-008", "cat": "General"}, {"n": "Outlet Tester", "c": "IT-013", "cat": "General"}, {"n": "Multi Meter", "c": "IT-012", "cat": "General"}, {"n": "Razor Knife", "c": "IT-003", "cat": "General"}, {"n": "RIGID 16 Gal Shop Vac", "c": "PT-013", "cat": "General"}, {"n": "Roll of Trash Bags", "c": "IT-011", "cat": "General"}, {"n": "Rubber Mallet", "c": "IT-006", "cat": "General"}, {"n": "Ryobi 2900 PSI Pressure Washer", "c": "PT-012", "cat": "General"}, {"n": "Scrub Brush", "c": "IT-040", "cat": "General"}, {"n": "Scissors", "c": "IT-009", "cat": "General"}, {"n": "Silicone Gun", "c": "IT-017", "cat": "General"}, {"n": "Pipe Snake", "c": "PM-003", "cat": "Plumbing"}, {"n": "Pipe Dope", "c": "PM-001", "cat": "Plumbing"}, {"n": "Pipe Cutter", "c": "PM-002", "cat": "Plumbing"}, {"n": "Clear Autofill Case", "c": "IT-056", "cat": "General"}, {"n": "Crimp Clamp Tool", "c": "IT-042", "cat": "General"}, {"n": "Brass Spigot Splitter", "c": "IT-057", "cat": "General"}, {"n": "Bullet Level", "c": "IT-032", "cat": "General"}, {"n": "Dykes", "c": "IT-005", "cat": "General"}, {"n": "2' Level", "c": "IT-030", "cat": "General"}, {"n": "4' Level", "c": "IT-031", "cat": "General"}, {"n": "Small Husky Reseal Kit Bag", "c": "IT-044", "cat": "General"}, {"n": "Wood Stake For Post", "c": "IT-001", "cat": "General"}, {"n": "Speedout Bits", "c": "IT-045", "cat": "General"}, {"n": "Step Bit", "c": "IT-047", "cat": "General"}, {"n": "Transit Stick", "c": "IT-051", "cat": "General"}, {"n": "Transit", "c": "IT-052", "cat": "General"}, {"n": "Zip Ties", "c": "IT-050", "cat": "General"}, {"n": "Small Husky Hangall", "c": "IT-039", "cat": "General"}, {"n": "Small Channel Locks", "c": "IT-004", "cat": "General"}, {"n": "Sillcock Key", "c": "IT-019", "cat": "General"}, {"n": "Magic Lube", "c": "CS-003", "cat": "Consumable"}, {"n": "Glue Opener", "c": "CS-007", "cat": "Consumable"}, {"n": "Lighter Fluid", "c": "CS-004", "cat": "Consumable"}, {"n": "Purple Primer", "c": "CS-002", "cat": "Consumable"}, {"n": "Box of Razor Blades", "c": "", "cat": "Consumable"}, {"n": "Folding Hand Saw", "c": "HT-001", "cat": "Hand Tool"}, {"n": "Hearing Protection", "c": "SF-006", "cat": "Safety"}, {"n": "Eye Protection", "c": "SF-007", "cat": "Safety"}, {"n": "Box of Rubber Gloves", "c": "SF-002", "cat": "Safety"}, {"n": "25' Tape Measure", "c": "HT-005", "cat": "Hand Tool"}, {"n": "100' Tape Measure", "c": "HT-004", "cat": "Hand Tool"}, {"n": "Garden Rake", "c": "HT-007", "cat": "Hand Tool"}, {"n": "Screwdriver", "c": "HT-003", "cat": "Hand Tool"}, {"n": "Squeegee", "c": "HT-009", "cat": "Hand Tool"}, {"n": "Spade Shovel", "c": "HT-006", "cat": "Hand Tool"}, {"n": "Flat Shovel", "c": "HT-008", "cat": "Hand Tool"}, {"n": "Trowel", "c": "HT-002", "cat": "Hand Tool"}, {"n": "Tamp", "c": "", "cat": "Hand Tool"}, {"n": "Various Wire Nuts", "c": "EL-008", "cat": "Electrical"}, {"n": "Wire Strippers", "c": "EL-001", "cat": "Electrical"}, {"n": "Small Husky Light Bag", "c": "EL-007", "cat": "Electrical"}, {"n": "Wire Nut Pouches", "c": "EL-009", "cat": "Electrical"}, {"n": "Spool of Homerun Wire", "c": "EL-002", "cat": "Electrical"}, {"n": "FILL VALVE GARDEN HOSE SPIGOT X 1/4\" QUICK-CONNECT", "c": "07000", "cat": "Plumbing-Water Fill Valves"}, {"n": "TRANSFORMER 60-WATT LOW VOLTAGE QUICK-CONNECT", "c": "742575984865", "cat": "Power"}, {"n": "3-PL MECHANICAL SEAL KIT", "c": "45059", "cat": "Pump Parts"}, {"n": "EXT PUMP 2\"-3\" PLUMBING KIT", "c": "48027", "cat": "Pump Parts"}, {"n": "FOUNTAIN COVER SPHERE - 32\" DIA (81 CM)", "c": "78376", "cat": "Decorative-Misc"}, {"n": "FOUNTAIN COVER SPHERE - 24\" DIA (61 CM)", "c": "78375", "cat": "Decorative-Misc"}, {"n": "FOUNTAIN COVER URN - 24\" H (61 CM)", "c": "78430", "cat": "Decorative-Misc"}, {"n": "SMART POND THERMOMETER", "c": "74012", "cat": "Smart Technology"}, {"n": "BULK PROTECTIVE POND NETTING 10' X 100' (3.05 X 30.5 M)", "c": "74007", "cat": "Seasonal"}, {"n": "SMART POND DOSING SYSTEM XT / DOSING SYSTEM SL-PUMP CARTRIDGE", "c": "40041", "cat": "Water Treatment-Dosing System"}, {"n": "SIGNATURE SERIES 1000 POND SKIMMER DEBRIS BASKET (NO HANDLE)", "c": "43009", "cat": "Filter-Skimmer"}, {"n": "SIGNATURE SERIES 400 POND SKIMMER", "c": "43021", "cat": "Filter-Skimmer"}, {"n": "SIGNATURE SERIES 1000 / 6.0 / 8.0 POND SKIMMER FILTER MAT", "c": "56000", "cat": "Filter-Skimmer"}, {"n": "SIGNATURE SERIES 8.0 / CLASSIC LARGE POND SKIMMER WEIR", "c": "29258", "cat": "Filter-Skimmer"}, {"n": "SIGNATURE SERIES 6.0 POND SKIMMER WEIR - 6\"", "c": "29530", "cat": "Filter-Skimmer"}, {"n": "SIGNATURE SERIES 1000 POND SKIMMER WEIR DOOR", "c": "43013", "cat": "Filter-Skimmer"}, {"n": "ADJUSTABLE FLOW PUMP REMOTE", "c": "45041", "cat": "Smart Technology"}, {"n": "HEAVY-DUTY AQUATIC PLANT POT 20\" DIA (50.8 CM)", "c": "47005", "cat": "Plant Care"}, {"n": "HEAVY-DUTY AQUATIC PLANT POT 16\" DIA (40.6 CM)", "c": "47004", "cat": "Plant Care"}, {"n": "FLOATING PLANT ISLAND", "c": "89006", "cat": "Plant Care"}, {"n": "AQUAGARDEN MINI POND KIT - MOCHA", "c": "78325", "cat": "Miscellaneous Group"}, {"n": "SIGNATURE SERIES 6000 BIOFALLS FILTER MAT", "c": "29318", "cat": "Filter-Media"}, {"n": "WATERFALL SPILLWAY 12\" W (31 CM)", "c": "77023", "cat": "Miscellaneous Group"}, {"n": "WATERFALL SPILLWAY 22\" W (56 CM)", "c": "77000", "cat": "Miscellaneous Group"}, {"n": "10' X 50' - 45 MIL FISH-SAFE EPDM LINER ROLL", "c": "29188", "cat": "Liner-EPDM"}, {"n": "25' X 50' - 45 MIL FISH-SAFE EPDM LINER ROLL", "c": "29200", "cat": "Liner-EPDM"}, {"n": "EPDM ONE-SIDED COVER TAPE - 6\" X 25' (15 CM X 7.6 M)", "c": "22003", "cat": "Liner-Accessories"}, {"n": "EPDM DOUBLE-SIDED SEAM TAPE - 3\" X 25' (7 CM X 7.6 M)", "c": "22017", "cat": "Liner-Accessories"}, {"n": "EPDM TAPE PRIMER - 1 QT / 946 ML", "c": "0827807540085", "cat": "Liner-Accessories"}, {"n": "COLOR-CHANGING LIGHT REMOTE", "c": "84073", "cat": "Lighting"}, {"n": "HAT TOP PATH AND AREA LANDSCAPE LIGHT", "c": "84063", "cat": "Lighting"}, {"n": "COLOR-CHANGING WIDE-ANGLE LIGHT 11-WATT", "c": "742575840765", "cat": "Lighting"}, {"n": "COLOR-CHANGING SPOTLIGHT - 8-WATT", "c": "742575840604", "cat": "Lighting"}, {"n": "LIGHT STAKE - FOR USE WITH UNIVERSAL MOUNT ADAPTER", "c": "84080", "cat": "Lighting"}, {"n": "WATERFALL FOAM DISPENSING GUN", "c": "54003", "cat": "Installation Tools"}, {"n": "SILICONE SEALANT TUBE-BLACK - 10.1 OZ / 316 ML", "c": "827807291864", "cat": "Installation Tools"}, {"n": "SNORKEL VAULT AND LID V2 W/END CAP FOR CENTIPEDE", "c": "51007", "cat": "Filter-Pondless/Wetland"}, {"n": "SNORKEL VAULT EXTENSION V2", "c": "51008", "cat": "Filter-Pondless/Wetland"}, {"n": "CENTIPEDE MODULE V2", "c": "51010", "cat": "Filter-Pondless/Wetland"}, {"n": "SUBMERSIBLE POND FILTER", "c": "742575951102", "cat": "Filter-Misc"}, {"n": "FOUNTAIN BOWL BIOLOGICAL FILTER KIT - 32\" DIA (81 CM)", "c": "80016", "cat": "Filter-Kits"}, {"n": "FOUNTAIN BOWL BIOLOGICAL FILTER KIT - 33\" SQ (84 CM)", "c": "80019", "cat": "Filter-Kits"}, {"n": "FOUNTAIN BOWL BIOLOGICAL FILTER KIT - 27\" SQ (69 CM)", "c": "80018", "cat": "Filter-Kits"}, {"n": "SIGNATURE SERIES 6000 BIOFALLS FILTER WITH 2\" BULKHEAD", "c": "29319", "cat": "Filter-Biofalls"}, {"n": "SIGNATURE SERIES 6000 BIOFALLS FILTER WITH 3\" BULKHEAD", "c": "29384", "cat": "Filter-Biofalls"}, {"n": "COARSE FILTER MEDIA ROLL - 1.25\" THICK - 10' L X 56\" W (305 X 142 CM)", "c": "99321", "cat": "Filter-Media"}, {"n": "SIGNATURE SERIES 2500 BIOFALLS FILTER MAT", "c": "29010", "cat": "Filter-Media"}, {"n": "FAUX BASALT COLUMN SET OF 3", "c": "78367", "cat": "Decorative-Misc"}, {"n": "FAUX BASALT COLUMN SET OF 5", "c": "78368", "cat": "Decorative-Misc"}, {"n": "FOUNTAIN BOWL - GREEN SLATE - 60\" DIA (152 CM)", "c": "78402", "cat": "Decorative-Misc"}, {"n": "FOUNTAIN BOWL - GREEN SLATE - 50\" DIA (127 CM)", "c": "78401", "cat": "Decorative-Misc"}, {"n": "FOUNTAIN COVER SPILLWAY BASIN - 40\" DIA (102 CM)", "c": "78382", "cat": "Decorative-Misc"}, {"n": "FOUNTAIN BOWL - GREEN SLATE - 32\" DIA (81 CM)", "c": "78399", "cat": "Decorative-Misc"}, {"n": "FOUNTAIN COVER URN - 45\" H (114 CM)", "c": "78379", "cat": "Decorative-Misc"}, {"n": "AQUABLOX LARGE WATER STORAGE MODULE", "c": "29492", "cat": "Aquablox"}, {"n": "AQUABASIN 30", "c": "78223", "cat": "Aquabasin"}, {"n": "LAKE BACTERIA PACKS (QTY 192)", "c": "827807400150", "cat": "Water Treatments"}, {"n": "ALGAECIDE - 2.5 GAL / 9.46 L", "c": "96053", "cat": "Water Treatments"}, {"n": "ALGAECIDE - 1 GAL / 3.78 L", "c": "96026", "cat": "Water Treatments"}, {"n": "POND STARTER BACTERIA - 32 OZ / 946 ML", "c": "96015", "cat": "Water Treatments"}, {"n": "POND STARTER BACTERIA - 16 OZ / 473 ML", "c": "96014", "cat": "Water Treatments"}, {"n": "POND STARTER BACTERIA - 8 OZ / 236 ML", "c": "96013", "cat": "Water Treatments"}, {"n": "BENEFICIAL BACTERIA - 1 GAL / 3.78 L", "c": "98885", "cat": "Water Treatments"}, {"n": "BENEFICIAL BACTERIA - 32 OZ / 946 ML", "c": "98888", "cat": "Water Treatments"}, {"n": "BENEFICIAL BACTERIA - 16 OZ / 473 ML", "c": "98887", "cat": "Water Treatments"}, {"n": "MAINTAIN FOR PONDS - 1 GAL / 3.78L", "c": "96060", "cat": "Water Treatments"}, {"n": "CLEAN FOR PONDS - 8 OZ / 236 ML", "c": "96061", "cat": "Water Treatments"}, {"n": "MAINTAIN FOR PONDS - 32 OZ / 946 ML", "c": "96059", "cat": "Water Treatments"}, {"n": "MAINTAIN FOR PONDS - 8 OZ / 236 ML", "c": "96057", "cat": "Water Treatments"}, {"n": "LAKE TREATMENT BOOSTER PACKS (QTY 1,152)", "c": "827807400297", "cat": "Water Treatments"}, {"n": "SAB STREAM & POND CLEANER PROFESSIONAL GRADE - 9 LB / 4.08 KG", "c": "827807304090", "cat": "Water Treatments"}, {"n": "POND STARTER BACTERIA - 1 GAL / 3.78 L", "c": "96008", "cat": "Water Treatments"}, {"n": "PRO AIR 60 - AERATION COMPRESSOR", "c": "827807610160", "cat": "Aeration"}, {"n": "RUBBER MEMBRANE AERATION DIFFUSER", "c": "61010", "cat": "Aeration"}, {"n": "PRO AIR 60 POND AERATION KIT", "c": "61008", "cat": "Aeration"}, {"n": "ULTRAKLEAN 2000 POND FILTER ELECTRONIC CONTROL BOARD & BALLAST KIT", "c": "95056", "cat": "Filter-UV Clarifier"}, {"n": "ULTRAKLEAN 2000 POND FILTER 14-WATT HIGH-OUTPUT UV BULB", "c": "95030", "cat": "Filter-UV Clarifier"}, {"n": "ECOWAVE 4000 POND PUMP", "c": "91133", "cat": "Pumps"}, {"n": "EXT 18000-3P POND PUMP", "c": "45052", "cat": "Pumps"}, {"n": "12-PN 10,000 SOLIDS-HANDLING POND PUMP", "c": "30391", "cat": "Pumps"}, {"n": "8-PN 5500 SOLIDS-HANDLING POND PUMP", "c": "29495", "cat": "Pumps"}, {"n": "SLD 5000-9000 ADJUSTABLE FLOW POND PUMP", "c": "45037", "cat": "Pumps"}, {"n": "AQUAFORCE 1800 SOLIDS-HANDLING POND PUMP", "c": "91112", "cat": "Pumps"}, {"n": "HEAVY-DUTY POND SKIMMER NET WITH EXTENDABLE HANDLE", "c": "98562", "cat": "Tools"}, {"n": "HEAVY-DUTY POND NET WITH EXTENDABLE HANDLE", "c": "98560", "cat": "Tools"}, {"n": "PROFESSIONAL GRADE POND NET", "c": "50000", "cat": "Tools"}, {"n": "Miscelaneous Fittings", "c": "PM-004", "cat": "Plumbing"}, {"n": "POND SHARK PRO", "c": "74005", "cat": "Tools"}, {"n": "Y 3/8\" BARB", "c": "74001", "cat": ""}, {"n": "WEIGHTED AERATION TUBING - 3/8\" X 25' (7.62 M)", "c": "78380", "cat": ""}, {"n": "3/8\" BRASS 4-WAY SPLITTER CAP", "c": "58110", "cat": ""}, {"n": "White River Waders", "c": "", "cat": "Tools"}, {"n": "Tub of Carbon", "c": "CS-001", "cat": "Consumable"}, {"n": "Tool Bucket/Bag", "c": "", "cat": "Tools"}, {"n": "Tool Bucket", "c": "EQ-006", "cat": "Equipment"}, {"n": "Thermal Imaging Camera", "c": "", "cat": "Tools"}, {"n": "Sawzall", "c": "", "cat": "Tools"}, {"n": "Reamer Bit Set", "c": "DB-05", "cat": "Tools"}, {"n": "Pressure Washer Gun and Nozzle", "c": "PT-014", "cat": "General"}, {"n": "Power Tool Batteries", "c": "", "cat": "Tools"}, {"n": "Power Drill", "c": "", "cat": "Tools"}, {"n": "Pair of Muck Boots", "c": "SF-001", "cat": "Safety"}, {"n": "Pair of Long Yellow Gloves", "c": "SF-003", "cat": "Safety"}, {"n": "Impact Driver", "c": "", "cat": "Tools"}, {"n": "Foam Gun", "c": "IT-018", "cat": "General"}, {"n": "Fish Holding Tank Aerator Bag", "c": "EQ-007", "cat": "Equipment"}, {"n": "Fertilizer w/ Container", "c": "CS-009", "cat": "Consumable"}, {"n": "COLLAPSIBLE FISH TANK - 500 GALLONS / 1890 L", "c": "", "cat": "Tools"}, {"n": "Coffee Filters w/ Container", "c": "CS-010", "cat": "Consumable"}, {"n": "Cleanout Buckets", "c": "EQ-001", "cat": "Equipment"}, {"n": "Bucket of Soil", "c": "EQ-008", "cat": "Equipment"}, {"n": "Bucket of Gravel", "c": "EQ-009", "cat": "Equipment"}, {"n": "Brass Autofill Fitting", "c": "PM-005", "cat": "Plumbing"}, {"n": "Black Spraypaint", "c": "IT-048", "cat": "General"}, {"n": "Battery Charger", "c": "", "cat": "Tools"}, {"n": "Bag of Salt", "c": "", "cat": "Tools"}, {"n": "API Test Kit", "c": "", "cat": "Tools"}, {"n": "50' Garden Hose", "c": "EQ-013", "cat": "Equipment"}, {"n": "50' Extension Cord", "c": "EQ-011", "cat": "Equipment"}, {"n": "500 Gal Tank", "c": "EQ-002", "cat": "Equipment"}, {"n": "4' Section of 2\" Flex PVC", "c": "IT-055", "cat": "General"}, {"n": "4' Section of 1.5\" Flex PVC", "c": "IT-054", "cat": "General"}, {"n": "3 Way Extension Cord Splitter", "c": "EQ-004", "cat": "Equipment"}, {"n": "3\" Channel Locks", "c": "", "cat": "Tools"}, {"n": "2' Cleanout Hoses", "c": "EQ-014", "cat": "Equipment"}, {"n": "1.5' Cleanout Hoses", "c": "EQ-015", "cat": "Equipment"}, {"n": "100' Garden Hose", "c": "EQ-012", "cat": "Equipment"}, {"n": "100' Extension Cord", "c": "EQ-010", "cat": "Equipment"}, {"n": "1000 Gal Tank", "c": "EQ-003", "cat": "Equipment"}, {"n": "COLOR-CHANGING SPOTLIGHT - 4.5-WATT", "c": "84059", "cat": "Lighting"}, {"n": "COLOR-CHANGING WATERFALL LIGHT - 2-WATT", "c": "742575840574", "cat": "Lighting"}, {"n": "SPOTLIGHT - 1-WATT", "c": "84031", "cat": "Lighting"}, {"n": "SPOTLIGHT - 3-WATT", "c": "84033", "cat": "Lighting"}, {"n": "COLOR-CHANGING LIGHT EXTENSION CABLE 5-OUTLETS - 25' (7.62 M)", "c": "84070", "cat": "Lighting"}, {"n": "BULKHEAD FITTING 1-1/2\" FPT", "c": "99126", "cat": "Plumbing-Fittings"}, {"n": "BULKHEAD FITTING 1-1/4\" FPT", "c": "99125", "cat": "Plumbing-Fittings"}, {"n": "BULKHEAD FITTING 1\" FPT", "c": "99124", "cat": "Plumbing-Fittings"}, {"n": "BULKHEAD FITTING 3/4\" FPT", "c": "99123", "cat": "Plumbing-Fittings"}, {"n": "PREMIUM COLD WATER FISH FOOD-LARGE PELLETS - 4.4 LB / 2 KG", "c": "98872", "cat": "Fish Care"}, {"n": "LARGE CENTIPEDE MODULE", "c": "29065", "cat": "Filter-Pondless/Wetland"}, {"n": "PVC MALE ADAPTER 3\" MPT X 3\" SLIP", "c": "436-030", "cat": "Plumbing-Fittings"}, {"n": "PVC ELBOW 90 DEG 3\" SLIP", "c": "406-030", "cat": "Plumbing-Fittings"}, {"n": "PVC MALE ADAPTER 1-1/2\" MPT X 1-1/2\" SLIP", "c": "99143", "cat": "Plumbing-Fittings"}, {"n": "PVC MALE ADAPTER 2\" MPT X 2\" SLIP", "c": "436-020", "cat": "Plumbing-Fittings"}, {"n": "PVC TEE 2\" SLIP", "c": "401-020", "cat": "Plumbing-Fittings"}, {"n": "PVC UNION 1-1/2\" SLIP", "c": "497-015", "cat": "Plumbing-Fittings"}, {"n": "PVC REDUCER BUSHING 3\" SPGT X 2\" SLIP", "c": "429-338", "cat": "Plumbing-Fittings"}, {"n": "PVC REDUCER BUSHING 2\" SPGT X 1-1/2\" SLIP", "c": "437-251", "cat": "Plumbing-Fittings"}, {"n": "PVC ELBOW 90 DEG 2\" SLIP", "c": "406-020", "cat": "Plumbing-Fittings"}, {"n": "PVC ELBOW 90 DEG 1-1/2\" SLIP", "c": "406-015", "cat": "Plumbing-Fittings"}, {"n": "PVC TEE 1-1/2\" SLIP", "c": "401-015", "cat": "Plumbing-Fittings"}, {"n": "BULKHEAD FITTING 2\" FPT", "c": "29103", "cat": "Plumbing-Fittings"}, {"n": "BULKHEAD FITTING 3\" FPT", "c": "29104", "cat": "Plumbing-Fittings"}, {"n": "PVC 1.5\u201d 45", "c": "417-015", "cat": "Plumbing-Fittings"}, {"n": "PVC 1.5\u201d Ball Valve", "c": "PVBVS150", "cat": "Plumbing-Fittings"}, {"n": "PVC 2\u201d 45", "c": "417-020", "cat": "Plumbing-Fittings"}, {"n": "PVC 2\u201d Ball Valve", "c": "PVBVS200", "cat": "Plumbing-Fittings"}, {"n": "PVC 2\" Cross \u201cX\u201d", "c": "420-020", "cat": "Plumbing-Fittings"}, {"n": "PVC 2\" Threaded 90", "c": "412-020", "cat": "Plumbing-Fittings"}, {"n": "PVC COUPLING 1-1/2\"", "c": "429-015", "cat": "Plumbing-Fittings"}, {"n": "PVC 3\" Ball Valve", "c": "PVBVS300", "cat": "Plumbing-Fittings"}, {"n": "PVC 3\u201d 45", "c": "427-030", "cat": "Plumbing-Fittings"}, {"n": "3\u201d PVC Schedule 40 Coupling", "c": "429-030", "cat": "Plumbing-Fittings"}, {"n": "2\" PVC Schedule 40 Coupling", "c": "429-020", "cat": "Plumbing-Fittings"}, {"n": "1-1/2\" PVC SCH 40 Male Adapter", "c": "436-015", "cat": "Plumbing-Fittings"}, {"n": "VALVE GATE 2\" SLIP", "c": "99208", "cat": "Plumbing-Fittings"}, {"n": "Respirator", "c": "SF-005", "cat": "Safety"}, {"n": "Container of Ear Plugs", "c": "SF-004", "cat": "Safety"}, {"n": "PVC STREET 90 2\u201d", "c": "409-020", "cat": "Plumbing-Fittings"}, {"n": "PVC STREET 90 1-1/2\u201d", "c": "409-015", "cat": "Plumbing-Fittings"}, {"n": "PVC MALE ADAPTER 3\" SLIP X 2\" MPT", "c": "436-253", "cat": "Plumbing-Fittings"}, {"n": "50' WIDE CUSTOM CUT 45 MIL FISH-SAFE EPDM LINER - PER FOOT", "c": "29587", "cat": "Liner-EPDM"}, {"n": "40' WIDE CUSTOM CUT 45 MIL FISH-SAFE EPDM LINER - PER FOOT", "c": "29585", "cat": "Liner-EPDM"}, {"n": "30' WIDE CUSTOM CUT 45 MIL FISH-SAFE EPDM LINER - PER FOOT", "c": "29583", "cat": "Liner-EPDM"}, {"n": "25' WIDE CUSTOM CUT 45 MIL FISH-SAFE EPDM LINER - PER FOOT", "c": "29582", "cat": "Liner-EPDM"}, {"n": "20' WIDE CUSTOM CUT 45 MIL FISH-SAFE EPDM LINER - PER FOOT", "c": "29581", "cat": "Liner-EPDM"}, {"n": "15' WIDE CUSTOM CUT 45 MIL FISH-SAFE EPDM LINER - PER FOOT", "c": "29580", "cat": "Liner-EPDM"}, {"n": "10' WIDE CUSTOM CUT 45 MIL FISH-SAFE EPDM LINER - PER FOOT", "c": "29579", "cat": "Liner-EPDM"}, {"n": "5' WIDE CUSTOM CUT 45 MIL FISH-SAFE EPDM LINER - PER FOOT", "c": "42024", "cat": "Liner-EPDM"}, {"n": "30' X 50' - 45 MIL FISH-SAFE EPDM LINER ROLL", "c": "29202", "cat": "Liner-EPDM"}, {"n": "EPDM LINER PATCH", "c": "22018", "cat": "Liner-EPDM"}, {"n": "RUBBER BULKHEAD 3\"", "c": "77032", "cat": "Plumbing-Fittings"}, {"n": "RUBBER BULKHEAD 3/4\"", "c": "77028", "cat": "Plumbing-Fittings"}, {"n": "RUBBER BULKHEAD 1\"", "c": "77029", "cat": "Plumbing-Fittings"}, {"n": "PVC COUPLING 1\" FPT", "c": "99177", "cat": "Plumbing-Fittings"}, {"n": "PVC COUPLING 1-1/4\" FPT", "c": "99178", "cat": "Plumbing-Fittings"}, {"n": "PVC COUPLING 1-1/2\" FPT", "c": "99179", "cat": "Plumbing-Fittings"}, {"n": "PVC MALE ADAPTER 1-1/4\" MPT", "c": "99141", "cat": "Plumbing-Fittings"}, {"n": "PVC MALE ADAPTER 1-1/4\" MPT X 1-1/2\" SLIP", "c": "99142", "cat": "Plumbing-Fittings"}, {"n": "PVC MALE ADAPTER 1-1/2\" MPT X 2\" SLIP", "c": "99144", "cat": "Plumbing-Fittings"}, {"n": "PVC MALE ADAPTER 2\" MPT X 1-1/2\" SLIP", "c": "29157", "cat": "Plumbing-Fittings"}, {"n": "PVC TEE 3\" SLIP", "c": "401-030", "cat": "Plumbing-Fittings"}, {"n": "PVC REDUCER BUSHING 3\" MPT X 2\" FPT", "c": "29526", "cat": "Plumbing-Fittings"}, {"n": "VALVE PRESSURE RELIEF 2\" MPT", "c": "29160", "cat": "Plumbing-Fittings"}, {"n": "RUBBER COUPLING 2\"", "c": "29265", "cat": "Plumbing-Fittings"}, {"n": "RUBBER REDUCER COUPLING 3\" X 2\"", "c": "29084", "cat": "Plumbing-Fittings"}, {"n": "REDUCING BUSHING 1/2\" MPT X 3/8\" FPT", "c": "99133", "cat": "Plumbing-Fittings"}, {"n": "REDUCING BUSHING 3/4\" MPT X 1/2\" FPT", "c": "99134", "cat": "Plumbing-Fittings"}, {"n": "REDUCING BUSHING 1\" MPT X 3/4\" FPT", "c": "99136", "cat": "Plumbing-Fittings"}, {"n": "REDUCING BUSHING 1-1/4\" MPT X 1\" FPT", "c": "99137", "cat": "Plumbing-Fittings"}, {"n": "REDUCING BUSHING 1-1/2\" MPT X 1\" FPT", "c": "99138", "cat": "Plumbing-Fittings"}, {"n": "REDUCING BUSHING 1-1/2\" MPT X 1-1/4\" FPT", "c": "99139", "cat": "Plumbing-Fittings"}, {"n": "REDUCING BUSHING 2\" MPT X 1-1/2\" FPT", "c": "99140", "cat": "Plumbing-Fittings"}, {"n": "SMART PUMP RECEIVER CONVERSION PLUG MALE X MALE", "c": "45062", "cat": "Smart Technology"}, {"n": "SMART CONTROL CONVERSION PLUG", "c": "45040", "cat": "Smart Technology"}, {"n": "FOUNTAIN COVER URN - 56\" H (142 CM)", "c": "78380", "cat": ""}, {"n": "RUBBER BULKHEAD 1-1/2\"", "c": "77030", "cat": "Plumbing-Fittings"}, {"n": "RUBBER BULKHEAD 2\"", "c": "77031", "cat": "Plumbing-Fittings"}, {"n": "PVC UNION 2\" Slip", "c": "PVUS200", "cat": "Plumbing-Fittings"}, {"n": "PREMIUM COLOR ENHANCING FISH FOOD-SMALL PELLETS - 2.2 LB / 1 KG", "c": "98874", "cat": "Fish Care"}, {"n": "LARGE SNORKEL VAULT CAP", "c": "29235", "cat": "Filter-Pondless/Wetland"}, {"n": "CENTIPEDE MODULE END CAP", "c": "29067", "cat": "Filter-Pondless/Wetland"}, {"n": "HALF CENTIPEDE MODULE", "c": "29066", "cat": "Filter-Pondless/Wetland"}, {"n": "FOUNTAIN BOWL FILTER MAT - FITS 33\" SQ (84 CM)", "c": "80011", "cat": "Filter-Media"}, {"n": "FOUNTAIN BOWL FILTER MAT - FITS 27\" SQ (69 CM)", "c": "80010", "cat": "Filter-Media"}, {"n": "FOUNTAIN BOWL FILTER MAT - FITS 40\" DIA (102 CM)", "c": "80009", "cat": "Filter-Media"}, {"n": "FOUNTAIN BOWL FILTER MAT - FITS 32\" DIA (81 CM)", "c": "80008", "cat": "Filter-Media"}, {"n": "STACKED SLATE URN - 33.5\" H (85 CM)", "c": "98939", "cat": "Decorative-Misc"}, {"n": "STACKED SLATE SPHERE - 6' DIA (1.8 M)", "c": "78428", "cat": "Decorative-Misc"}, {"n": "STACKED SLATE SPHERE - 18\" DIA (46 CM)", "c": "78358", "cat": "Decorative-Misc"}, {"n": "PRO AIR-CHECK VALVE", "c": "61003", "cat": "Aeration"}, {"n": "2-OUTLET POND AERATION KIT", "c": "75000", "cat": "Aeration"}, {"n": "Name", "c": "", "cat": "N/A"}, {"n": "1-1/2\" FPT BACKWASH CAP FOR ULTRAKLEAN PRESSURE FILTER/ULTRAKLEAR UVC", "c": "58110", "cat": ""}];
+
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 const API_URL = 'https://script.google.com/macros/s/AKfycbxJo-zKm7nQ6q02ayzpO-duQ3mFDPNOUQhrIanGun3WrQXaXfxqYhjTaJlB1bEvIzN25g/exec';
 const MANAGER_PASS = 'pondpro2024';
@@ -1812,6 +2222,16 @@ function enterApp() {
     document.getElementById('manager-view').classList.remove('hidden');
     document.getElementById('member-view').classList.add('hidden');
     populateMonthSelects(); renderManagerOverview(); renderProductConfig(); renderMembersConfig(); renderManagersConfig(); renderReports(); renderReview();
+    // Super admin tab — only for Sean Sawicki
+    var saTab = document.getElementById('super-admin-tab');
+    if (saTab) {
+      if (state.currentUser && state.currentUser.name.toLowerCase().trim() === 'sean sawicki') {
+        saTab.style.display = '';
+        renderSuperAdminDashboard();
+      } else {
+        saTab.style.display = 'none';
+      }
+    }
     resetAutoLogout();
   } else {
     document.getElementById('member-view').classList.remove('hidden');
@@ -1840,7 +2260,7 @@ function showTab(name) {
   if (name==='log') { renderQuickLog(); renderMotivationBar(); }
 }
 function showManagerTab(name) {
-  ['overview','review','reports','config'].forEach(t => document.getElementById('mgr-tab-'+t).classList.toggle('hidden', t!==name));
+  ['overview','review','reports','config','superadmin'].forEach(t => { var el = document.getElementById('mgr-tab-'+t); if(el) el.classList.toggle('hidden', t!==name); });
   document.querySelectorAll('#manager-view .tab').forEach((tab,i) => tab.classList.toggle('active',['overview','review','reports','config'][i]===name));
   if (name==='overview') renderManagerOverview();
   if (name==='review') renderReview();
@@ -1860,10 +2280,29 @@ function calcCommission() {
   const qty      = parseFloat(document.getElementById('sale-quantity') ? document.getElementById('sale-quantity').value : 1)||1;
   const product  = state.products.find(p => p.id===prodId);
   const box      = document.getElementById('commission-preview-box');
-  if (!product||price<=0) { box.style.display='none'; return; }
-  const comm = getCommission(product, price) * qty;
-  document.getElementById('commission-preview-amount').textContent = '$'+comm.toFixed(2);
-  box.style.display = 'flex';
+  if (!product||price<=0) { box.style.display='none'; } else {
+    const comm = getCommission(product, price) * qty;
+    document.getElementById('commission-preview-amount').textContent = '$'+comm.toFixed(2);
+    box.style.display = 'flex';
+  }
+  // Show/hide condition checkboxes
+  var condWrap = document.getElementById('upsell-conditions');
+  if (product && condWrap) {
+    var hasCond = product.reqPaid || product.reqCallback || product.reqProfit;
+    condWrap.style.display = hasCond ? 'block' : 'none';
+    var paidDiv = document.getElementById('condition-paid');
+    var cbDiv   = document.getElementById('condition-callback');
+    var profDiv = document.getElementById('condition-profit');
+    if (paidDiv) paidDiv.style.display = product.reqPaid ? 'block' : 'none';
+    if (cbDiv)   cbDiv.style.display   = product.reqCallback ? 'block' : 'none';
+    if (profDiv) profDiv.style.display = product.reqProfit ? 'block' : 'none';
+    // Reset checkboxes when product changes
+    ['chk-paid','chk-callback','chk-profit'].forEach(function(id) {
+      var el = document.getElementById(id); if(el) el.checked = false;
+    });
+  } else if (condWrap) {
+    condWrap.style.display = 'none';
+  }
 }
 function getCommission(product, price) {
   if (product.type==='percent') return price*(product.percent/100);
@@ -1885,12 +2324,24 @@ function logUpsell() {
   const price    = parseFloat(document.getElementById('sale-price').value);
   const qty      = parseInt(document.getElementById('sale-quantity') ? document.getElementById('sale-quantity').value : 1)||1;
   if (!date||!customer||!invoice||!prodId||!price||price<=0) return showAlert('log-alert','Please fill in all fields including Invoice #.','error');
+  // Check required conditions
+  var product2 = state.products.find(function(p){ return p.id===prodId; });
+  if (product2) {
+    if (product2.reqPaid && !document.getElementById('chk-paid').checked) return showAlert('log-alert','Please confirm the client invoice has been paid.','error');
+    if (product2.reqCallback && !document.getElementById('chk-callback').checked) return showAlert('log-alert','Please confirm no callbacks in the last 30 days.','error');
+    if (product2.reqProfit && !document.getElementById('chk-profit').checked) return showAlert('log-alert','Please confirm 50%+ gross profit for this job.','error');
+  }
   const product    = state.products.find(p=>p.id===prodId);
   const commission = getCommission(product, price) * qty;
+  var condPaid     = document.getElementById('chk-paid')     ? document.getElementById('chk-paid').checked     : false;
+  var condCallback = document.getElementById('chk-callback') ? document.getElementById('chk-callback').checked : false;
+  var condProfit   = document.getElementById('chk-profit')   ? document.getElementById('chk-profit').checked   : false;
   const upsell = {
     id:'u'+Date.now(), memberId:state.currentUser.id, memberName:state.currentUser.name,
     date, customer, invoice, productId:prodId, productName:product.name,
-    price: price * qty, commission, quantity: qty, status:'pending', submitted:false, submittedMonth:''
+    price: price * qty, commission, quantity: qty, status:'pending', submitted:false, submittedMonth:'',
+    condPaid, condCallback, condProfit,
+    createdAt: new Date().toISOString()
   };
   apiWrite({action:'addUpsell', ...upsell});
   state.upsells.push(upsell);
@@ -1899,6 +2350,8 @@ function logUpsell() {
   document.getElementById('sale-price').value='';
   document.getElementById('sale-product').value='';
   if (document.getElementById('sale-quantity')) document.getElementById('sale-quantity').value='1';
+  ['chk-paid','chk-callback','chk-profit'].forEach(function(id){ var el=document.getElementById(id); if(el) el.checked=false; });
+  var cw = document.getElementById('upsell-conditions'); if(cw) cw.style.display='none';
   document.getElementById('commission-preview-box').style.display='none';
   checkFirstUpsellOfDay();
   showAlert('log-alert','Upsell saved — est. commission: <strong>$'+commission.toFixed(2)+'</strong>','success');
@@ -2498,7 +2951,7 @@ function openAddMember() {
   document.getElementById('modal-add-product').classList.add('hidden');
   document.getElementById('modal-email-report').classList.add('hidden');
 }
-function closeModal() { document.getElementById('modal-overlay').classList.add('hidden'); ['modal-add-product','modal-add-member','modal-edit-member','modal-email-report','modal-add-manager','modal-edit-manager','modal-edit-upsell','modal-manager-note','modal-employee-history'].forEach(function(id){ var el=document.getElementById(id); if(el) el.classList.add('hidden'); }); }
+function closeModal() { document.getElementById('modal-overlay').classList.add('hidden'); ['modal-add-product','modal-add-member','modal-edit-member','modal-email-report','modal-add-manager','modal-edit-manager','modal-edit-upsell','modal-manager-note','modal-employee-history','modal-new-job','modal-log-hours'].forEach(function(id){ var el=document.getElementById(id); if(el) el.classList.add('hidden'); }); }
 
 function toggleProdFields() {
   const t = document.getElementById('prod-type').value;
@@ -3294,6 +3747,1161 @@ function saveNewPin() {
   enterApp();
 }
 
+// ── SUPER ADMIN DASHBOARD ─────────────────────────────────────────────────────
+function renderSuperAdminDashboard() {
+  renderDigestBanner();
+  renderSAStats();
+  renderSARevenueChart();
+  renderSACommissionChart();
+  renderSATopEarners();
+  renderSATopProducts();
+  populateSASelects();
+}
+
+function renderSAStats() {
+  var el = document.getElementById('sa-stats-row');
+  if (!el) return;
+  var all = state.upsells;
+  var year = new Date().getFullYear().toString();
+  var ytd = all.filter(function(u){ return u.date && u.date.slice(0,4) === year; });
+  var totalRevenue  = all.reduce(function(s,u){ return s+u.price; }, 0);
+  var totalComm     = all.filter(function(u){ return u.status==='approved'; }).reduce(function(s,u){ return s+u.commission; }, 0);
+  var ytdRevenue    = ytd.reduce(function(s,u){ return s+u.price; }, 0);
+  var ytdComm       = ytd.filter(function(u){ return u.status==='approved'; }).reduce(function(s,u){ return s+u.commission; }, 0);
+  var pending       = state.submissions.filter(function(s){ return s.status==='pending'; }).length;
+  var avgPerUpsell  = all.length ? (totalRevenue/all.length).toFixed(0) : 0;
+
+  el.innerHTML =
+    '<div class="stat-card"><div class="stat-label">All-Time Revenue</div><div class="stat-value">$'+totalRevenue.toFixed(0)+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">All-Time Commissions</div><div class="stat-value gold">$'+totalComm.toFixed(0)+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">YTD Revenue</div><div class="stat-value blue">$'+ytdRevenue.toFixed(0)+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">YTD Commissions</div><div class="stat-value gold">$'+ytdComm.toFixed(0)+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Total Upsells</div><div class="stat-value blue">'+all.length+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Avg Sale Value</div><div class="stat-value">$'+avgPerUpsell+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Team Members</div><div class="stat-value">'+state.members.length+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Pending Review</div><div class="stat-value warn">'+pending+'</div></div>';
+}
+
+function renderSABarChart(elId, data, maxVal, color) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  if (maxVal === 0) { el.innerHTML = '<div style="color:var(--text-dim);font-style:italic;font-size:13px;padding:20px 0">No data yet</div>'; return; }
+  el.innerHTML = '<div class="bar-chart">' + data.map(function(d) {
+    var h = Math.max((d.val/maxVal)*90, d.val>0?4:0);
+    return '<div class="bar-wrap">'+
+      '<div class="bar-val">'+(d.val>0?'$'+Math.round(d.val):'')+'</div>'+
+      '<div class="bar" style="height:'+h+'px;background:'+color+'" data-tip="$'+Math.round(d.val)+'"></div>'+
+      '<div class="bar-label">'+d.label+'</div>'+
+      '</div>';
+  }).join('') + '</div>';
+}
+
+function renderSARevenueChart() {
+  var now = new Date();
+  var months = [];
+  for (var i = 11; i >= 0; i--) {
+    var d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    months.push({ value: d.toISOString().slice(0,7), label: d.toLocaleDateString('en-US',{month:'short'}) });
+  }
+  var maxVal = 0;
+  var data = months.map(function(m) {
+    var val = state.upsells.filter(function(u){ return u.date && u.date.slice(0,7)===m.value; }).reduce(function(s,u){ return s+u.price; },0);
+    if (val>maxVal) maxVal=val;
+    return { label:m.label, val:val };
+  });
+  renderSABarChart('sa-revenue-chart', data, maxVal, 'linear-gradient(to top, var(--teal), #29c4ff)');
+}
+
+function renderSACommissionChart() {
+  var now = new Date();
+  var months = [];
+  for (var i = 11; i >= 0; i--) {
+    var d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    months.push({ value: d.toISOString().slice(0,7), label: d.toLocaleDateString('en-US',{month:'short'}) });
+  }
+  var maxVal = 0;
+  var data = months.map(function(m) {
+    var val = state.upsells.filter(function(u){ return u.date && u.date.slice(0,7)===m.value && u.status==='approved'; }).reduce(function(s,u){ return s+u.commission; },0);
+    if (val>maxVal) maxVal=val;
+    return { label:m.label, val:val };
+  });
+  renderSABarChart('sa-commission-chart', data, maxVal, 'linear-gradient(to top, var(--copper), #e8a030)');
+}
+
+function renderSATopEarners() {
+  var el = document.getElementById('sa-top-earners');
+  if (!el) return;
+  var byMember = {};
+  state.upsells.forEach(function(u) {
+    if (!byMember[u.memberName]) byMember[u.memberName] = { comm:0, sales:0, count:0 };
+    byMember[u.memberName].comm  += u.commission;
+    byMember[u.memberName].sales += u.price;
+    byMember[u.memberName].count++;
+  });
+  var sorted = Object.entries(byMember).sort(function(a,b){ return b[1].comm - a[1].comm; });
+  if (!sorted.length) { el.innerHTML = '<div style="color:var(--text-dim);font-style:italic;font-size:13px">No data yet</div>'; return; }
+  var max = sorted[0][1].comm;
+  var medals = ['🥇','🥈','🥉'];
+  el.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px">' +
+    sorted.map(function(entry, i) {
+      var pct = max > 0 ? (entry[1].comm/max*100).toFixed(0) : 0;
+      return '<div>'+
+        '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">'+
+        '<span style="font-weight:600">'+(medals[i]||'')+'  '+entry[0]+'</span>'+
+        '<span style="color:var(--copper);font-weight:700">$'+entry[1].comm.toFixed(0)+'</span>'+
+        '</div>'+
+        '<div style="background:var(--sand-mid);border-radius:4px;height:6px;overflow:hidden">'+
+        '<div style="width:'+pct+'%;height:100%;background:var(--copper);border-radius:4px;transition:width 0.8s ease"></div>'+
+        '</div>'+
+        '<div style="font-size:11px;color:var(--text-dim);margin-top:2px">'+entry[1].count+' upsells · $'+entry[1].sales.toFixed(0)+' sales</div>'+
+        '</div>';
+    }).join('') + '</div>';
+}
+
+function renderSATopProducts() {
+  var el = document.getElementById('sa-top-products');
+  if (!el) return;
+  var byProduct = {};
+  state.upsells.forEach(function(u) {
+    if (!byProduct[u.productName]) byProduct[u.productName] = { count:0, sales:0 };
+    byProduct[u.productName].count++;
+    byProduct[u.productName].sales += u.price;
+  });
+  var sorted = Object.entries(byProduct).sort(function(a,b){ return b[1].count - a[1].count; }).slice(0,6);
+  if (!sorted.length) { el.innerHTML = '<div style="color:var(--text-dim);font-style:italic;font-size:13px">No data yet</div>'; return; }
+  var max = sorted[0][1].count;
+  var colors = ['#00aeef','#bf7825','#1a6e48','#a82828','#7a4fb0','#2980b9'];
+  el.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px">' +
+    sorted.map(function(entry, i) {
+      var pct = max > 0 ? (entry[1].count/max*100).toFixed(0) : 0;
+      return '<div>'+
+        '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">'+
+        '<span style="font-weight:600">'+entry[0]+'</span>'+
+        '<span style="color:var(--text-dim)">'+entry[1].count+'x sold · $'+entry[1].sales.toFixed(0)+'</span>'+
+        '</div>'+
+        '<div style="background:var(--sand-mid);border-radius:4px;height:6px;overflow:hidden">'+
+        '<div style="width:'+pct+'%;height:100%;background:'+colors[i]+';border-radius:4px;transition:width 0.8s ease"></div>'+
+        '</div>'+
+        '</div>';
+    }).join('') + '</div>';
+}
+
+function populateSASelects() {
+  // Month select for report generator
+  var monthSel = document.getElementById('sa-report-month');
+  if (monthSel) {
+    var months = [];
+    var now = new Date();
+    for (var i = 0; i < 12; i++) {
+      var d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+      var val = d.toISOString().slice(0,7);
+      months.push('<option value="'+val+'">'+d.toLocaleDateString('en-US',{month:'long',year:'numeric'})+'</option>');
+    }
+    monthSel.innerHTML = months.join('');
+  }
+
+  // Employee select
+  var empSel = document.getElementById('sa-employee-select');
+  if (empSel) {
+    empSel.innerHTML = '<option value="all">All Employees</option>' +
+      state.members.map(function(m){ return '<option value="'+m.id+'">'+m.name+'</option>'; }).join('');
+  }
+
+  // Year select
+  var yearSel = document.getElementById('sa-year-select');
+  if (yearSel) {
+    var thisYear = new Date().getFullYear();
+    var years = [];
+    for (var y = thisYear; y >= thisYear-2; y--) years.push('<option value="'+y+'">'+y+'</option>');
+    yearSel.innerHTML = years.join('');
+  }
+}
+
+function generateMonthlyReport() {
+  var month = document.getElementById('sa-report-month').value;
+  var el = document.getElementById('sa-report-output');
+  if (!el || !month) return;
+
+  var upsells = state.upsells.filter(function(u){ return u.date && u.date.slice(0,7) === month; });
+  var monthLabel2 = new Date(month+'-15').toLocaleDateString('en-US',{month:'long',year:'numeric'});
+
+  if (!upsells.length) {
+    el.innerHTML = '<div style="color:var(--text-dim);font-style:italic;padding:20px 0">No upsells recorded for '+monthLabel2+'</div>';
+    return;
+  }
+
+  // Stats
+  var totalRevenue = upsells.reduce(function(s,u){ return s+u.price; },0);
+  var totalComm    = upsells.filter(function(u){ return u.status==='approved'; }).reduce(function(s,u){ return s+u.commission; },0);
+  var pending      = upsells.filter(function(u){ return u.status==='pending'; }).length;
+
+  // By member
+  var byMember = {};
+  upsells.forEach(function(u) {
+    if (!byMember[u.memberName]) byMember[u.memberName] = { upsells:[], revenue:0, comm:0 };
+    byMember[u.memberName].upsells.push(u);
+    byMember[u.memberName].revenue += u.price;
+    byMember[u.memberName].comm    += u.commission;
+  });
+
+  var memberRows = Object.entries(byMember).sort(function(a,b){ return b[1].comm-a[1].comm; }).map(function(entry) {
+    return '<tr>'+
+      '<td><strong>'+entry[0]+'</strong></td>'+
+      '<td style="text-align:center">'+entry[1].upsells.length+'</td>'+
+      '<td>$'+entry[1].revenue.toFixed(2)+'</td>'+
+      '<td style="color:var(--copper);font-weight:700">$'+entry[1].comm.toFixed(2)+'</td>'+
+      '</tr>';
+  }).join('');
+
+  var upsellRows = upsells.sort(function(a,b){ return b.date.localeCompare(a.date); }).map(function(u) {
+    return '<tr>'+
+      '<td>'+u.date+'</td>'+
+      '<td>'+u.memberName+'</td>'+
+      '<td>'+u.customer+'</td>'+
+      '<td>'+u.productName+'</td>'+
+      '<td style="color:var(--text-dim);font-size:12px">'+(u.invoice||'—')+'</td>'+
+      '<td>$'+u.price.toFixed(2)+'</td>'+
+      '<td style="color:var(--copper);font-weight:700">$'+u.commission.toFixed(2)+'</td>'+
+      '<td><span class="badge badge-'+u.status+'">'+u.status+'</span></td>'+
+      '</tr>';
+  }).join('');
+
+  el.innerHTML =
+    '<div style="background:linear-gradient(135deg,var(--deep),var(--surface));border-radius:12px;padding:20px 24px;margin-bottom:16px;color:white">'+
+    '<div style="font-family:Cormorant Garamond,serif;font-size:22px;font-weight:700;margin-bottom:4px">'+monthLabel2+' Report</div>'+
+    '<div style="font-size:12px;color:rgba(255,255,255,0.5);letter-spacing:1px;text-transform:uppercase">New England Aquatic Landscaping</div>'+
+    '</div>'+
+    '<div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">'+
+    '<div class="stat-card"><div class="stat-label">Total Upsells</div><div class="stat-value blue">'+upsells.length+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value">$'+totalRevenue.toFixed(2)+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Commissions Approved</div><div class="stat-value gold">$'+totalComm.toFixed(2)+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Pending</div><div class="stat-value warn">'+pending+'</div></div>'+
+    '</div>'+
+    '<div class="chart-title" style="margin-bottom:8px">Team Breakdown</div>'+
+    '<div class="table-wrap" style="margin-bottom:16px"><table>'+
+    '<thead><tr><th>Team Member</th><th>Upsells</th><th>Revenue</th><th>Commission</th></tr></thead>'+
+    '<tbody>'+memberRows+'</tbody>'+
+    '</table></div>'+
+    '<div class="chart-title" style="margin-bottom:8px">All Upsells</div>'+
+    '<div class="table-wrap"><table>'+
+    '<thead><tr><th>Date</th><th>Member</th><th>Customer</th><th>Product</th><th>Invoice</th><th>Sale</th><th>Commission</th><th>Status</th></tr></thead>'+
+    '<tbody>'+upsellRows+'</tbody>'+
+    '</table></div>'+
+    '<div style="margin-top:16px;display:flex;gap:10px">'+
+    '<button class="btn btn-outline" onclick="window.print()">🖨 Print Report</button>'+
+    '</div>';
+}
+
+function generateEmployeeReview() {
+  var memberId = document.getElementById('sa-employee-select').value;
+  var year     = document.getElementById('sa-year-select').value;
+  var el       = document.getElementById('sa-employee-output');
+  if (!el) return;
+
+  var upsells = state.upsells.filter(function(u) {
+    var matchMember = memberId === 'all' || u.memberId === memberId;
+    var matchYear   = u.date && u.date.slice(0,4) === year;
+    return matchMember && matchYear;
+  });
+
+  var name = memberId === 'all' ? 'All Employees' : (state.members.find(function(m){ return m.id===memberId; })||{}).name||'Unknown';
+
+  if (!upsells.length) {
+    el.innerHTML = '<div style="color:var(--text-dim);font-style:italic;padding:20px 0">No data for '+name+' in '+year+'</div>';
+    return;
+  }
+
+  var totalRevenue = upsells.reduce(function(s,u){ return s+u.price; },0);
+  var totalComm    = upsells.filter(function(u){ return u.status==='approved'; }).reduce(function(s,u){ return s+u.commission; },0);
+
+  // Best month
+  var byMonth = {};
+  upsells.forEach(function(u) {
+    var m = u.date.slice(0,7);
+    if (!byMonth[m]) byMonth[m] = 0;
+    byMonth[m] += u.commission;
+  });
+  var bestMonth = Object.entries(byMonth).sort(function(a,b){ return b[1]-a[1]; })[0];
+  var bestMonthLabel = bestMonth ? new Date(bestMonth[0]+'-15').toLocaleDateString('en-US',{month:'long',year:'numeric'}) : '—';
+
+  // Best product
+  var byProduct = {};
+  upsells.forEach(function(u) {
+    if (!byProduct[u.productName]) byProduct[u.productName] = 0;
+    byProduct[u.productName]++;
+  });
+  var bestProduct = Object.entries(byProduct).sort(function(a,b){ return b[1]-a[1]; })[0];
+
+  el.innerHTML =
+    '<div style="background:linear-gradient(135deg,var(--deep),var(--surface));border-radius:12px;padding:20px 24px;margin-bottom:16px;color:white">'+
+    '<div style="font-family:Cormorant Garamond,serif;font-size:22px;font-weight:700;margin-bottom:4px">'+name+' — '+year+' Year in Review</div>'+
+    '<div style="font-size:12px;color:rgba(255,255,255,0.5);letter-spacing:1px;text-transform:uppercase">New England Aquatic Landscaping</div>'+
+    '</div>'+
+    '<div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">'+
+    '<div class="stat-card"><div class="stat-label">Total Upsells</div><div class="stat-value blue">'+upsells.length+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Total Sales</div><div class="stat-value">$'+totalRevenue.toFixed(0)+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Commissions Earned</div><div class="stat-value gold">$'+totalComm.toFixed(0)+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Avg per Upsell</div><div class="stat-value">$'+(upsells.length?totalRevenue/upsells.length:0).toFixed(0)+'</div></div>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">'+
+    '<div class="chart-card"><div class="chart-title">🏆 Best Month</div><div style="font-family:Cormorant Garamond,serif;font-size:24px;font-weight:700;color:var(--copper)">'+bestMonthLabel+'</div><div style="color:var(--text-dim);font-size:13px">$'+(bestMonth?bestMonth[1].toFixed(0):'0')+' in commissions</div></div>'+
+    '<div class="chart-card"><div class="chart-title">🎣 Top Product</div><div style="font-family:Cormorant Garamond,serif;font-size:24px;font-weight:700;color:var(--teal)">'+(bestProduct?bestProduct[0]:'—')+'</div><div style="color:var(--text-dim);font-size:13px">'+(bestProduct?bestProduct[1]+' times sold':'')+'</div></div>'+
+    '</div>';
+}
+
+// ── SA INNER TABS ─────────────────────────────────────────────────────────────
+function showSATab(name) {
+  ['overview','jobs','calendar','reports'].forEach(function(t) {
+    var el = document.getElementById('sa-tab-' + t);
+    var btn = document.getElementById('sa-tab-btn-' + t);
+    if (el) el.classList.toggle('hidden', t !== name);
+    if (btn) btn.classList.toggle('active', t === name);
+  });
+  if (name === 'jobs') renderJobTracker();
+  if (name === 'calendar') renderJobCalendar();
+}
+
+// ── JOB TRACKER ───────────────────────────────────────────────────────────────
+var LABOR_RATE    = 150;    // blended $/hr
+var LABOR_RATE_OT = 225;    // 1.5x overtime
+var TIM_EMAIL     = 'Tim@Iloveponds.com';
+var JOBS_KEY      = 'neal-jobs';
+
+function getJobs() {
+  try { return JSON.parse(localStorage.getItem(JOBS_KEY) || '[]'); } catch(e) { return []; }
+}
+
+function saveJobs(jobs) {
+  try { localStorage.setItem(JOBS_KEY, JSON.stringify(jobs)); renderDigestBanner(); } catch(e) {}
+}
+
+function openNewJobModal() {
+  // Reset all fields safely
+  var fields = ['job-name','job-number','job-client','job-address','job-phone','job-size',
+    'job-contract','job-est-hours','job-special','job-weather',
+    'site-gate','site-driveway','site-equip-width','site-staging','site-access-route',
+    'site-obstacles','site-ticket','site-utilities','site-rock-depth',
+    'site-dist-power','site-dist-water','site-dist-house','site-slope','site-goals','site-concerns'];
+  fields.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  var startEl = document.getElementById('job-start');
+  if (startEl) startEl.value = new Date().toISOString().slice(0,10);
+
+  // Reset to first tab
+  showJobTab('info');
+
+  // Reset materials
+  materialRows = [];
+
+  document.getElementById('modal-overlay').classList.remove('hidden');
+  document.getElementById('modal-new-job').classList.remove('hidden');
+  ['modal-add-product','modal-add-member','modal-edit-member','modal-email-report',
+   'modal-add-manager','modal-edit-manager','modal-edit-upsell','modal-manager-note',
+   'modal-employee-history','modal-log-hours'].forEach(function(id) {
+    var el = document.getElementById(id); if(el) el.classList.add('hidden');
+  });
+}
+
+function saveNewJob() {
+  var name     = document.getElementById('job-name').value.trim();
+  var number   = document.getElementById('job-number').value.trim();
+  var client   = document.getElementById('job-client').value.trim();
+  var address  = document.getElementById('job-address').value.trim();
+  var start    = document.getElementById('job-start').value;
+  var end      = document.getElementById('job-end').value;
+  var contract = parseFloat(document.getElementById('job-contract').value)||0;
+  var estHours = parseFloat(document.getElementById('job-est-hours').value)||0;
+  var notes    = document.getElementById('job-notes').value.trim();
+  if (!name || !client) return alert('Please fill in job name and client.');
+
+  var jobs = getJobs();
+  jobs.push({
+    id: 'j' + Date.now(), name, number, client, address,
+    start, end, contract, estHours, notes,
+    status: 'In Progress', log: [],
+    createdAt: new Date().toISOString()
+  });
+  saveJobs(jobs);
+  closeModal();
+  renderJobTracker();
+}
+
+function renderJobTracker() {
+  var el = document.getElementById('job-tracker-list');
+  if (!el) return;
+  var jobs = getJobs();
+
+  // ── SUMMARY CARDS ──────────────────────────────────────────────────────────
+  var today = new Date();
+  var stats = {
+    total:    jobs.length,
+    scheduled: jobs.filter(function(j){ return j.status === 'Scheduled'; }).length,
+    active:   jobs.filter(function(j){ return j.status === 'In Progress'; }).length,
+    prepped:  jobs.filter(function(j){ return !!localStorage.getItem('jcform-'+j.id); }).length,
+    overdue:  jobs.filter(function(j){
+                if (j.status === 'Complete') return false;
+                if (!j.end) return false;
+                return new Date(j.end) < today;
+              }).length,
+    hold:     jobs.filter(function(j){ return j.status === 'On Hold'; }).length,
+    done:     jobs.filter(function(j){ return j.status === 'Complete'; }).length
+  };
+  // Revenue calcs
+  var totalContract = jobs.reduce(function(s,j){ return s+(j.contract||0); },0);
+  var activeContract = jobs.filter(function(j){ return j.status==='In Progress'; })
+                           .reduce(function(s,j){ return s+(j.contract||0); },0);
+
+  var sc = document.getElementById('job-summary-cards');
+  if (sc) {
+    sc.innerHTML = [
+      { label:'Total Jobs',  filter:'all',       val: stats.total,     color:'var(--ink)',     sub: '$'+totalContract.toLocaleString()+' total' },
+      { label:'Scheduled',   filter:'scheduled', val: stats.scheduled, color:'#7c5cbf',        sub: 'Upcoming jobs' },
+      { label:'In Progress', filter:'active',    val: stats.active,    color:'var(--teal)',    sub: '$'+activeContract.toLocaleString()+' active' },
+      { label:'Form Filled', filter:'prepped', val: stats.prepped, color:'var(--copper)',  sub: 'Job cost form saved' },
+      { label:'Overdue',     filter:'overdue', val: stats.overdue, color:'var(--danger)',  sub: 'Past target date' },
+      { label:'Complete',    filter:'done',    val: stats.done,    color:'var(--success)', sub: 'Jobs finished' }
+    ].map(function(c) {
+      return '<div style="background:white;border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);border-top:3px solid '+c.color+';cursor:pointer" onclick="setJobFilter('+JSON.stringify(c.filter)+')">'
+        + '<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px">'+c.label+'</div>'
+        + '<div style="font-size:28px;font-weight:700;color:'+c.color+'">'+c.val+'</div>'
+        + '<div style="font-size:11px;color:var(--text-dim);margin-top:3px">'+c.sub+'</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  // ── FILTER ──────────────────────────────────────────────────────────────────
+  var filter = window._jobFilter || 'all';
+  var filtered = jobs.filter(function(j) {
+    if (filter === 'all')     return true;
+    if (filter === 'scheduled') return j.status === 'Scheduled';
+    if (filter === 'active')  return j.status === 'In Progress';
+    if (filter === 'prepped') return !!localStorage.getItem('jcform-'+j.id);
+    if (filter === 'overdue') return j.status !== 'Complete' && j.end && new Date(j.end) < today;
+    if (filter === 'hold')    return j.status === 'On Hold';
+    if (filter === 'done')    return j.status === 'Complete';
+    return true;
+  });
+
+  if (!filtered.length) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim);font-style:italic">'
+      + (jobs.length ? 'No jobs match this filter.' : 'No jobs yet — click + New Job to get started')
+      + '</div>';
+    return;
+  }
+
+  el.innerHTML = filtered.map(function(job) {
+    var totalRegular = job.log.reduce(function(s,l){ return s+(l.regular||0); },0);
+    var totalOT      = job.log.reduce(function(s,l){ return s+(l.ot||0); },0);
+    var laborCost    = (totalRegular * LABOR_RATE) + (totalOT * LABOR_RATE_OT);
+    var grossProfit  = job.contract > 0 ? ((job.contract - laborCost) / job.contract * 100) : 0;
+    var gpColor      = grossProfit >= 60 ? 'var(--success)' : grossProfit >= 50 ? 'var(--copper)' : 'var(--danger)';
+    var gpFlag       = grossProfit >= 60 ? '✅' : grossProfit >= 50 ? '⚠️' : '🚨';
+    var hasForm      = !!localStorage.getItem('jcform-'+job.id);
+
+    var endDate  = job.end ? new Date(job.end) : null;
+    var daysLeft = endDate ? Math.ceil((endDate - today) / (1000*60*60*24)) : null;
+    var timelineStr   = daysLeft === null ? '—' : daysLeft > 0 ? daysLeft + ' days left' : Math.abs(daysLeft) + ' days overdue';
+    var timelineColor = daysLeft === null ? 'var(--text-dim)' : daysLeft > 7 ? 'var(--success)' : daysLeft >= 0 ? 'var(--copper)' : 'var(--danger)';
+
+    var statusColors = { 'Scheduled':'#7c5cbf', 'In Progress':'var(--teal)', 'Complete':'var(--success)', 'On Hold':'var(--copper)' };
+    var jid = JSON.stringify(job.id);
+
+    // Status badge row
+    var badges = '';
+    if (job.status === 'Complete') badges += '<span style="background:rgba(26,110,72,.12);color:var(--success);border-radius:12px;padding:2px 9px;font-size:10px;font-weight:700">✅ Complete</span> ';
+    if (job.status === 'Scheduled') badges += '<span style="background:rgba(124,92,191,.12);color:#7c5cbf;border-radius:12px;padding:2px 9px;font-size:10px;font-weight:700">🟣 Scheduled</span> ';
+    if (job.status === 'On Hold')  badges += '<span style="background:rgba(191,120,37,.12);color:var(--copper);border-radius:12px;padding:2px 9px;font-size:10px;font-weight:700">⏸ On Hold</span> ';
+    if (hasForm) badges += '<span style="background:rgba(0,174,239,.12);color:var(--teal);border-radius:12px;padding:2px 9px;font-size:10px;font-weight:700">📋 Form Saved</span> ';
+    if (job.submittedToTim) badges += '<span style="background:rgba(191,120,37,.12);color:var(--copper);border-radius:12px;padding:2px 9px;font-size:10px;font-weight:700">✉ Sent to Tim</span> ';
+    if (daysLeft !== null && daysLeft < 0 && job.status !== 'Complete') badges += '<span style="background:rgba(168,40,40,.12);color:var(--danger);border-radius:12px;padding:2px 9px;font-size:10px;font-weight:700">🔴 Overdue</span> ';
+
+    return '<div class="member-card" style="margin-bottom:16px;'+(job.status==='Complete'?'opacity:.75':'')+'"><div class="member-card-header">'
+      + '<div>'
+      + '<div class="member-card-name">' + (job.number ? '['+job.number+'] ' : '') + job.name + '</div>'
+      + '<div class="member-card-meta">' + (job.client||'') + (job.address ? ' · '+job.address : '') + (job.jobType ? ' · '+job.jobType : '') + '</div>'
+      + (badges ? '<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">'+badges+'</div>' : '')
+      + '</div>'
+      + '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
+      + '<select onchange="updateJobStatus('+jid+',this.value)" style="font-size:11px;padding:4px 8px;width:auto;color:'+statusColors[job.status]+';font-weight:700">'
+      + ['Scheduled','In Progress','Complete','On Hold'].map(function(s){ return '<option value="'+s+'"'+(job.status===s?' selected':'')+'>'+s+'</option>'; }).join('')
+      + '</select>'
+      + '<button class="btn btn-outline btn-sm" onclick="window.open('+JSON.stringify('job-cost.html?id='+job.id)+',\'_blank\');">📋 Job Form</button>'
+      + '<button class="btn btn-outline btn-sm" onclick="openLogHours('+jid+')">+ Log Hours</button>'
+      + (job.status === 'Complete' ? '<button class="btn btn-primary btn-sm" onclick="submitJobToTim('+jid+')">✉ Send to Tim</button>' : '')
+      + '<button class="btn btn-ghost btn-sm" onclick="deleteJob('+jid+')" style="color:var(--danger)">Remove</button>'
+      + '</div></div>'
+
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px">'
+      + '<div style="background:var(--sand);border-radius:8px;padding:10px 12px">'
+      + '<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px">Contract</div>'
+      + '<div style="font-size:18px;font-weight:700;color:var(--ink)">$'+(job.contract?job.contract.toFixed(0):'—')+'</div>'
+      + '</div>'
+      + '<div style="background:var(--sand);border-radius:8px;padding:10px 12px">'
+      + '<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px">Labor Cost</div>'
+      + '<div style="font-size:18px;font-weight:700;color:var(--ink)">$'+laborCost.toFixed(0)+'</div>'
+      + '<div style="font-size:11px;color:var(--text-dim)">'+totalRegular+'hrs reg · '+totalOT+'hrs OT</div>'
+      + '</div>'
+      + '<div style="background:var(--sand);border-radius:8px;padding:10px 12px">'
+      + '<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px">Gross Profit</div>'
+      + '<div style="font-size:18px;font-weight:700;color:'+gpColor+'">'+gpFlag+' '+grossProfit.toFixed(1)+'%</div>'
+      + '<div style="font-size:11px;color:var(--text-dim)">'+(grossProfit>=60?'🎉 Bonus eligible!':grossProfit>=50?'Above 50%':laborCost===0?'No hours logged':'Below target')+'</div>'
+      + '</div>'
+      + '<div style="background:var(--sand);border-radius:8px;padding:10px 12px">'
+      + '<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px">Timeline</div>'
+      + '<div style="font-size:16px;font-weight:700;color:'+timelineColor+'">'+timelineStr+'</div>'
+      + '<div style="font-size:11px;color:var(--text-dim)">'+(job.end?'Due: '+job.end:'No end date set')+'</div>'
+      + '</div>'
+      + '</div>'
+
+      // Log entries preview
+      + (job.log && job.log.length ? '<div style="margin-top:12px;border-top:1px solid var(--sand-mid);padding-top:10px">'
+      + '<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px">Recent Labor Logs</div>'
+      + '<div style="display:flex;flex-direction:column;gap:4px">'
+      + job.log.slice(-3).reverse().map(function(l){
+          var c = ((l.regular||0)*LABOR_RATE)+((l.ot||0)*LABOR_RATE_OT);
+          return '<div style="display:flex;gap:12px;font-size:12px;align-items:center">'
+            +'<span style="color:var(--text-dim);min-width:90px">'+l.date+'</span>'
+            +'<span style="font-weight:600">'+l.crew+'</span>'
+            +'<span style="color:var(--text-dim)">'+( l.regular||0)+'h reg'+(l.ot?' · '+(l.ot)+'h OT':'')+'</span>'
+            +'<span style="color:var(--copper);font-weight:700;margin-left:auto">$'+c.toFixed(2)+'</span>'
+            +'</div>';
+        }).join('')
+      + '</div></div>' : '')
+
+      + '</div>';
+  }).join('');
+}
+
+function setJobFilter(f) {
+  window._jobFilter = f;
+  document.querySelectorAll('.job-filter-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.filter === f);
+  });
+  renderJobTracker();
+}
+
+function openLogHours(jobId) {
+  document.getElementById('log-hours-job-id').value = jobId;
+  document.getElementById('log-hours-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('log-hours-crew').value = 'Sean';
+  document.getElementById('log-hours-regular').value = '';
+  document.getElementById('log-hours-ot').value = '';
+  document.getElementById('log-hours-materials').value = '';
+  document.getElementById('log-hours-notes').value = '';
+  document.getElementById('modal-overlay').classList.remove('hidden');
+  document.getElementById('modal-log-hours').classList.remove('hidden');
+  ['modal-add-product','modal-add-member','modal-edit-member','modal-email-report',
+   'modal-add-manager','modal-edit-manager','modal-edit-upsell','modal-manager-note',
+   'modal-employee-history','modal-new-job'].forEach(function(id) {
+    var el = document.getElementById(id); if(el) el.classList.add('hidden');
+  });
+}
+
+function saveLogEntry() {
+  var jobId    = document.getElementById('log-hours-job-id').value;
+  var date     = document.getElementById('log-hours-date').value;
+  var crew     = document.getElementById('log-hours-crew').value.trim();
+  var regular  = parseFloat(document.getElementById('log-hours-regular').value)||0;
+  var ot       = parseFloat(document.getElementById('log-hours-ot').value)||0;
+  var materials= document.getElementById('log-hours-materials').value.trim();
+  var notes    = document.getElementById('log-hours-notes').value.trim();
+  if (!date || !crew || (!regular && !ot)) return alert('Please fill in date, crew, and hours.');
+
+  var jobs = getJobs();
+  var job  = jobs.find(function(j){ return j.id === jobId; });
+  if (!job) return;
+  job.log.push({ date, crew, regular, ot, materials, notes, loggedAt: new Date().toISOString() });
+  saveJobs(jobs);
+  closeModal();
+  renderJobTracker();
+}
+
+function updateJobStatus(jobId, status) {
+  var jobs = getJobs();
+  var job  = jobs.find(function(j){ return j.id === jobId; });
+  if (!job) return;
+  job.status = status;
+  if (status === 'Complete' && !job.completedAt) job.completedAt = new Date().toISOString();
+  if (status === 'Scheduled') job.scheduledAt = job.scheduledAt || new Date().toISOString();
+  saveJobs(jobs);
+  renderJobTracker();
+}
+
+function deleteJob(jobId) {
+  if (!confirm('Remove this job? This cannot be undone.')) return;
+  var jobs = getJobs().filter(function(j){ return j.id !== jobId; });
+  saveJobs(jobs);
+  renderJobTracker();
+}
+
+function submitJobToTim(jobId) {
+  var jobs = getJobs();
+  var job  = jobs.find(function(j){ return j.id === jobId; });
+  if (!job) return;
+
+  var totalRegular = job.log.reduce(function(s,l){ return s+(l.regular||0); },0);
+  var totalOT      = job.log.reduce(function(s,l){ return s+(l.ot||0); },0);
+  var laborCost    = (totalRegular * LABOR_RATE) + (totalOT * LABOR_RATE_OT);
+  var grossProfit  = job.contract > 0 ? ((job.contract - laborCost) / job.contract * 100) : 0;
+  var completedAt  = job.completedAt ? new Date(job.completedAt).toLocaleString() : new Date().toLocaleString();
+  var submittedAt  = new Date().toLocaleString();
+
+  var logRows = job.log.map(function(l) {
+    return '<tr><td>'+l.date+'</td><td>'+l.crew+'</td><td>'+l.regular+'</td><td>'+(l.ot||0)+'</td>'
+      + '<td style="color:#bf7825;font-weight:700">$'+((l.regular*LABOR_RATE)+(( l.ot||0)*LABOR_RATE_OT)).toFixed(2)+'</td>'
+      + '<td>'+(l.materials||'—')+'</td><td>'+(l.notes||'—')+'</td></tr>';
+  }).join('');
+
+  var html2 = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>'
+    + 'body{font-family:Arial,sans-serif;font-size:12px;color:#1a2e3e;margin:0;padding:32px;max-width:800px}'
+    + 'h1{font-size:20px;font-weight:700;color:#1a3a52;margin:0 0 4px}'
+    + 'h2{font-size:13px;font-weight:700;color:#1a3a52;margin:20px 0 8px;border-bottom:2px solid #00aeef;padding-bottom:4px}'
+    + '.meta{font-size:11px;color:#7a9aaa;margin-bottom:20px}'
+    + '.grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px}'
+    + '.card{background:#f4f7f9;border-radius:6px;padding:12px;border:1px solid #e4ecf0}'
+    + '.card .label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#7a9aaa;margin-bottom:4px}'
+    + '.card .value{font-size:18px;font-weight:700;color:#1a3a52}'
+    + '.card .value.green{color:#1a6e48}.card .value.gold{color:#bf7825}.card .value.red{color:#a82828}'
+    + 'table{width:100%;border-collapse:collapse;font-size:11px}'
+    + 'th{background:#1a3a52;color:rgba(255,255,255,0.7);padding:8px 10px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase}'
+    + 'td{padding:8px 10px;border-bottom:1px solid #f0ece4}'
+    + '.total-row td{font-weight:700;background:#f4f7f9;border-top:2px solid #1a3a52}'
+    + '.timestamp{font-size:10px;color:#aaa;margin-top:24px;padding-top:12px;border-top:1px solid #eee}'
+    + '.bonus{background:#e5f5ec;border:1px solid #a8d9bc;border-radius:6px;padding:12px 16px;margin:16px 0;color:#1a6e48;font-weight:700}'
+    + '</style></head><body>'
+    + '<img src="https://iloveponds.com/favicon.ico" style="height:40px;margin-bottom:8px">'
+    + '<h1>Job Cost Report — ' + job.name + '</h1>'
+    + '<div class="meta">' + (job.number?'Job #'+job.number+' · ':'') + job.client + (job.address?' · '+job.address:'') + '</div>'
+    + (grossProfit >= 60 ? '<div class="bonus">✅ This job qualifies for the 60%+ gross profit bonus!</div>' : '')
+    + '<div class="grid">'
+    + '<div class="card"><div class="label">Contract Value</div><div class="value">$'+job.contract.toFixed(2)+'</div></div>'
+    + '<div class="card"><div class="label">Total Labor Cost</div><div class="value gold">$'+laborCost.toFixed(2)+'</div></div>'
+    + '<div class="card"><div class="label">Gross Profit</div><div class="value '+(grossProfit>=60?'green':grossProfit>=50?'gold':'red')+'">'+grossProfit.toFixed(1)+'%</div></div>'
+    + '<div class="card"><div class="label">Total Man Hours</div><div class="value">'+(totalRegular+totalOT)+'hrs</div></div>'
+    + '</div>'
+    + '<h2>Labor Log</h2>'
+    + '<table><thead><tr><th>Date</th><th>Crew</th><th>Reg Hrs</th><th>OT Hrs</th><th>Labor Cost</th><th>Materials Used</th><th>Notes</th></tr></thead>'
+    + '<tbody>' + logRows
+    + '<tr class="total-row"><td colspan="2">TOTALS</td><td>'+totalRegular+'</td><td>'+totalOT+'</td><td>$'+laborCost.toFixed(2)+'</td><td colspan="2"></td></tr>'
+    + '</tbody></table>'
+    + (job.notes ? '<h2>Project Notes</h2><p>'+job.notes+'</p>' : '')
+    + '<div class="timestamp">Job completed: '+completedAt+' · Report submitted: '+submittedAt+' · Submitted by: Sean Sawicki</div>'
+    + '</body></html>';
+
+  // Open print window
+  var win = window.open('','_blank');
+  win.document.write(html2);
+  win.document.close();
+
+  // Mark as submitted with timestamp
+  job.submittedToTim = new Date().toISOString();
+  saveJobs(jobs);
+  renderJobTracker();
+
+  // Also trigger email via Apps Script
+  apiWrite({
+    action: 'sendJobReport',
+    to: TIM_EMAIL,
+    subject: 'Job Cost Report — ' + job.name + (job.number ? ' ['+job.number+']' : ''),
+    jobName: job.name,
+    jobNumber: job.number || '',
+    client: job.client,
+    address: job.address || '',
+    contract: job.contract,
+    laborCost: laborCost,
+    grossProfit: grossProfit,
+    totalRegular: totalRegular,
+    totalOT: totalOT,
+    log: job.log,
+    notes: job.notes || '',
+    completedAt: completedAt,
+    submittedAt: submittedAt
+  });
+
+  alert('Report opened for printing AND emailed to Tim at ' + TIM_EMAIL + '\nTimestamp: ' + submittedAt);
+}
+
+// ── JOB FORM TABS ─────────────────────────────────────────────────────────────
+function showJobTab(name) {
+  ['info','site','materials'].forEach(function(t) {
+    var el  = document.getElementById('job-tab-'+t);
+    var btn = document.getElementById('jt-'+t);
+    if (el)  el.classList.toggle('hidden', t !== name);
+    if (btn) btn.classList.toggle('active', t === name);
+  });
+  if (name === 'materials') renderMaterialRows();
+}
+
+// ── PRODUCT AUTOCOMPLETE ──────────────────────────────────────────────────────
+var materialRows = [];
+
+function addMaterialRow() {
+  var id = 'mr' + Date.now();
+  materialRows.push({ id: id, name: '', code: '', qty: 1, section: '' });
+  renderMaterialRows();
+}
+
+function renderMaterialRows() {
+  var el = document.getElementById('job-materials-list');
+  if (!el) return;
+  if (!materialRows.length) {
+    // Add a few default rows
+    ['Liner & Underlayment','Filtration','Plumbing','Illumination','Hard Goods','Add Ons'].forEach(function(s) {
+      materialRows.push({ id: 'mr'+Date.now()+Math.random(), name:'', code:'', qty:1, section:s });
+    });
+  }
+  el.innerHTML = materialRows.map(function(row) {
+    var rid = row.id;
+    var rname = (row.name||'').replace(/"/g,'&quot;');
+    var rcode = (row.code||'').replace(/"/g,'&quot;');
+    var ridJson = JSON.stringify(rid);
+    return '<div style="display:grid;grid-template-columns:2fr 1fr 60px 30px;gap:8px;align-items:center;margin-bottom:6px" id="row-'+rid+'">'
+      + '<div class="prod-autocomplete-wrap">'
+      + '<input type="text" placeholder="Search product..." value="'+rname+'" oninput="filterProducts(this,' + ridJson + ')" onfocus="filterProducts(this,' + ridJson + ')" style="width:100%">'
+      + '<div id="ac-'+rid+'" class="prod-autocomplete-list" style="display:none"></div>'
+      + '</div>'
+      + '<input type="text" placeholder="Product #" value="'+rcode+'" oninput="updateMaterialCode('+ridJson+',this.value)" style="width:100%">'
+      + '<input type="number" value="'+row.qty+'" min="1" oninput="updateMaterialQty('+ridJson+',this.value)" style="width:100%">'
+      + '<button onclick="removeMaterialRow('+ridJson+')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px;padding:0">✕</button>'
+      + '</div>';
+  }).join('')
+
+function filterProducts(input, rowId) {
+  var query = input.value.toLowerCase().trim();
+  var dropdown = document.getElementById('ac-'+rowId);
+  if (!dropdown) return;
+  if (!query || query.length < 2) { dropdown.style.display = 'none'; return; }
+
+  var matches = AQUASCAPE_PRODUCTS.filter(function(p) {
+    return p.n.toLowerCase().includes(query) || p.c.toLowerCase().includes(query);
+  }).slice(0, 12);
+
+  if (!matches.length) { dropdown.style.display = 'none'; return; }
+
+  dropdown.innerHTML = matches.map(function(p) {
+    var safeName = p.n.replace(/'/g, "&#39;").replace(/"/g, '&quot;');
+    var safeCode = p.c.replace(/'/g, "&#39;");
+    return '<div class="prod-autocomplete-item" onmousedown="'+'selectProduct('+JSON.stringify(rowId)+','+JSON.stringify(p.n)+','+JSON.stringify(p.c)+')"'+'>'+ p.n + '<span class="prod-code">#'+p.c+'</span><span class="prod-cat">'+p.cat+'</span></div>';
+  }).join('');
+  dropdown.style.display = 'block';
+}
+
+function selectProduct(rowId, name, code) {
+  var row = materialRows.find(function(r){ return r.id === rowId; });
+  if (row) { row.name = name; row.code = code; }
+  var dropdown = document.getElementById('ac-'+rowId);
+  if (dropdown) dropdown.style.display = 'none';
+  var rowEl = document.getElementById('row-'+rowId);
+  if (rowEl) {
+    var inputs = rowEl.querySelectorAll('input[type=text]');
+    if (inputs[0]) inputs[0].value = name;
+    if (inputs[1]) inputs[1].value = code;
+  }
+}
+function updateMaterialCode(rowId, value) {
+  var row = materialRows.find(function(r){ return r.id === rowId; });
+  if (row) row.code = value;
+}
+function updateMaterialQty(rowId, value) {
+  var row = materialRows.find(function(r){ return r.id === rowId; });
+  if (row) row.qty = parseFloat(value)||1;
+}
+
+function updateMaterialRow(rowId, field, value) {
+  var row = materialRows.find(function(r){ return r.id === rowId; });
+  if (row) row[field] = field === 'qty' ? parseFloat(value)||1 : value;
+}
+
+function removeMaterialRow(rowId) {
+  materialRows = materialRows.filter(function(r){ return r.id !== rowId; });
+  renderMaterialRows();
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.prod-autocomplete-wrap')) {
+    document.querySelectorAll('.prod-autocomplete-list').forEach(function(d){ d.style.display='none'; });
+  }
+});
+
+// ── UPDATE saveNewJob TO INCLUDE ALL NEW FIELDS ───────────────────────────────
+var _origSaveNewJob = saveNewJob;
+saveNewJob = function() {
+  var name     = document.getElementById('job-name').value.trim();
+  var number   = document.getElementById('job-number').value.trim();
+  var client   = document.getElementById('job-client').value.trim();
+  var address  = document.getElementById('job-address').value.trim();
+  var start    = document.getElementById('job-start').value;
+  var end      = document.getElementById('job-end').value;
+  var contract = parseFloat(document.getElementById('job-contract').value)||0;
+  var estHours = parseFloat(document.getElementById('job-est-hours').value)||0;
+  var jobType  = document.getElementById('job-type') ? document.getElementById('job-type').value : '';
+  var phone    = document.getElementById('job-phone') ? document.getElementById('job-phone').value.trim() : '';
+  var size     = document.getElementById('job-size') ? document.getElementById('job-size').value.trim() : '';
+  var special  = document.getElementById('job-special') ? document.getElementById('job-special').value.trim() : '';
+  var weather  = document.getElementById('job-weather') ? document.getElementById('job-weather').value.trim() : '';
+
+  // Site assessment fields
+  var site = {
+    gate:        document.getElementById('site-gate')          ? document.getElementById('site-gate').value.trim() : '',
+    driveway:    document.getElementById('site-driveway')      ? document.getElementById('site-driveway').value.trim() : '',
+    equipWidth:  document.getElementById('site-equip-width')   ? document.getElementById('site-equip-width').value : '',
+    staging:     document.getElementById('site-staging')       ? document.getElementById('site-staging').value.trim() : '',
+    accessRoute: document.getElementById('site-access-route')  ? document.getElementById('site-access-route').value.trim() : '',
+    obstacles:   document.getElementById('site-obstacles')     ? document.getElementById('site-obstacles').value.trim() : '',
+    digsafe:     document.getElementById('site-digsafe')       ? document.getElementById('site-digsafe').value : '',
+    ticket:      document.getElementById('site-ticket')        ? document.getElementById('site-ticket').value.trim() : '',
+    utilities:   document.getElementById('site-utilities')     ? document.getElementById('site-utilities').value.trim() : '',
+    soil:        document.getElementById('site-soil')          ? document.getElementById('site-soil').value : '',
+    rockDepth:   document.getElementById('site-rock-depth')    ? document.getElementById('site-rock-depth').value.trim() : '',
+    distPower:   document.getElementById('site-dist-power')    ? document.getElementById('site-dist-power').value : '',
+    distWater:   document.getElementById('site-dist-water')    ? document.getElementById('site-dist-water').value : '',
+    distHouse:   document.getElementById('site-dist-house')    ? document.getElementById('site-dist-house').value : '',
+    slope:       document.getElementById('site-slope')         ? document.getElementById('site-slope').value.trim() : '',
+    goals:       document.getElementById('site-goals')         ? document.getElementById('site-goals').value.trim() : '',
+    concerns:    document.getElementById('site-concerns')      ? document.getElementById('site-concerns').value.trim() : ''
+  };
+
+  if (!name || !client) return alert('Please fill in job name and client.');
+
+  var jobs = getJobs();
+  var usedMaterials = materialRows.filter(function(r){ return r.name.trim(); });
+  jobs.push({
+    id: 'j'+Date.now(), name, number, client, address, phone, size,
+    jobType, start, end, contract, estHours, special, weather,
+    site: site, materials: usedMaterials,
+    status: 'In Progress', log: [],
+    createdAt: new Date().toISOString()
+  });
+  saveJobs(jobs);
+  materialRows = [];
+  closeModal();
+  renderJobTracker();
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DAILY DIGEST BANNER
+// ══════════════════════════════════════════════════════════════════════════════
+function renderDigestBanner() {
+  var el = document.getElementById('sa-digest-banner');
+  if (!el) return;
+  var jobs = getJobs();
+  if (!jobs.length) { el.innerHTML = ''; return; }
+
+  var today    = new Date();
+  var todayStr = today.toDateString();
+  var msDay    = 86400000;
+
+  var active   = jobs.filter(function(j){ return j.status === 'In Progress'; });
+  var overdue  = jobs.filter(function(j){
+    return j.status !== 'Complete' && j.status !== 'Scheduled' && j.end && new Date(j.end) < today;
+  });
+  var dueSoon  = jobs.filter(function(j){
+    if (j.status === 'Complete') return false;
+    if (!j.end) return false;
+    var diff = (new Date(j.end) - today) / msDay;
+    return diff >= 0 && diff <= 7;
+  });
+  var unsent   = jobs.filter(function(j){
+    return j.status === 'Complete' && !j.submittedToTim;
+  });
+  var noForm   = jobs.filter(function(j){
+    return j.status === 'In Progress' && !localStorage.getItem('jcform-'+j.id);
+  });
+
+  var items = [];
+
+  // Greeting
+  var hr = today.getHours();
+  var greeting = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var dateStr = days[today.getDay()] + ', ' + months[today.getMonth()] + ' ' + today.getDate();
+
+  if (overdue.length) {
+    items.push({ icon:'🔴', color:'#a82828', bg:'rgba(168,40,40,.08)',
+      text: overdue.length + ' job' + (overdue.length>1?'s':'') + ' overdue — '
+        + overdue.map(function(j){ return j.name; }).join(', ') });
+  }
+  if (unsent.length) {
+    items.push({ icon:'✉️', color:'#bf7825', bg:'rgba(191,120,37,.08)',
+      text: unsent.length + ' complete job' + (unsent.length>1?'s':'') + ' not sent to Tim yet — '
+        + unsent.map(function(j){ return j.name; }).join(', ') });
+  }
+  if (dueSoon.length) {
+    items.push({ icon:'⏰', color:'#bf7825', bg:'rgba(191,120,37,.08)',
+      text: dueSoon.length + ' job' + (dueSoon.length>1?'s':'') + ' due within 7 days — '
+        + dueSoon.map(function(j){
+            var d = Math.ceil((new Date(j.end) - today) / msDay);
+            return j.name + ' (' + (d===0?'today':d+'d') + ')';
+          }).join(', ') });
+  }
+  if (noForm.length) {
+    items.push({ icon:'📋', color:'var(--teal)', bg:'rgba(0,174,239,.07)',
+      text: noForm.length + ' active job' + (noForm.length>1?'s':'') + ' with no form started — '
+        + noForm.map(function(j){ return j.name; }).join(', ') });
+  }
+  if (!items.length && active.length) {
+    items.push({ icon:'✅', color:'var(--success)', bg:'rgba(26,110,72,.07)',
+      text: 'All ' + active.length + ' active job' + (active.length>1?'s':'') + ' on track — looking good!' });
+  }
+
+  el.innerHTML = '<div style="background:white;border-radius:12px;box-shadow:var(--shadow);overflow:hidden">'
+    + '<div style="background:var(--deep);padding:12px 18px;display:flex;align-items:center;justify-content:space-between">'
+    + '<div style="color:white">'
+    + '<span style="font-size:11px;letter-spacing:2px;text-transform:uppercase;opacity:.6">' + dateStr + '</span>'
+    + '<div style="font-family:Cormorant Garamond,serif;font-size:20px;font-weight:700;font-style:italic;color:var(--teal)">'
+    + greeting + ', Sean ✦ Daily Digest</div>'
+    + '</div>'
+    + '<div style="text-align:right;color:rgba(255,255,255,.5);font-size:11px">'
+    + active.length + ' active · ' + jobs.length + ' total jobs'
+    + '</div>'
+    + '</div>'
+    + '<div style="padding:0">'
+    + (items.length ? items.map(function(item) {
+        return '<div style="display:flex;align-items:flex-start;gap:12px;padding:11px 18px;border-bottom:1px solid var(--sand);background:'+item.bg+'">'
+          + '<span style="font-size:16px;line-height:1.4">'+item.icon+'</span>'
+          + '<span style="font-size:13px;color:'+item.color+';font-weight:600;line-height:1.5">'+item.text+'</span>'
+          + '</div>';
+      }).join('') : '<div style="padding:14px 18px;color:var(--text-dim);font-size:13px">Nothing urgent today.</div>')
+    + '</div>'
+    + '</div>';
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// JOB CALENDAR
+// ══════════════════════════════════════════════════════════════════════════════
+var _calYear  = new Date().getFullYear();
+var _calMonth = new Date().getMonth();
+
+// ── CALENDAR NOTES (localStorage) ────────────────────────────────────────────
+function getCalNotes() {
+  try { return JSON.parse(localStorage.getItem('neal-cal-notes') || '{}'); } catch(e) { return {}; }
+}
+function saveCalNotes(n) { localStorage.setItem('neal-cal-notes', JSON.stringify(n)); }
+
+function renderJobCalendar() {
+  try {
+    var root = document.getElementById('sa-calendar-root');
+    if (!root) return;
+
+    var jobs   = getJobs();
+    var notes  = getCalNotes();
+    var today  = new Date();
+    var yr     = _calYear;
+    var mo     = _calMonth;
+    var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    var STATUS_COLOR = { 'Scheduled':'#7c5cbf','In Progress':'var(--teal)','Complete':'var(--success)','On Hold':'var(--copper)' };
+
+    // Build date → events map
+    var evMap = {};
+    function addEv(ds, ev) { if (!ds) return; if (!evMap[ds]) evMap[ds] = []; evMap[ds].push(ev); }
+
+    jobs.forEach(function(j) {
+      if (j.start) addEv(j.start, { label: j.name, type:'start', job:j });
+      if (j.end)   addEv(j.end,   { label: j.name, type:'end',   job:j });
+      if (j.log)   j.log.forEach(function(l) {
+        if (l.date) addEv(l.date, { label: j.name + ' · ' + (l.crew||'crew'), type:'log', job:j });
+      });
+    });
+
+    // Calendar notes
+    Object.keys(notes).forEach(function(ds) {
+      if (notes[ds]) addEv(ds, { label: notes[ds], type:'note' });
+    });
+
+    // Grid
+    var firstDay    = new Date(yr, mo, 1).getDay();
+    var daysInMonth = new Date(yr, mo+1, 0).getDate();
+    var todayStr    = today.toISOString().slice(0,10);
+
+    var typeStyle = {
+      start: 'background:rgba(0,174,239,.15);color:var(--teal);',
+      end:   'background:rgba(191,120,37,.15);color:var(--copper);',
+      log:   'background:rgba(122,154,170,.15);color:var(--text-dim);',
+      note:  'background:rgba(26,58,82,.1);color:var(--ink);'
+    };
+    var typeIcon = { start:'▶', end:'⏹', log:'⚒', note:'📝' };
+
+    var cells = DAYS.map(function(d) {
+      return '<div style="text-align:center;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);padding:5px 0">' + d + '</div>';
+    }).join('');
+
+    for (var b = 0; b < firstDay; b++) {
+      cells += '<div style="min-height:88px;background:rgba(240,238,232,.5);border-radius:6px"></div>';
+    }
+
+    for (var d = 1; d <= daysInMonth; d++) {
+      var ds      = yr + '-' + String(mo+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+      var isToday = ds === todayStr;
+      var evs     = evMap[ds] || [];
+
+      var dotHTML = evs.slice(0,3).map(function(e) {
+        var st = typeStyle[e.type] || typeStyle.note;
+        var ic = typeIcon[e.type]  || '•';
+        var lbl = e.label.length > 14 ? e.label.slice(0,13) + '…' : e.label;
+        return '<div style="' + st + 'font-size:9px;line-height:1.3;padding:2px 4px;border-radius:3px;margin-bottom:2px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + ic + ' ' + lbl + '</div>';
+      }).join('');
+      if (evs.length > 3) dotHTML += '<div style="font-size:9px;color:var(--text-dim);padding:1px 3px">+' + (evs.length-3) + ' more</div>';
+
+      cells += '<div onclick="calDayClick(' + JSON.stringify(ds) + ')" style="min-height:88px;border-radius:8px;padding:6px;cursor:pointer;transition:.12s;'
+        + 'background:' + (isToday ? 'rgba(0,174,239,.1)' : 'white') + ';'
+        + 'border:' + (isToday ? '2px solid var(--teal)' : '1px solid var(--sand-mid)') + ';'
+        + 'box-shadow: 0 1px 4px rgba(26,58,82,.05)">'
+        + '<div style="font-size:11px;font-weight:' + (isToday?'800':'600') + ';color:' + (isToday?'var(--teal)':'var(--ink)') + ';margin-bottom:4px">'
+        + (isToday ? '<span style="background:var(--teal);color:white;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px">' + d + '</span>' : d)
+        + '</div>'
+        + dotHTML
+        + '</div>';
+    }
+
+    // Upcoming sidebar (next 45 days)
+    var upcoming = [];
+    jobs.forEach(function(j) {
+      if (j.status === 'Complete') return;
+      ['start','end'].forEach(function(type) {
+        var ds = j[type];
+        if (!ds) return;
+        var diff = Math.round((new Date(ds) - today) / 86400000);
+        if (diff >= -2 && diff <= 45) upcoming.push({ job:j, type:type, ds:ds, diff:diff });
+      });
+    });
+    upcoming.sort(function(a,b){ return new Date(a.ds) - new Date(b.ds); });
+
+    var sideHTML = upcoming.length ? upcoming.map(function(e) {
+      var diff = e.diff;
+      var urgency = diff < 0 ? 'var(--danger)' : diff <= 3 ? 'var(--copper)' : diff <= 7 ? '#bf7825' : 'var(--success)';
+      var when = diff < 0 ? Math.abs(diff)+'d ago' : diff === 0 ? 'Today' : diff === 1 ? 'Tomorrow' : 'In '+diff+'d';
+      var typeLbl = e.type === 'start' ? '▶ Start' : '⏹ Due';
+      var sc = STATUS_COLOR[e.job.status] || 'var(--teal)';
+      return '<div style="padding:9px 11px;border-radius:8px;background:white;box-shadow:0 1px 6px rgba(26,58,82,.08);margin-bottom:8px;border-left:3px solid '+urgency+'">'
+        + '<div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:2px">' + e.job.name + '</div>'
+        + '<div style="font-size:10px;color:var(--text-dim);margin-bottom:4px">' + (e.job.client||'') + (e.job.jobType?' · '+e.job.jobType:'') + '</div>'
+        + '<div style="display:flex;justify-content:space-between;align-items:center">'
+        + '<span style="font-size:10px;font-weight:700;color:'+sc+';background:'+sc+'22;padding:2px 7px;border-radius:8px">'+e.job.status+'</span>'
+        + '<span style="font-size:11px;font-weight:700;color:'+urgency+'">'+typeLbl+' · '+when+'</span>'
+        + '</div></div>';
+    }).join('')
+    : '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:20px 10px;line-height:1.6">No upcoming jobs in the next 45 days.<br><span style="font-size:11px">Create a job in the Job Tracker to see it here.</span></div>';
+
+    root.innerHTML =
+      '<div style="display:grid;grid-template-columns:1fr 220px;gap:20px;align-items:start">'
+
+      // ── LEFT: Calendar
+      + '<div>'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
+      + '<button onclick="calNav(-1)" style="background:none;border:1px solid var(--sand-dark);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:16px;color:var(--ink)">‹</button>'
+      + '<div style="font-family:Cormorant Garamond,serif;font-size:24px;font-weight:700;font-style:italic;color:var(--ink)">' + MONTHS[mo] + ' ' + yr + '</div>'
+      + '<button onclick="calNav(1)"  style="background:none;border:1px solid var(--sand-dark);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:16px;color:var(--ink)">›</button>'
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">' + cells + '</div>'
+      + '<div style="display:flex;gap:16px;margin-top:10px;font-size:11px;color:var(--text-dim);flex-wrap:wrap">'
+      + '<span style="display:flex;align-items:center;gap:4px"><span style="background:rgba(0,174,239,.15);color:var(--teal);padding:1px 6px;border-radius:3px;font-weight:700">▶</span> Job Start</span>'
+      + '<span style="display:flex;align-items:center;gap:4px"><span style="background:rgba(191,120,37,.15);color:var(--copper);padding:1px 6px;border-radius:3px;font-weight:700">⏹</span> Target Complete</span>'
+      + '<span style="display:flex;align-items:center;gap:4px"><span style="background:rgba(122,154,170,.15);color:var(--text-dim);padding:1px 6px;border-radius:3px;font-weight:700">⚒</span> Labor Day</span>'
+      + '<span style="display:flex;align-items:center;gap:4px"><span style="background:rgba(26,58,82,.1);color:var(--ink);padding:1px 6px;border-radius:3px;font-weight:700">📝</span> Note</span>'
+      + '</div>'
+      + '</div>'
+
+      // ── RIGHT: Sidebar
+      + '<div>'
+      + '<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px">Upcoming (45 days)</div>'
+      + sideHTML
+      + '</div>'
+
+      + '</div>'
+      + '<div id="cal-day-detail" style="margin-top:16px"></div>';
+
+  } catch(err) {
+    var root = document.getElementById('sa-calendar-root');
+    if (root) root.innerHTML = '<div style="color:var(--danger);padding:20px">Calendar error: ' + err.message + '</div>';
+  }
+}
+
+function calNav(dir) {
+  _calMonth += dir;
+  if (_calMonth > 11) { _calMonth = 0; _calYear++; }
+  if (_calMonth < 0)  { _calMonth = 11; _calYear--; }
+  renderJobCalendar();
+}
+
+function calDayClick(ds) {
+  var el = document.getElementById('cal-day-detail');
+  if (!el) return;
+
+  var jobs  = getJobs();
+  var notes = getCalNotes();
+  var evs   = [];
+
+  jobs.forEach(function(j) {
+    var types = [];
+    if (j.start === ds) types.push({ icon:'▶', label:'Job Start', color:'var(--teal)' });
+    if (j.end   === ds) {
+      var overdue = new Date(ds) < new Date() && j.status !== 'Complete';
+      types.push({ icon:'⏹', label: overdue ? 'Target Complete (OVERDUE)' : 'Target Complete', color: overdue ? 'var(--danger)' : 'var(--copper)' });
+    }
+    if (j.log) j.log.forEach(function(l) {
+      if (l.date === ds) types.push({ icon:'⚒', label:'Labor · '+( l.crew||'')+ ' · '+(l.regular||0)+'h reg'+(l.ot?' · '+l.ot+'h OT':''), color:'var(--text-dim)' });
+    });
+    if (types.length) evs.push({ job:j, types:types });
+  });
+
+  var note = notes[ds] || '';
+  var d  = new Date(ds + 'T12:00:00');
+  var ML = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var DL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var lbl = DL[d.getDay()] + ', ' + ML[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+
+  el.innerHTML = '<div style="background:white;border-radius:12px;box-shadow:var(--shadow);overflow:hidden">'
+    + '<div style="background:var(--deep);padding:12px 18px;display:flex;align-items:center;justify-content:space-between">'
+    + '<div style="color:white;font-size:14px;font-weight:700">' + lbl + '</div>'
+    + '<button onclick="document.getElementById(\'cal-day-detail\').innerHTML=\'\'" style="background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:18px">×</button>'
+    + '</div>'
+    + '<div style="padding:16px">'
+
+    // Job events
+    + (evs.length ? evs.map(function(e) {
+        var sc = { 'Scheduled':'#7c5cbf','In Progress':'var(--teal)','Complete':'var(--success)','On Hold':'var(--copper)' }[e.job.status] || 'var(--teal)';
+        return '<div style="display:flex;gap:14px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--sand)">'
+          + '<div style="flex:1">'
+          + '<div style="font-size:14px;font-weight:700;color:var(--ink)">' + e.job.name + '</div>'
+          + '<div style="font-size:11px;color:var(--text-dim);margin:2px 0">' + (e.job.client||'') + (e.job.jobType?' · '+e.job.jobType:'') + '</div>'
+          + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px">'
+          + e.types.map(function(t){ return '<span style="font-size:11px;font-weight:600;color:'+t.color+';background:'+t.color+'22;border-radius:10px;padding:2px 8px">'+t.icon+' '+t.label+'</span>'; }).join('')
+          + '</div></div>'
+          + '<div style="text-align:right;flex-shrink:0">'
+          + '<span style="font-size:11px;font-weight:700;color:'+sc+';background:'+sc+'22;border-radius:8px;padding:2px 8px">'+e.job.status+'</span><br>'
+          + '<button class="btn btn-outline btn-sm" style="margin-top:6px" onclick="window.open(\'job-cost.html?id='+e.job.id+'\',\'_blank\')">📋 Form</button>'
+          + '</div></div>';
+      }).join('') : '<div style="color:var(--text-dim);font-size:13px;padding:8px 0">No jobs on this date.</div>')
+
+    // Notes
+    + '<div style="margin-top:14px">'
+    + '<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px">📝 Note for this day</div>'
+    + '<textarea id="cal-note-input" rows="2" style="width:100%;border:1px solid var(--sand-dark);border-radius:8px;padding:8px 10px;font-family:Outfit,sans-serif;font-size:13px;resize:none" placeholder="Add a note...">' + (note||'') + '</textarea>'
+    + '<button onclick="saveCalNote(' + JSON.stringify(ds) + ')" class="btn btn-primary" style="margin-top:6px;font-size:12px;padding:5px 14px">Save Note</button>'
+    + (note ? ' <button onclick="deleteCalNote(' + JSON.stringify(ds) + ')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:12px;margin-left:8px">Clear</button>' : '')
+    + '</div>'
+    + '</div></div>';
+}
+
+function saveCalNote(ds) {
+  var notes = getCalNotes();
+  var val = document.getElementById('cal-note-input');
+  if (val) { notes[ds] = val.value.trim(); saveCalNotes(notes); renderJobCalendar(); calDayClick(ds); }
+}
+function deleteCalNote(ds) {
+  var notes = getCalNotes();
+  delete notes[ds];
+  saveCalNotes(notes);
+  renderJobCalendar();
+  document.getElementById('cal-day-detail').innerHTML = '';
+}
+
+};
 </script>
 </body>
 </html>

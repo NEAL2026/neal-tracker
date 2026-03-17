@@ -412,6 +412,89 @@ body {
   to   { transform: translateX(-50%); }
 }
 .ticker-sep { color: var(--dim); }
+
+/* ── JOBS SECTION ── */
+.jobs-section {
+  max-width: 1100px;
+  margin: 0 auto 24px;
+  padding: 0 24px;
+}
+.jobs-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.4);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.jobs-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,.1);
+}
+.jobs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.job-card-lb {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px;
+  padding: 14px 16px;
+  backdrop-filter: blur(4px);
+}
+.job-card-lb .jc-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.job-card-lb .jc-client {
+  font-size: 11px;
+  color: rgba(255,255,255,.45);
+  margin-bottom: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.job-card-lb .jc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+}
+.job-card-lb .jc-status {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 10px;
+}
+.jc-stat-box {
+  text-align: center;
+}
+.jc-stat-box .jc-val {
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+}
+.jc-stat-box .jc-lbl {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.4);
+}
+
 </style>
 </head>
 <body>
@@ -458,6 +541,9 @@ body {
 
   <!-- REST OF LIST -->
   <div class="list-section" id="list-section"></div>
+
+  <!-- JOBS SECTION -->
+  <div class="jobs-section" id="jobs-section" style="display:none"></div>
 
   <!-- FOOTER -->
   <div class="footer">
@@ -649,7 +735,80 @@ async function loadData() {
 // ── BOOT ──────────────────────────────────────────────
 populateMonthSelect();
 loadData();
+renderJobsSection();
 setInterval(loadData, 60000); // refresh every 60s
+setInterval(renderJobsSection, 30000); // refresh jobs every 30s
+// ── JOBS SECTION ─────────────────────────────────────────────────────────────
+function renderJobsSection() {
+  var el = document.getElementById('jobs-section');
+  if (!el) return;
+  try {
+    var jobs = JSON.parse(localStorage.getItem('neal-jobs') || '[]');
+    var active = jobs.filter(function(j) {
+      return j.status === 'Scheduled' || j.status === 'In Progress';
+    }).sort(function(a,b) {
+      // Scheduled first, then In Progress; within each sort by end date
+      if (a.status !== b.status) return a.status === 'In Progress' ? -1 : 1;
+      if (!a.end && !b.end) return 0;
+      if (!a.end) return 1;
+      if (!b.end) return -1;
+      return new Date(a.end) - new Date(b.end);
+    });
+
+    if (!active.length) { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+
+    var today = new Date();
+    var STATUS_COLOR = {
+      'Scheduled': '#7c5cbf',
+      'In Progress': '#00aeef',
+      'Complete': '#1a6e48',
+      'On Hold': '#bf7825'
+    };
+
+    var cards = active.map(function(j) {
+      var lr = 150, lo = 225;
+      var regH = (j.log||[]).reduce(function(s,l){ return s+(l.regular||0); }, 0);
+      var otH  = (j.log||[]).reduce(function(s,l){ return s+(l.ot||0); }, 0);
+      var labor = regH * lr + otH * lo;
+      var gp = j.contract > 0 ? ((j.contract - labor) / j.contract * 100) : null;
+      var gpColor = gp === null ? 'rgba(255,255,255,.4)' : gp >= 60 ? '#4caf82' : gp >= 50 ? '#f0a030' : '#e05050';
+
+      var daysLeft = j.end ? Math.ceil((new Date(j.end) - today) / 86400000) : null;
+      var timeStr  = daysLeft === null ? '—'
+                   : daysLeft > 0  ? daysLeft + 'd left'
+                   : daysLeft === 0 ? 'Due today'
+                   : Math.abs(daysLeft) + 'd over';
+      var timeColor = daysLeft === null ? 'rgba(255,255,255,.4)'
+                    : daysLeft > 7  ? '#4caf82'
+                    : daysLeft >= 0 ? '#f0a030'
+                    : '#e05050';
+
+      var sc = STATUS_COLOR[j.status] || '#00aeef';
+
+      return '<div class="job-card-lb">'
+        + '<div class="jc-name">' + (j.number ? '['+j.number+'] ' : '') + j.name + '</div>'
+        + '<div class="jc-client">' + (j.client||'') + (j.jobType ? ' · ' + j.jobType : '') + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">'
+        + '<div class="jc-stat-box"><div class="jc-val">$' + (j.contract ? Math.round(j.contract/1000)+'k' : '—') + '</div><div class="jc-lbl">Contract</div></div>'
+        + '<div class="jc-stat-box"><div class="jc-val" style="color:'+gpColor+'">' + (gp !== null ? gp.toFixed(0)+'%' : '—') + '</div><div class="jc-lbl">Gross Profit</div></div>'
+        + '<div class="jc-stat-box"><div class="jc-val" style="color:'+timeColor+'">' + timeStr + '</div><div class="jc-lbl">Timeline</div></div>'
+        + '</div>'
+        + '<div class="jc-row">'
+        + '<span class="jc-status" style="background:'+sc+'33;color:'+sc+'">' + j.status + '</span>'
+        + '<span style="font-size:11px;color:rgba(255,255,255,.4)">' + (regH+otH) + ' hrs logged</span>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    el.innerHTML = '<div class="jobs-section-title">🏗️ Active & Scheduled Jobs (' + active.length + ')</div>'
+      + '<div class="jobs-grid">' + cards + '</div>';
+
+  } catch(e) {
+    el.style.display = 'none';
+  }
+}
+
 </script>
 </body>
 </html>
