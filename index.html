@@ -2165,24 +2165,28 @@ window.addEventListener('DOMContentLoaded', async () => {
   refreshLoginLeaderboard();
   setInterval(refreshLoginLeaderboard, 60000);
 
-  // Restore session if user came back from leaderboard
+  // Only restore session if coming back from leaderboard
   try {
-    var saved = localStorage.getItem('neal-session');
-    if (saved) {
-      var sess = JSON.parse(saved);
-      if (sess.isManager) {
-        var mgr = state.managers.find(function(m){ return m.id === sess.userId; });
-        if (mgr) {
-          state.currentUser = {name: mgr.name, id: mgr.id};
-          state.isManager = true;
-          enterApp();
-        }
-      } else {
-        var mem = state.members.find(function(m){ return m.id === sess.userId; });
-        if (mem) {
-          state.currentUser = mem;
-          state.isManager = false;
-          enterApp();
+    var referrer = document.referrer || '';
+    var fromLeaderboard = referrer.indexOf('leaderboard') !== -1;
+    if (fromLeaderboard) {
+      var saved = localStorage.getItem('neal-session');
+      if (saved) {
+        var sess = JSON.parse(saved);
+        if (sess.isManager) {
+          var mgr = state.managers.find(function(m){ return m.id === sess.userId; });
+          if (mgr) {
+            state.currentUser = {name: mgr.name, id: mgr.id};
+            state.isManager = true;
+            enterApp();
+          }
+        } else {
+          var mem = state.members.find(function(m){ return m.id === sess.userId; });
+          if (mem) {
+            state.currentUser = mem;
+            state.isManager = false;
+            enterApp();
+          }
         }
       }
     }
@@ -4321,8 +4325,8 @@ function renderJobTracker() {
       + '<button class="btn btn-outline btn-sm" onclick="window.open(\'job-cost.html?id=' + job.id + '\',\'_blank\')">📋 Job Form</button>'
       + '<button class="btn btn-outline btn-sm" onclick="openLogHours('+jid+')">+ Log Hours</button>'
       + (job.status === 'Complete' ? '<button class="btn btn-primary btn-sm" onclick="submitJobToTim('+jid+')">✉ Send to Tim</button>' : '')
-      + '<button class="btn btn-outline btn-sm" onclick="openEditJobModal(\'+jid+\')">✏️ Edit</button>'
-      + '<button class="btn btn-ghost btn-sm" onclick="deleteJob(\'+jid+\'\')" style="color:var(--danger)">Remove</button>'
+      + '<button class="btn btn-outline btn-sm" onclick="openEditJobModal('+jid+')">✏️ Edit</button>'
+      + '<button class="btn btn-ghost btn-sm" onclick="deleteJob('+jid+')" style="color:var(--danger)">Remove</button>'
       + '</div></div>'
 
       + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px">'
