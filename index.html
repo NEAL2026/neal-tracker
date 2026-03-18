@@ -4292,7 +4292,7 @@ function renderJobTracker() {
       + '<button class="btn btn-outline btn-sm" onclick="window.open(\'job-cost.html?id=' + job.id + '\',\'_blank\')">📋 Job Form</button>'
       + '<button class="btn btn-outline btn-sm" onclick="openLogHours('+jid+')">+ Log Hours</button>'
       + (job.status === 'Complete' ? '<button class="btn btn-primary btn-sm" onclick="submitJobToTim('+jid+')">✉ Send to Tim</button>' : '')
-      + '<button class="btn btn-outline btn-sm" onclick="openEditJobModal(\'+jid+\'\')">✏️ Edit</button>'
+      + '<button class="btn btn-outline btn-sm" onclick="openEditJobModal(\'+jid+\')">✏️ Edit</button>'
       + '<button class="btn btn-ghost btn-sm" onclick="deleteJob(\'+jid+\'\')" style="color:var(--danger)">Remove</button>'
       + '</div></div>'
 
