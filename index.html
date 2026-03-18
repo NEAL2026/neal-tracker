@@ -2135,6 +2135,29 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('sale-date').value = today();
   refreshLoginLeaderboard();
   setInterval(refreshLoginLeaderboard, 60000);
+
+  // Restore session if user came back from leaderboard
+  try {
+    var saved = localStorage.getItem('neal-session');
+    if (saved) {
+      var sess = JSON.parse(saved);
+      if (sess.isManager) {
+        var mgr = state.managers.find(function(m){ return m.id === sess.userId; });
+        if (mgr) {
+          state.currentUser = {name: mgr.name, id: mgr.id};
+          state.isManager = true;
+          enterApp();
+        }
+      } else {
+        var mem = state.members.find(function(m){ return m.id === sess.userId; });
+        if (mem) {
+          state.currentUser = mem;
+          state.isManager = false;
+          enterApp();
+        }
+      }
+    }
+  } catch(e) {}
 });
 
 function today() { return new Date().toISOString().slice(0,10); }
@@ -4787,7 +4810,20 @@ function renderJobCalendar() {
     }).join('')
     : '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:20px 10px;line-height:1.6">No upcoming jobs in the next 45 days.<br><span style="font-size:11px">Create a job in the Job Tracker to see it here.</span></div>';
 
-    root.innerHTML =
+    // Banner if jobs exist but none have dates
+    var jobsWithDates = jobs.filter(function(j){ return j.start || j.end; });
+    var noDates = jobs.length > 0 && jobsWithDates.length === 0;
+    var emptyBanner = noDates
+      ? '<div style="background:rgba(191,120,37,.1);border:1px solid rgba(191,120,37,.3);border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:var(--copper)">'
+        + '💡 <strong>Tip:</strong> Add start dates and target completion dates to your jobs in the Job Tracker — they will appear on the calendar.'
+        + '</div>'
+      : jobs.length === 0
+      ? '<div style="background:var(--sand);border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:var(--text-dim)">'
+        + '📅 No jobs yet. Create a job in the <strong>Job Tracker</strong> tab and it will show up here.'
+        + '</div>'
+      : '';
+
+    root.innerHTML = emptyBanner +
       '<div style="display:grid;grid-template-columns:1fr 220px;gap:20px;align-items:start">'
 
       // ── LEFT: Calendar
