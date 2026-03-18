@@ -2003,9 +2003,15 @@ let state = { currentUser:null, isManager:false, members:[], managers:[], produc
 // GET for reads (no CORS issues), no-cors POST for writes (fire & forget)
 async function apiRead() {
   try {
-    const r = await fetch(API_URL + '?action=getAll');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000); // 8s timeout
+    const r = await fetch(API_URL + '?action=getAll', { signal: controller.signal });
+    clearTimeout(timeout);
     return await r.json();
-  } catch(e) { console.error('API read error',e); return null; }
+  } catch(e) {
+    console.error('API read error', e);
+    return null;
+  }
 }
 
 function apiWrite(data) {
@@ -2092,7 +2098,8 @@ function setLoading(on, msg) {
 // ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
   setLoading(true, 'Connecting');
-  const data = await apiRead();
+  let data = null;
+  try { data = await apiRead(); } catch(e) {}
 
   if (data) {
     state.members     = parseMembers(data.members);
@@ -2100,6 +2107,28 @@ window.addEventListener('DOMContentLoaded', async () => {
     state.products    = parseProducts(data.products);
     state.upsells     = parseUpsells(data.upsells);
     state.submissions = parseSubmissions(data.submissions);
+    // Cache for offline fallback
+    try {
+      localStorage.setItem('neal-data-cache', JSON.stringify({
+        members: state.members, managers: state.managers,
+        products: state.products, upsells: state.upsells,
+        submissions: state.submissions
+      }));
+    } catch(e) {}
+  } else {
+    // API unreachable — load from localStorage cache if available
+    try {
+      var cached = localStorage.getItem('neal-data-cache');
+      if (cached) {
+        var c = JSON.parse(cached);
+        state.members     = c.members     || [];
+        state.managers    = c.managers    || [];
+        state.products    = c.products    || [];
+        state.upsells     = c.upsells     || [];
+        state.submissions = c.submissions || [];
+        console.warn('Loaded from cache — API unavailable');
+      }
+    } catch(e) {}
   }
 
   // Seed default manager if none exist
