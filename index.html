@@ -2211,6 +2211,7 @@ function doLogin() {
   const member = state.members.find(m => m.id===userId);
   if (!member || String(member.pin) !== String(pin)) return showLoginAlert('Incorrect PIN.','error');
   state.currentUser = member; state.isManager = false;
+  localStorage.setItem('neal-session', JSON.stringify({userId: member.id, isManager: false}));
   if (member.mustChangePin) {
     showPinChangeScreen();
   } else {
@@ -2223,7 +2224,9 @@ function doManagerLogin() {
   if (!mgrId) return showLoginAlert('Please select a manager.','error');
   var mgr = state.managers.find(function(m){ return m.id === mgrId; });
   if (!mgr || mgr.password !== pass) return showLoginAlert('Incorrect password.','error');
-  state.currentUser = {name: mgr.name, id: mgr.id}; state.isManager = true; enterApp();
+  state.currentUser = {name: mgr.name, id: mgr.id}; state.isManager = true;
+  localStorage.setItem('neal-session', JSON.stringify({userId: mgr.id, isManager: true}));
+  enterApp();
 }
 function showLoginAlert(msg, type) {
   const el = document.getElementById('login-alert');
@@ -2265,6 +2268,7 @@ function enterApp() {
 }
 function logout() {
   state.currentUser = null; state.isManager = false;
+  localStorage.removeItem('neal-session');
   document.getElementById('login-screen').classList.remove('hidden');
   document.getElementById('app-screen').classList.add('hidden');
   document.getElementById('header-user').style.display = 'none';
@@ -4288,7 +4292,8 @@ function renderJobTracker() {
       + '<button class="btn btn-outline btn-sm" onclick="window.open(\'job-cost.html?id=' + job.id + '\',\'_blank\')">📋 Job Form</button>'
       + '<button class="btn btn-outline btn-sm" onclick="openLogHours('+jid+')">+ Log Hours</button>'
       + (job.status === 'Complete' ? '<button class="btn btn-primary btn-sm" onclick="submitJobToTim('+jid+')">✉ Send to Tim</button>' : '')
-      + '<button class="btn btn-ghost btn-sm" onclick="deleteJob('+jid+')" style="color:var(--danger)">Remove</button>'
+      + '<button class="btn btn-outline btn-sm" onclick="openEditJobModal(\'+jid+\'\')">✏️ Edit</button>'
+      + '<button class="btn btn-ghost btn-sm" onclick="deleteJob(\'+jid+\'\')" style="color:var(--danger)">Remove</button>'
       + '</div></div>'
 
       + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px">'
@@ -4919,6 +4924,152 @@ function deleteCalNote(ds) {
   renderJobCalendar();
   document.getElementById('cal-day-detail').innerHTML = '';
 }
+// ── EDIT JOB ──────────────────────────────────────────────────────────────────
+var _editingJobId = null;
+
+function openEditJobModal(jobId) {
+  var jobs = getJobs();
+  var job  = jobs.find(function(j){ return j.id === jobId; });
+  if (!job) return;
+  _editingJobId = jobId;
+
+  // Pre-fill all fields
+  var set = function(id, val) { var el = document.getElementById(id); if (el && val !== undefined && val !== null) el.value = val; };
+  set('job-name',       job.name);
+  set('job-number',     job.number);
+  set('job-client',     job.client);
+  set('job-address',    job.address);
+  set('job-phone',      job.phone);
+  set('job-size',       job.size);
+  set('job-contract',   job.contract);
+  set('job-est-hours',  job.estHours);
+  set('job-start',      job.start);
+  set('job-end',        job.end);
+  set('job-special',    job.special);
+  set('job-weather',    job.weather);
+  if (job.jobType) { var t = document.getElementById('job-type'); if (t) t.value = job.jobType; }
+
+  // Site assessment
+  if (job.site) {
+    var s = job.site;
+    set('site-gate',         s.gate);
+    set('site-driveway',     s.driveway);
+    set('site-equip-width',  s.equipWidth);
+    set('site-staging',      s.staging);
+    set('site-access-route', s.accessRoute);
+    set('site-obstacles',    s.obstacles);
+    set('site-ticket',       s.ticket);
+    set('site-utilities',    s.utilities);
+    set('site-rock-depth',   s.rockDepth);
+    set('site-dist-power',   s.distPower);
+    set('site-dist-water',   s.distWater);
+    set('site-dist-house',   s.distHouse);
+    set('site-slope',        s.slope);
+    set('site-goals',        s.goals);
+    set('site-concerns',     s.concerns);
+    if (s.digsafe) { var dg = document.getElementById('site-digsafe'); if (dg) dg.value = s.digsafe; }
+    if (s.soil)    { var sl = document.getElementById('site-soil');    if (sl) sl.value = s.soil; }
+  }
+
+  // Status radio
+  var statusVal = job.status || 'In Progress';
+  var radio = document.querySelector('input[name="job-status-radio"][value="' + statusVal + '"]');
+  if (radio) radio.checked = true;
+
+  // Materials
+  materialRows = (job.materials || []).map(function(m) {
+    return { id: 'mr' + Date.now() + Math.random(), name: m.name || '', code: m.code || '', qty: m.qty || 1 };
+  });
+
+  // Change modal title and button to show Edit mode
+  var title = document.querySelector('#modal-new-job .modal-title');
+  if (title) title.textContent = 'Edit Job';
+  var saveBtn = document.querySelector('#modal-new-job .modal-footer .btn-primary');
+  if (saveBtn) { saveBtn.textContent = 'Save Changes'; saveBtn.setAttribute('onclick', 'saveEditJob()'); }
+
+  // Reset to first tab and open modal
+  showJobTab('info');
+  document.getElementById('modal-overlay').classList.remove('hidden');
+  document.getElementById('modal-new-job').classList.remove('hidden');
+  ['modal-add-product','modal-add-member','modal-edit-member','modal-email-report',
+   'modal-add-manager','modal-edit-manager','modal-edit-upsell','modal-manager-note',
+   'modal-employee-history','modal-log-hours'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.classList.add('hidden');
+  });
+}
+
+function saveEditJob() {
+  if (!_editingJobId) return;
+  var jobs = getJobs();
+  var idx  = jobs.findIndex(function(j){ return j.id === _editingJobId; });
+  if (idx === -1) return alert('Job not found.');
+
+  var get = function(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  var getN = function(id) { return parseFloat(get(id)) || 0; };
+
+  var name = get('job-name');
+  var client = get('job-client');
+  if (!name || !client) return alert('Please fill in job name and client.');
+
+  var statusRadio = document.querySelector('input[name="job-status-radio"]:checked');
+  var status = statusRadio ? statusRadio.value : (jobs[idx].status || 'In Progress');
+
+  // Merge — keep existing fields (log, createdAt etc) and update the rest
+  jobs[idx] = Object.assign({}, jobs[idx], {
+    name:     name,
+    number:   get('job-number'),
+    client:   client,
+    address:  get('job-address'),
+    phone:    get('job-phone'),
+    size:     get('job-size'),
+    jobType:  document.getElementById('job-type') ? document.getElementById('job-type').value : '',
+    start:    get('job-start'),
+    end:      get('job-end'),
+    contract: getN('job-contract'),
+    estHours: getN('job-est-hours'),
+    special:  get('job-special'),
+    weather:  get('job-weather'),
+    status:   status,
+    site: {
+      gate:        get('site-gate'),
+      driveway:    get('site-driveway'),
+      equipWidth:  get('site-equip-width'),
+      staging:     get('site-staging'),
+      accessRoute: get('site-access-route'),
+      obstacles:   get('site-obstacles'),
+      digsafe:     document.getElementById('site-digsafe') ? document.getElementById('site-digsafe').value : '',
+      ticket:      get('site-ticket'),
+      utilities:   get('site-utilities'),
+      soil:        document.getElementById('site-soil') ? document.getElementById('site-soil').value : '',
+      rockDepth:   get('site-rock-depth'),
+      distPower:   get('site-dist-power'),
+      distWater:   get('site-dist-water'),
+      distHouse:   get('site-dist-house'),
+      slope:       get('site-slope'),
+      goals:       get('site-goals'),
+      concerns:    get('site-concerns')
+    },
+    materials: materialRows.filter(function(r){ return r.name && r.name.trim(); })
+  });
+
+  if (status === 'Complete' && !jobs[idx].completedAt) {
+    jobs[idx].completedAt = new Date().toISOString();
+  }
+
+  saveJobs(jobs);
+  materialRows = [];
+  _editingJobId = null;
+
+  // Reset modal title and button back to Create
+  var title = document.querySelector('#modal-new-job .modal-title');
+  if (title) title.textContent = 'New Construction Job';
+  var saveBtn = document.querySelector('#modal-new-job .modal-footer .btn-primary');
+  if (saveBtn) { saveBtn.textContent = 'Create Job'; saveBtn.setAttribute('onclick', 'saveNewJob()'); }
+
+  closeModal();
+  renderJobTracker();
+}
+
 
 }
 </script>
