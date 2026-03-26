@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FieldStockPro — Field Staff Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue:#1a56db;--blue-dark:#0f3d9e;--blue-light:#dbeafe;
+  --ink:#0f1923;--gray:#64748b;--light:#f1f5f9;--border:#e2e8f0;
+  --green:#059669;--green-light:#d1fae5;
+  --amber:#d97706;--amber-light:#fef3c7;
+  --red:#dc2626;--red-light:#fee2e2;
+  --white:#fff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#f1f5f9;color:var(--ink);font-size:15px;line-height:1.65}
+
+.hero{background:linear-gradient(140deg,#0a1628 0%,#0f2d6b 50%,#1a56db 100%);padding:48px 24px 40px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.badge{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;padding:5px 16px;border-radius:20px;margin-bottom:18px}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(46px,12vw,76px);color:white;letter-spacing:2px;line-height:1;margin-bottom:10px}
+.hero h1 span{color:#60a5fa}
+.hero-sub{color:rgba(255,255,255,.6);font-size:15px;max-width:480px;margin:0 auto 22px;line-height:1.6}
+.company-pill{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);padding:7px 18px;border-radius:9px;color:white;font-size:13px;font-weight:600}
+
+.toc{background:white;border-radius:14px;border:1px solid var(--border);padding:18px 20px;margin:20px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.toc-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:12px}
+.toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.toc-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:var(--light);font-size:13px;font-weight:600;color:var(--ink);text-decoration:none;transition:.15s}
+.toc-item:hover{background:var(--blue-light);color:var(--blue-dark)}
+.toc-item .ti{font-size:16px}
+
+.wrap{max-width:680px;margin:0 auto;padding:0 16px 40px}
+
+.card{background:white;border-radius:14px;border:1px solid var(--border);margin-bottom:18px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card-head{padding:18px 20px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px}
+.card-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.bg-blue{background:var(--blue-light)} .bg-green{background:var(--green-light)}
+.bg-amber{background:var(--amber-light)} .bg-red{background:var(--red-light)}
+.bg-purple{background:#ede9fe}
+.card-num{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:2px}
+.card-title{font-size:18px;font-weight:700;color:var(--ink);line-height:1.2}
+.card-body{padding:18px 20px}
+
+.callout{border-radius:10px;padding:13px 15px;margin-bottom:14px;display:flex;gap:11px;align-items:flex-start}
+.c-green{background:var(--green-light);border-left:3px solid var(--green)}
+.c-amber{background:var(--amber-light);border-left:3px solid var(--amber)}
+.c-red{background:var(--red-light);border-left:3px solid var(--red)}
+.c-blue{background:var(--blue-light);border-left:3px solid var(--blue)}
+.c-purple{background:#ede9fe;border-left:3px solid #7c3aed}
+.callout-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.callout-text{font-size:14px;line-height:1.55}
+.callout-text strong{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.c-green .callout-text strong{color:var(--green)}
+.c-amber .callout-text strong{color:var(--amber)}
+.c-red .callout-text strong{color:var(--red)}
+.c-blue .callout-text strong{color:var(--blue-dark)}
+.c-purple .callout-text strong{color:#5b21b6}
+
+.step{display:flex;gap:14px;padding:15px 0;border-bottom:1px solid var(--light)}
+.step:last-child{border-bottom:none;padding-bottom:0}
+.step-num{width:30px;height:30px;border-radius:50%;background:var(--blue);color:white;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.step-title{font-size:15px;font-weight:700;margin-bottom:3px}
+.step-desc{font-size:14px;color:var(--gray);line-height:1.5}
+.step-tip{margin-top:8px;background:var(--blue-light);border-radius:7px;padding:8px 12px;font-size:13px;color:var(--blue-dark);font-weight:500}
+.step-green{margin-top:8px;background:var(--green-light);border-radius:7px;padding:8px 12px;font-size:13px;color:#065f46;font-weight:500}
+
+.rule{display:flex;gap:12px;padding:13px;border-radius:10px;border:1px solid var(--border);margin-bottom:10px;align-items:flex-start}
+.rule:last-child{margin-bottom:0}
+.rule-icon{font-size:22px;flex-shrink:0}
+.rule-text{font-size:14px;line-height:1.5}
+.rule-text b{font-weight:700;color:var(--ink)}
+
+.flow-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.flow-box{flex:1;min-width:130px;border-radius:10px;padding:12px 14px;text-align:center;font-size:13px;font-weight:600}
+.flow-blue{background:var(--blue-light);color:var(--blue-dark);border:1px solid #93c5fd}
+.flow-green{background:var(--green-light);color:#065f46;border:1px solid #6ee7b7}
+.flow-amber{background:var(--amber-light);color:#92400e;border:1px solid #fcd34d}
+.flow-arrow{display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--gray);flex-shrink:0}
+.flow-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;opacity:.7}
+.divider{display:flex;align-items:center;gap:12px;margin:18px 0 14px;color:var(--gray);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.qr-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.qr-item{border-radius:10px;padding:13px;border:1px solid var(--border);background:var(--light)}
+.qr-item .qi{font-size:22px;margin-bottom:6px}
+.qr-item .ql{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gray);margin-bottom:3px}
+.qr-item .qv{font-size:14px;font-weight:600;color:var(--ink);line-height:1.4}
+
+.print-btn{display:block;background:var(--blue);color:white;border:none;border-radius:10px;padding:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-bottom:20px;text-align:center}
+.print-btn:hover{background:var(--blue-dark)}
+
+.foot{text-align:center;font-size:12px;color:var(--gray);padding:20px 0 10px;border-top:1px solid var(--border);margin-top:10px}
+
+/* Sean note card */
+.sean-note{background:linear-gradient(135deg,#0a1628,#1a3a6e);border-radius:14px;padding:22px 20px;margin-bottom:18px;color:white}
+.sean-note-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.sean-note-avatar{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.sean-note-name{font-size:13px;font-weight:700;color:white}
+.sean-note-title{font-size:11px;color:rgba(255,255,255,.5);margin-top:1px}
+.sean-note-text{font-size:14px;color:rgba(255,255,255,.8);line-height:1.65}
+
+@media print{
+  .hero{padding:20px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .hero h1{font-size:40px}
+  .print-btn,.toc{display:none}
+  .card{break-inside:avoid;margin-bottom:12px;box-shadow:none}
+  body{background:white}
+  .wrap{padding:0 8px}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">New England Aquatic Landscaping · 2026</div>
+  <h1>Field<span>Stock</span>Pro<br>Training Guide</h1>
+  <p class="hero-sub">Everything you need to know about the new inventory accountability system. Quick read — 5 minutes.</p>
+  <div class="company-pill">🌊 iloveponds.com</div>
+</div>
+
+<div class="toc">
+  <div class="toc-title">What's in this guide</div>
+  <div class="toc-grid">
+    
+    <a class="toc-item" href="#why"><span class="ti">💡</span> Why we use it</a>
+    <a class="toc-item" href="#how"><span class="ti">🔄</span> How stock moves</a>
+    <a class="toc-item" href="#restock"><span class="ti">📦</span> Restocking your van</a>
+    <a class="toc-item" href="#issued"><span class="ti">🔍</span> Checking issued items</a>
+    <a class="toc-item" href="#rules"><span class="ti">✅</span> The rules</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+<button class="print-btn" onclick="window.print()">🖨 Print This Guide (for your truck)</button>
+
+
+
+<!-- SECTION 1: WHY -->
+<div class="card" id="why">
+  <div class="card-head">
+    <div class="card-icon bg-blue">💡</div>
+    <div>
+      <div class="card-num">Section 1</div>
+      <div class="card-title">Why We're Doing This</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="rule">
+      <div class="rule-icon">🚐</div>
+      <div class="rule-text"><b>Every van has its own inventory.</b> At the start of the season, Sean loads your vehicle with the materials assigned to it. That's your stock to work with.</div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon">📋</div>
+      <div class="rule-text"><b>Nothing changes about Jobber.</b> You still get your jobs assigned through Jobber and create all your invoices there. That hasn't changed at all.</div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon">🔄</div>
+      <div class="rule-text"><b>One new responsibility.</b> When you use something off your van, you need to restock it through FieldStockPro before the end of your day. That's it.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: HOW STOCK MOVES -->
+<div class="card" id="how">
+  <div class="card-head">
+    <div class="card-icon bg-green">🔄</div>
+    <div>
+      <div class="card-num">Section 2</div>
+      <div class="card-title">How Stock Moves — The Two Ways</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <p style="font-size:14px;color:var(--gray);margin-bottom:16px">There are only <strong style="color:var(--ink)">two ways</strong> stock can move off your van. Know these cold.</p>
+
+    <div class="divider">Way 1 — Standard Jobs</div>
+    <div class="flow-row">
+      <div class="flow-box flow-blue"><div class="flow-label">You do</div>Job in Jobber</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box flow-blue"><div class="flow-label">You do</div>Invoice in Jobber</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box flow-green"><div class="flow-label">Automatic</div>Stock removed from van</div>
+    </div>
+    <div class="callout c-green" style="margin-bottom:18px">
+      <div class="callout-icon">✅</div>
+      <div class="callout-text"><strong>Standard jobs</strong>When you write an invoice in Jobber with materials, FieldStockPro automatically moves that stock off your van. You don't do anything extra — just invoice correctly in Jobber like always.</div>
+    </div>
+
+    <div class="divider">Way 2 — Sean Issues Items for a Specific Job</div>
+    <div class="flow-row">
+      <div class="flow-box flow-amber"><div class="flow-label">Sean does</div>Issues items + prints list</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box flow-blue"><div class="flow-label">You get</div>Physical printout with materials</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box flow-green"><div class="flow-label">Done</div>Use those items only</div>
+    </div>
+    <div class="callout c-amber">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-text"><strong>Special job issues</strong>Sometimes Sean will pre-issue specific materials to a job — usually for construction or larger installs. When this happens, Sean will print a list of everything issued and leave it with the materials or hand it directly to the team lead. Use that list as your reference on site. Do NOT invoice these items in Jobber — they have already been issued and accounted for.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3: RESTOCKING -->
+<div class="card" id="restock">
+  <div class="card-head">
+    <div class="card-icon bg-amber">📦</div>
+    <div>
+      <div class="card-num">Section 3</div>
+      <div class="card-title">Restocking Your Van</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="callout c-blue">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-text"><strong>When to restock</strong>Any time you grab something off your van for a job — whether it's a bottle of treatment, a part, or supplies — you need to log the restock through FieldStockPro when you return to the shop. Do it before you leave for the day.</div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Open FieldStockPro</div>
+        <div class="step-desc">Log in at fieldstockpro.com or open it from your phone.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Go to Products</div>
+        <div class="step-desc">Tap <strong>Products</strong> in the left menu. Search for the item you used by name, or use the built-in barcode scanner.</div>
+        <div class="step-tip">📷 Tip: Use the barcode scanner — it's the fastest way. Look for the small scanner icon right next to the search bar inside the app. Tap it and point your phone camera at the barcode on the product box — it finds the item instantly.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Select the Item</div>
+        <div class="step-desc">Tap on the product to open it. You'll see current stock levels across all vehicles and locations.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div>
+        <div class="step-title">Add Stock to Your Van</div>
+        <div class="step-desc">Select your vehicle (Red Truck, Blue Van, Yellow Van, etc.), enter the quantity you're putting back, and confirm.</div>
+        <div class="step-tip">🚐 Make sure you select YOUR vehicle — not another crew's van.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div>
+        <div class="step-title">Done</div>
+        <div class="step-desc">Your van inventory is updated. Sean can see the stock moved from the shop to your vehicle and everything balances.</div>
+      </div>
+    </div>
+
+    <div class="callout c-red" style="margin-top:16px">
+      <div class="callout-icon">🚨</div>
+      <div class="callout-text"><strong>Don't forget</strong>If you use something and don't restock it in the system, your van shows more stock than you actually have. This causes ordering problems and makes it look like product is missing. Please do it the same day.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: CHECKING ISSUED ITEMS -->
+<div class="card" id="issued">
+  <div class="card-head">
+    <div class="card-icon bg-green">🔍</div>
+    <div>
+      <div class="card-num">Section 4</div>
+      <div class="card-title">Checking What's Been Issued to Your Job</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <p style="font-size:14px;color:var(--gray);margin-bottom:16px">When Sean issues materials for a specific job, here's how you know what's yours to use.</p>
+
+    <div class="callout c-green">
+      <div class="callout-icon">📄</div>
+      <div class="callout-text"><strong>Check the physical printout first</strong>When Sean issues items to a job he generates and prints a list of everything that's been assigned. He'll either leave it with the materials at the shop or hand it directly to the team lead before the job. This printout is your primary reference — check it before you start.</div>
+    </div>
+
+    <div class="callout c-blue">
+      <div class="callout-icon">📱</div>
+      <div class="callout-text"><strong>Don't have the printout? Check FieldStockPro</strong>If you don't have a physical copy, open FieldStockPro → tap <strong>Jobs</strong> → find your job → review the issued materials list. Everything Sean assigned will be there.</div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Check the Physical Printout</div>
+        <div class="step-desc">Sean leaves this with the materials or gives it to the team lead. This is your list of what's been issued for the job.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Use Only What's on the List</div>
+        <div class="step-desc">These items are already accounted for. Do NOT add them to your Jobber invoice — they have already been issued to the job.</div>
+        <div class="step-green">✅ These items are paid for and tracked. Invoicing them in Jobber would double-count them.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Need Something Not on the List?</div>
+        <div class="step-desc">Text or call Sean before pulling anything extra from your van. He'll either add it to the issued list or tell you to put it on the Jobber invoice.</div>
+      </div>
+    </div>
+
+    <div class="callout c-amber" style="margin-top:6px;margin-bottom:0">
+      <div class="callout-icon">💬</div>
+      <div class="callout-text"><strong>When in doubt — ask first</strong>Never guess whether something should be invoiced or was already issued. A quick text saves a lot of headaches on both ends.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: THE RULES -->
+<div class="card" id="rules">
+  <div class="card-head">
+    <div class="card-icon bg-red">✅</div>
+    <div>
+      <div class="card-num">Section 5</div>
+      <div class="card-title">The Rules — Simple Version</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="rule">
+      <div class="rule-icon">✅</div>
+      <div class="rule-text"><b>DO:</b> Restock your van in FieldStockPro any time you use something — same day.</div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon">✅</div>
+      <div class="rule-text"><b>DO:</b> Check the physical printout (or FieldStockPro) before a job when Sean has issued materials.</div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon">✅</div>
+      <div class="rule-text"><b>DO:</b> Invoice materials in Jobber the same way you always have for standard jobs.</div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon">✅</div>
+      <div class="rule-text"><b>DO:</b> Speak up if something in the system isn't working right — Sean wants to know.</div>
+    </div>
+    <div class="rule" style="background:var(--red-light);border-color:#fca5a5">
+      <div class="rule-icon">❌</div>
+      <div class="rule-text"><b>DON'T:</b> Invoice items in Jobber that Sean already issued to the job in FieldStockPro — that double-counts them.</div>
+    </div>
+    <div class="rule" style="background:var(--red-light);border-color:#fca5a5">
+      <div class="rule-icon">❌</div>
+      <div class="rule-text"><b>DON'T:</b> Use stock off your van without logging the restock in FieldStockPro.</div>
+    </div>
+    <div class="rule" style="background:var(--red-light);border-color:#fca5a5">
+      <div class="rule-icon">❌</div>
+      <div class="rule-text"><b>DON'T:</b> Move stock between vans or locations on your own — that's Sean's job.</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK REFERENCE -->
+<div class="card">
+  <div class="card-head">
+    <div class="card-icon bg-blue">🖨</div>
+    <div>
+      <div class="card-num">Quick Reference</div>
+      <div class="card-title">Print This for Your Truck</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="qr-grid">
+      <div class="qr-item">
+        <div class="qi">🌐</div>
+        <div class="ql">Website</div>
+        <div class="qv">fieldstockpro.com</div>
+      </div>
+      <div class="qr-item">
+        <div class="qi">📧</div>
+        <div class="ql">Your Login</div>
+        <div class="qv">Your work email address</div>
+      </div>
+      <div class="qr-item">
+        <div class="qi">📦</div>
+        <div class="ql">Used something?</div>
+        <div class="qv">Products → Find item → Scan barcode → Add to your van</div>
+      </div>
+      <div class="qr-item">
+        <div class="qi">📄</div>
+        <div class="ql">Job issued by Sean?</div>
+        <div class="qv">Check the physical printout first. No printout? Jobs → Find your job → Materials list</div>
+      </div>
+      <div class="qr-item">
+        <div class="qi">📋</div>
+        <div class="ql">Standard job?</div>
+        <div class="qv">Invoice in Jobber like always — FieldStockPro updates automatically</div>
+      </div>
+      <div class="qr-item">
+        <div class="qi">❓</div>
+        <div class="ql">Questions?</div>
+        <div class="qv">Text Sean — (413) 658-5495</div>
+      </div>
+    </div>
+
+    <div class="callout c-purple" style="margin-top:16px;margin-bottom:0">
+      <div class="callout-icon">💪</div>
+      <div class="callout-text"><strong>Thank you</strong>This system is new and it's going to have rough edges — that's just how it goes. Your patience and feedback is what makes it better. If you get stuck or something isn't working right, reach out to Sean at <strong>(413) 658-5495</strong>.</div>
+    </div>
+  </div>
+</div>
+
+<button class="print-btn" onclick="window.print()">🖨 Print This Guide</button>
+
+<div class="foot">
+  New England Aquatic Landscaping · iloveponds.com · (413) 658-5495<br>
+  FieldStockPro Field Staff Training Guide 2026 · For internal use only
+</div>
+
+</div>
+</body>
+</html>

@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1a3a52">
 <title>NEAL Commission Leaderboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -495,6 +498,48 @@ body {
   color: rgba(255,255,255,.4);
 }
 
+
+/* ── MILESTONE BADGES ── */
+.badge-strip {
+  display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;
+}
+.mbadge {
+  font-size: 11px; padding: 2px 7px; border-radius: 10px;
+  font-weight: 700; background: rgba(255,255,255,.1); color: rgba(255,255,255,.7);
+}
+.mbadge.gold { background: rgba(191,120,37,.3); color: #fbbf24; }
+.mbadge.teal { background: rgba(0,174,239,.2); color: #7dd3fc; }
+.mbadge.green { background: rgba(5,150,105,.2); color: #6ee7b7; }
+
+/* ── TEAM CHALLENGE ── */
+.challenge-bar-wrap {
+  max-width: 1100px; margin: 0 auto 16px; padding: 0 24px;
+}
+.challenge-card {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px; padding: 16px 20px;
+}
+.challenge-head {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+}
+.challenge-title { font-size: 13px; font-weight: 700; color: white; }
+.challenge-nums { font-size: 13px; font-weight: 700; color: #00aeef; }
+.challenge-track {
+  height: 10px; background: rgba(255,255,255,.1);
+  border-radius: 10px; overflow: hidden; margin-bottom: 6px;
+}
+.challenge-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00aeef, #7dd3fc);
+  border-radius: 10px;
+  transition: width .8s ease;
+}
+.challenge-foot {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: rgba(255,255,255,.4);
+}
+
 </style>
 </head>
 <body>
@@ -533,6 +578,23 @@ body {
       <span>🏆 Commission Tracker</span>
       <span class="ticker-sep">·</span>
       <span>Loading data…</span>
+    </div>
+  </div>
+
+  <!-- TEAM CHALLENGE -->
+  <div class="challenge-bar-wrap" id="challenge-bar-wrap" style="display:none">
+    <div class="challenge-card">
+      <div class="challenge-head">
+        <div class="challenge-title">🏆 Team Upsell Challenge — 2026 Spring Season</div>
+        <div class="challenge-nums" id="challenge-nums">$0 / $0</div>
+      </div>
+      <div class="challenge-track">
+        <div class="challenge-fill" id="challenge-fill" style="width:0%"></div>
+      </div>
+      <div class="challenge-foot">
+        <span id="challenge-foot-left">Loading...</span>
+        <span id="challenge-foot-right"></span>
+      </div>
     </div>
   </div>
 
@@ -682,6 +744,7 @@ function render(standings) {
         <div>
           <div class="row-name">${p.memberName}</div>
           <div class="row-upsells">${p.count} upsells · $${p.totalSales.toFixed(0)} in sales</div>
+          <div class="badge-strip">${getMilestoneBadges(p)}</div>
         </div>
         <div class="row-bar-wrap">
           <div class="row-bar-track"><div class="row-bar-fill" style="width:${pct}%"></div></div>
@@ -724,6 +787,7 @@ async function loadData() {
     allData    = data;
     const month = document.getElementById('month-select').value;
     const standings = buildStandings(data, month);
+    renderTeamChallenge(standings);
     render(standings);
     document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
   } catch(e) {
@@ -736,8 +800,8 @@ async function loadData() {
 populateMonthSelect();
 loadData();
 renderJobsSection();
-setInterval(loadData, 60000); // refresh every 60s
-setInterval(renderJobsSection, 30000); // refresh jobs every 30s
+setInterval(loadData, 60000);
+setInterval(renderJobsSection, 30000);
 // ── JOBS SECTION ─────────────────────────────────────────────────────────────
 function renderJobsSection() {
   var el = document.getElementById('jobs-section');
@@ -807,6 +871,46 @@ function renderJobsSection() {
   } catch(e) {
     el.style.display = 'none';
   }
+}
+
+// ── MILESTONE BADGES ─────────────────────────────────────────────────────────
+function getMilestoneBadges(p) {
+  var badges = '';
+  var comm = p.totalCommission || 0;
+  var sales = p.totalSales || 0;
+  var count = p.count || 0;
+  if (count >= 1)    badges += '<span class="mbadge teal">First Upsell 🎉</span>';
+  if (count >= 5)    badges += '<span class="mbadge teal">5 Upsells</span>';
+  if (count >= 10)   badges += '<span class="mbadge green">10 Upsells 🔥</span>';
+  if (count >= 25)   badges += '<span class="mbadge green">25 Upsells ⚡</span>';
+  if (comm >= 100)   badges += '<span class="mbadge teal">$100 Earned</span>';
+  if (comm >= 500)   badges += '<span class="mbadge gold">$500 Club 💰</span>';
+  if (comm >= 1000)  badges += '<span class="mbadge gold">$1K Club 🏆</span>';
+  if (comm >= 2500)  badges += '<span class="mbadge gold">$2.5K Elite ⭐</span>';
+  if (sales >= 5000) badges += '<span class="mbadge green">$5K in Sales</span>';
+  return badges;
+}
+
+// ── TEAM CHALLENGE ────────────────────────────────────────────────────────────
+var TEAM_GOAL = 5000; // update this to your season target
+
+function renderTeamChallenge(standings) {
+  var wrap = document.getElementById('challenge-bar-wrap');
+  if (!wrap) return;
+  if (!standings || !standings.length) { wrap.style.display = 'none'; return; }
+
+  var totalSales = standings.reduce(function(s, p) { return s + (p.totalSales||0); }, 0);
+  var totalComm  = standings.reduce(function(s, p) { return s + (p.totalCommission||0); }, 0);
+  var pct = Math.min((totalSales / TEAM_GOAL * 100), 100).toFixed(1);
+  var remaining = Math.max(TEAM_GOAL - totalSales, 0);
+
+  wrap.style.display = 'block';
+  document.getElementById('challenge-nums').textContent = '$' + totalSales.toFixed(0) + ' / $' + TEAM_GOAL.toLocaleString();
+  document.getElementById('challenge-fill').style.width = pct + '%';
+  document.getElementById('challenge-foot-left').textContent = pct + '% of team goal reached · ' + standings.length + ' contributors';
+  document.getElementById('challenge-foot-right').textContent = remaining > 0
+    ? '$' + remaining.toFixed(0) + ' to go'
+    : '🎉 Goal crushed!';
 }
 
 </script>

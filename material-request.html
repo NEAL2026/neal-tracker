@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f1f2e">
+<title>Supply Request — I Love Ponds</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --deep: #0f1f2e;
+  --navy: #1a3a52;
+  --teal: #00aeef;
+  --teal-dark: #0090c8;
+  --copper: #bf7825;
+  --white: #ffffff;
+  --gray: #64748b;
+  --border: rgba(255,255,255,.12);
+  --green: #059669;
+  --amber: #d97706;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--deep);
+  color: white;
+  min-height: 100vh;
+}
+.bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(191,120,37,.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(0,174,239,.1) 0%, transparent 50%),
+    linear-gradient(180deg, #0f1f2e 0%, #0a1520 100%);
+}
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 480px; margin: 0 auto;
+  padding: 40px 20px 60px;
+}
+
+.header { text-align: center; margin-bottom: 32px; }
+.header-icon {
+  width: 60px; height: 60px; border-radius: 16px;
+  background: rgba(191,120,37,.15);
+  border: 1px solid rgba(191,120,37,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; margin: 0 auto 16px;
+}
+.header h1 { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+.header h1 span { color: var(--copper); font-style: italic; }
+.header p { font-size: 13px; color: rgba(255,255,255,.5); line-height: 1.5; }
+
+.form-card {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 18px;
+  padding: 24px 20px;
+}
+
+.field { margin-bottom: 18px; }
+.field label {
+  display: block; font-size: 11px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(255,255,255,.5); margin-bottom: 8px;
+}
+.field input, .field select, .field textarea {
+  width: 100%;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px; color: white; outline: none;
+  transition: border-color .2s; -webkit-appearance: none;
+}
+.field input::placeholder, .field textarea::placeholder { color: rgba(255,255,255,.3); }
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--copper);
+  background: rgba(191,120,37,.08);
+}
+.field select option { background: #1a3a52; color: white; }
+.field textarea { resize: none; min-height: 80px; line-height: 1.5; }
+
+/* ITEMS TABLE */
+.items-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: rgba(255,255,255,.5);
+  margin-bottom: 10px;
+}
+.item-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 36px;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+.item-row input {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 8px; padding: 10px 12px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px; color: white; outline: none;
+  transition: border-color .2s; width: 100%;
+}
+.item-row input:focus { border-color: var(--copper); }
+.item-row input::placeholder { color: rgba(255,255,255,.3); }
+.remove-item-btn {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: rgba(220,38,38,.15); border: 1px solid rgba(220,38,38,.3);
+  color: #f87171; font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all .2s;
+}
+.remove-item-btn:hover { background: rgba(220,38,38,.3); }
+.add-item-btn {
+  width: 100%; padding: 10px;
+  background: rgba(255,255,255,.05);
+  border: 1px dashed rgba(255,255,255,.2);
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px; font-weight: 600;
+  color: rgba(255,255,255,.4);
+  cursor: pointer; transition: all .2s;
+  margin-bottom: 18px;
+}
+.add-item-btn:hover { border-color: var(--copper); color: var(--copper); background: rgba(191,120,37,.08); }
+.items-header {
+  display: grid; grid-template-columns: 1fr 80px 36px;
+  gap: 8px; margin-bottom: 6px;
+}
+.items-header span { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,.3); }
+
+/* NEEDED BY */
+.date-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.date-pill {
+  padding: 8px 14px; border-radius: 20px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px; font-weight: 600;
+  color: rgba(255,255,255,.5);
+  cursor: pointer; transition: all .2s;
+}
+.date-pill:hover { border-color: var(--copper); color: var(--copper); }
+.date-pill.active { background: rgba(191,120,37,.2); border-color: var(--copper); color: var(--copper); }
+
+.submit-btn {
+  width: 100%; padding: 16px;
+  background: var(--copper);
+  border: none; border-radius: 12px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px; font-weight: 700;
+  color: white; cursor: pointer;
+  transition: all .2s; margin-top: 8px;
+}
+.submit-btn:hover { background: #a06820; transform: translateY(-1px); }
+.submit-btn:disabled { background: rgba(255,255,255,.15); cursor: not-allowed; transform: none; }
+
+.error-msg {
+  background: rgba(220,38,38,.15); border: 1px solid rgba(220,38,38,.3);
+  border-radius: 8px; padding: 10px 14px;
+  font-size: 13px; color: #f87171; margin-bottom: 14px; display: none;
+}
+
+.success { display: none; text-align: center; padding: 40px 20px; }
+.success-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: rgba(191,120,37,.2); border: 2px solid var(--copper);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; margin: 0 auto 20px;
+}
+.success h2 { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+.success p { font-size: 13px; color: rgba(255,255,255,.5); line-height: 1.6; }
+.req-num {
+  display: inline-block;
+  background: rgba(191,120,37,.15); border: 1px solid rgba(191,120,37,.3);
+  border-radius: 20px; padding: 6px 16px;
+  font-size: 13px; font-weight: 700; color: var(--copper); margin: 12px 0;
+}
+.back-btn {
+  display: inline-block; margin-top: 20px; padding: 12px 24px;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px; font-size: 14px; font-weight: 600;
+  color: rgba(255,255,255,.7); cursor: pointer; text-decoration: none;
+}
+.footer { text-align: center; margin-top: 24px; font-size: 11px; color: rgba(255,255,255,.2); }
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-icon">📦</div>
+    <h1>Supply <span>Request</span></h1>
+    <p>Need something that's not on your van? Fill this out and Sean gets notified right away.</p>
+  </div>
+
+  <div class="form-card" id="form-section">
+    <div class="error-msg" id="error-msg"></div>
+
+    <div class="field">
+      <label>Your Name</label>
+      <input type="text" id="f-name" placeholder="Your full name">
+    </div>
+
+    <div class="field">
+      <label>What Type of Request?</label>
+      <select id="f-type" onchange="toggleJobVehicle()">
+        <option value="">— Select request type —</option>
+        <option value="Van Restock">Van Restock — need to restock my van</option>
+        <option value="Job Materials">Job Materials — need items for a specific job</option>
+        <option value="Tool / Equipment">Tool / Equipment — need a tool or piece of equipment</option>
+        <option value="Shop Supplies">Shop Supplies — general shop or office supplies</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="field" id="field-vehicle" style="display:none">
+      <label>Your Vehicle <span style="font-weight:400;letter-spacing:0;text-transform:none;font-size:10px;color:rgba(255,255,255,.3)">(if applicable)</span></label>
+      <select id="f-vehicle">
+        <option value="">— Select your van / truck —</option>
+        <option>Red Truck</option>
+        <option>Blue Van</option>
+        <option>Yellow Van</option>
+        <option>Purple Van</option>
+        <option>Orange Truck</option>
+        <option>Not applicable</option>
+      </select>
+    </div>
+
+    <div class="field" id="field-job" style="display:none">
+      <label>Job Name / Customer <span style="font-weight:400;letter-spacing:0;text-transform:none;font-size:10px;color:rgba(255,255,255,.3)">(if applicable)</span></label>
+      <input type="text" id="f-job" placeholder="e.g. Johnson Residence, Maple Pond Rd">
+    </div>
+
+    <!-- ITEMS -->
+    <div class="items-label">Items / Description</div>
+    <div class="items-header">
+      <span>Item / Product Name</span>
+      <span>Qty</span>
+      <span></span>
+    </div>
+    <div id="items-list"></div>
+    <button class="add-item-btn" onclick="addItemRow()">+ Add Item</button>
+
+    <!-- NEEDED BY -->
+    <div class="items-label" style="margin-bottom:10px">When Do You Need This?</div>
+    <div class="date-pills" id="date-pills">
+      <button class="date-pill" data-val="Today" onclick="selectDate('Today', this)">Today</button>
+      <button class="date-pill" data-val="Tomorrow" onclick="selectDate('Tomorrow', this)">Tomorrow</button>
+      <button class="date-pill" data-val="This Week" onclick="selectDate('This Week', this)">This Week</button>
+      <button class="date-pill" data-val="Not Urgent" onclick="selectDate('Not Urgent', this)">Not Urgent</button>
+    </div>
+    <input type="hidden" id="f-when" value="">
+
+    <div class="field">
+      <label>Notes (optional)</label>
+      <textarea id="f-notes" placeholder="Any extra details — brand preference, job site access, etc."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Your Phone #</label>
+      <input type="tel" id="f-phone" placeholder="(555) 555-5555">
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="submitRequest()">Submit Request</button>
+  </div>
+
+  <div class="success" id="success-section">
+    <div class="success-icon">📦</div>
+    <h2>Request sent!</h2>
+    <div class="req-num" id="req-num">REQ-—</div>
+    <p>Sean has been notified and will follow up. You'll hear back as soon as possible.</p>
+    <a class="back-btn" href="index.html">← Back to App</a>
+  </div>
+
+  <div class="footer">New England Aquatic Landscaping · iloveponds.com</div>
+</div>
+
+<script>
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxJo-zKm7nQ6q02ayzpO-duQ3mFDPNOUQhrIanGun3WrQXaXfxqYhjTaJlB1bEvIzN25g/exec';
+var selectedWhen = '';
+var itemCount = 0;
+
+function toggleJobVehicle() {
+  var type = document.getElementById('f-type').value;
+  var showVehicle = ['Van Restock', 'Job Materials'].includes(type);
+  var showJob = type === 'Job Materials';
+  document.getElementById('field-vehicle').style.display = showVehicle ? 'block' : 'none';
+  document.getElementById('field-job').style.display = showJob ? 'block' : 'none';
+}
+
+function addItemRow() {
+  itemCount++;
+  var id = 'item-' + itemCount;
+  var row = document.createElement('div');
+  row.className = 'item-row';
+  row.id = id;
+  row.innerHTML =
+    '<input type="text" placeholder="Item name, tool, product..." class="item-name">' +
+    '<input type="number" placeholder="Qty" min="1" value="1" class="item-qty">' +
+    '<button class="remove-item-btn" onclick="removeItem(\'' + id + '\')">×</button>';
+  document.getElementById('items-list').appendChild(row);
+}
+
+function removeItem(id) {
+  var el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+function selectDate(val, btn) {
+  selectedWhen = val;
+  document.getElementById('f-when').value = val;
+  document.querySelectorAll('.date-pill').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+
+function getItems() {
+  var rows = document.querySelectorAll('.item-row');
+  var items = [];
+  rows.forEach(function(row) {
+    var name = row.querySelector('.item-name').value.trim();
+    var qty  = row.querySelector('.item-qty').value;
+    if (name) items.push({ name: name, qty: qty || 1 });
+  });
+  return items;
+}
+
+function generateReqNum() {
+  var now = new Date();
+  return 'REQ-' + now.getFullYear().toString().slice(-2)
+    + String(now.getMonth()+1).padStart(2,'0')
+    + String(now.getDate()).padStart(2,'0')
+    + '-' + Math.floor(Math.random()*9000+1000);
+}
+
+function showError(msg) {
+  var el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(function(){ el.style.display = 'none'; }, 4000);
+}
+
+function submitRequest() {
+  var name    = document.getElementById('f-name').value.trim();
+  var vehicle = document.getElementById('f-vehicle').value;
+  var job     = document.getElementById('f-job').value.trim();
+  var when    = selectedWhen;
+  var phone   = document.getElementById('f-phone').value.trim();
+  var notes   = document.getElementById('f-notes').value.trim();
+  var items   = getItems();
+
+  var type = document.getElementById('f-type').value;
+  if (!name)         return showError('Please enter your name.');
+  if (!type)         return showError('Please select the type of request.');
+  if (!items.length) return showError('Please add at least one item.');
+  if (!when)         return showError('Please select when you need this.');
+
+  var reqNum = generateReqNum();
+  var btn = document.getElementById('submit-btn');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+
+  var payload = {
+    action:      'submitMaterialRequest',
+    reqNum:      reqNum,
+    name:        name,
+    type:        type,
+    vehicle:     vehicle || '',
+    job:         job || '',
+    items:       items,
+    when:        when,
+    phone:       phone,
+    notes:       notes,
+    submittedAt: new Date().toISOString()
+  };
+
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: JSON.stringify(payload)
+  }).catch(function(){});
+
+  try {
+    var reqs = JSON.parse(localStorage.getItem('neal-material-requests') || '[]');
+    reqs.push(payload);
+    localStorage.setItem('neal-material-requests', JSON.stringify(reqs));
+  } catch(e) {}
+
+  setTimeout(function() {
+    document.getElementById('form-section').style.display = 'none';
+    document.getElementById('success-section').style.display = 'block';
+    document.getElementById('req-num').textContent = reqNum;
+  }, 800);
+}
+
+// Start with one item row
+addItemRow();
+</script>
+</body>
+</html>

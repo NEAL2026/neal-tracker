@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commission Tracker Field Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #e2e8f0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px;
+  min-height: 100vh;
+}
+
+.card {
+  width: 8.5in;
+  min-height: 11in;
+  background: white;
+  box-shadow: 0 4px 24px rgba(0,0,0,.15);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+}
+
+/* HEADER */
+.header {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, #0f2030 0%, #1a3a52 50%, #00aeef 100%);
+  padding: 18px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-accent { width: 6px; height: 52px; background: #00aeef; border-radius: 3px; }
+.header-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: white; letter-spacing: 2px; line-height: 1; }
+.header-title span { color: #7dd3fc; }
+.header-sub { font-size: 11px; color: rgba(255,255,255,.6); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
+.header-right { text-align: right; }
+.header-company { font-size: 11px; color: rgba(255,255,255,.5); font-weight: 600; letter-spacing: 1px; }
+.header-tagline { font-size: 10px; color: #bf7825; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
+
+/* COLUMNS */
+.col { padding: 20px 24px; }
+.col-left { border-right: 2px solid #e2e8f0; }
+
+/* SECTION HEADER */
+.sec-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px; padding-bottom: 7px;
+  border-bottom: 2px solid #00aeef;
+}
+.sec-icon { font-size: 16px; }
+.sec-title { font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #1a3a52; }
+
+/* STEPS */
+.steps { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.step { display: flex; gap: 10px; align-items: flex-start; }
+.step-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #00aeef; color: white;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.step-text { font-size: 12px; line-height: 1.45; color: #1a2e3e; }
+.step-text b { font-weight: 700; color: #0f1923; }
+.step-tip {
+  background: #e0f5fd; border-radius: 5px;
+  padding: 5px 8px; margin-top: 4px;
+  font-size: 11px; color: #0c4a6e; line-height: 1.4;
+}
+
+/* CALLOUTS */
+.callout {
+  border-radius: 7px; padding: 9px 12px; margin-bottom: 14px;
+  font-size: 12px; line-height: 1.45;
+  display: flex; gap: 8px; align-items: flex-start;
+}
+.callout-teal { background: #e0f5fd; border-left: 3px solid #00aeef; color: #0c4a6e; }
+.callout-green { background: #d1fae5; border-left: 3px solid #059669; color: #065f46; }
+.callout-amber { background: #fef3c7; border-left: 3px solid #d97706; color: #92400e; }
+.callout-red { background: #fee2e2; border-left: 3px solid #dc2626; color: #7f1d1d; }
+.callout-copper { background: #fef0d9; border-left: 3px solid #bf7825; color: #78350f; }
+.callout-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.callout b { font-weight: 700; display: block; font-size: 11px; letter-spacing: .3px; margin-bottom: 2px; text-transform: uppercase; }
+
+/* COMMISSION TYPES */
+.comm-types { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-bottom: 14px; }
+.comm-type { border-radius: 7px; padding: 8px 10px; }
+.ct-teal { background: #e0f5fd; }
+.ct-green { background: #d1fae5; }
+.ct-copper { background: #fef0d9; }
+.comm-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+.ct-teal .comm-label { color: #0090c8; }
+.ct-green .comm-label { color: #059669; }
+.ct-copper .comm-label { color: #bf7825; }
+.comm-title { font-size: 11px; font-weight: 700; color: #0f1923; margin-bottom: 3px; }
+.comm-desc { font-size: 10px; color: #475569; line-height: 1.35; }
+
+/* STATUS BADGES */
+.statuses { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.status-badge { border-radius: 20px; padding: 5px 12px; font-size: 11px; font-weight: 700; }
+.s-pending { background: #fef3c7; color: #92400e; }
+.s-approved { background: #d1fae5; color: #065f46; }
+.s-denied { background: #fee2e2; color: #7f1d1d; }
+.status-desc { font-size: 10px; color: #64748b; margin-top: 2px; }
+
+/* QUICK REF GRID */
+.qr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.qr-item { background: #f1f5f9; border-radius: 7px; padding: 8px 10px; }
+.qr-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 3px; }
+.qr-val { font-size: 11px; font-weight: 700; color: #0f1923; line-height: 1.35; }
+
+/* FOOTER */
+.footer {
+  grid-column: 1 / -1;
+  background: #0f1923;
+  padding: 10px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.footer-left { font-size: 10px; color: rgba(255,255,255,.4); }
+.footer-contact { font-size: 12px; font-weight: 700; color: #60a5fa; }
+
+.divider { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #94a3b8; margin: 12px 0 10px; display: flex; align-items: center; gap: 8px; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
+
+@media print {
+  body { background: white; padding: 0; }
+  .card { box-shadow: none; width: 100%; min-height: auto; }
+  @page { size: letter; margin: 0.4in; }
+}
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-accent"></div>
+      <div>
+        <div class="header-title">Commission <span>Tracker</span></div>
+        <div class="header-sub">Field Reference Card · 2026</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-company">New England Aquatic Landscaping</div>
+      <div class="header-tagline">Log It · Earn It · Get Paid</div>
+    </div>
+  </div>
+
+  <!-- LEFT COLUMN -->
+  <div class="col col-left">
+
+    <!-- WHAT IS IT -->
+    <div class="sec-head">
+      <span class="sec-icon">💰</span>
+      <span class="sec-title">What It Is</span>
+    </div>
+    <div class="callout callout-teal" style="margin-bottom:10px">
+      <span class="callout-icon">💡</span>
+      <div>Upsell a product or service → log it here → earn a commission on top of your regular pay. More you log, more you earn.</div>
+    </div>
+    <div class="comm-types">
+      <div class="comm-type ct-teal">
+        <div class="comm-label">% Commission</div>
+        <div class="comm-title">% of the sale</div>
+        <div class="comm-desc">$200 sale at 10% = $20 earned</div>
+      </div>
+      <div class="comm-type ct-green">
+        <div class="comm-label">Flat Rate</div>
+        <div class="comm-title">Fixed amount</div>
+        <div class="comm-desc">Set $ per sale regardless of price</div>
+      </div>
+      <div class="comm-type ct-copper">
+        <div class="comm-label">Tiered</div>
+        <div class="comm-title">More = higher %</div>
+        <div class="comm-desc">% increases as sales add up</div>
+      </div>
+    </div>
+
+    <!-- HOW TO ACCESS -->
+    <div class="sec-head">
+      <span class="sec-icon">🔗</span>
+      <span class="sec-title">How to Access</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+      <div style="background:#e0f5fd;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;color:#0c4a6e">📱 Scan QR Code</div>
+      <div style="color:#94a3b8;font-size:14px">→</div>
+      <div style="background:#e0f5fd;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;color:#0c4a6e">Employee Landing Page</div>
+      <div style="color:#94a3b8;font-size:14px">→</div>
+      <div style="background:#00aeef;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;color:white">🏆 Track Your Commission</div>
+    </div>
+    <div class="callout callout-teal" style="margin-bottom:6px">
+      <span class="callout-icon">💡</span>
+      <div><b>Save to home screen</b>Open tracker → Share → "Add to Home Screen" → opens like an app, no QR needed</div>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="sec-head" style="margin-top:4px">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">Logging In</span>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Select your <b>name</b> from the dropdown</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Enter your <b>4-digit PIN</b>
+          <div class="step-tip">First time? You'll be asked to set a new PIN. First login uses PIN given by Sean.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Tap <b>Sign In</b> → you're in</div>
+      </div>
+    </div>
+
+    <!-- CHECKING COMMISSIONS -->
+    <div class="sec-head">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">Checking Your Commissions</span>
+    </div>
+    <div style="font-size:12px;color:#1a2e3e;margin-bottom:8px">
+      <b style="color:#00aeef">My Upsells tab</b> — every upsell, sale price, commission earned, and status<br>
+      <b style="color:#00aeef">Dashboard</b> — total commissions, goal progress, 6-month chart
+    </div>
+    <div style="margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:6px">Status Meanings</div>
+      <div class="statuses">
+        <div>
+          <div class="status-badge s-pending">Pending</div>
+          <div class="status-desc">Logged, not reviewed yet</div>
+        </div>
+        <div>
+          <div class="status-badge s-approved">Approved</div>
+          <div class="status-desc">In your next payout</div>
+        </div>
+        <div>
+          <div class="status-badge s-denied">Denied</div>
+          <div class="status-desc">Check with Sean</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="col">
+
+    <!-- LOG AN UPSELL -->
+    <div class="sec-head">
+      <span class="sec-icon">➕</span>
+      <span class="sec-title">How to Log an Upsell</span>
+    </div>
+    <div class="callout callout-green">
+      <span class="callout-icon">⭐</span>
+      <div><b>Log it the same day</b>While at the job or on the way home. Don't wait — you'll forget and that's money lost.</div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Tap <b>"Log Upsell"</b> tab — first tab after login</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Confirm the <b>date</b> (defaults to today)</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">
+          Select the <b>product</b> from the dropdown — commission calculates automatically
+          <div class="step-tip">⚡ Quick Log: Recent products appear at the top — one tap pre-fills everything</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">Enter <b>customer name</b> or address + <b>sale price</b></div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-text">Add <b>Jobber invoice #</b> (optional but helpful)</div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-text">Tap <b>"Log Upsell"</b> — done, shows up immediately</div>
+      </div>
+    </div>
+
+    <!-- WHAT COUNTS -->
+    <div class="sec-head">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">What Counts as an Upsell</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:14px;font-size:11px;color:#1a2e3e">
+      <div>• Water treatments & dosers</div>
+      <div>• Aeration systems</div>
+      <div>• Lighting packages</div>
+      <div>• Koi fish & aquatic plants</div>
+      <div>• Auto dosers & filters</div>
+      <div>• Fountainscapes & fire features</div>
+      <div>• Anything on the product list</div>
+    </div>
+    <div class="callout callout-copper">
+      <span class="callout-icon">💰</span>
+      <div>If you recommend it and they say yes — <b>LOG IT.</b> Takes 30 seconds.</div>
+    </div>
+
+    <!-- SUBMITTING YOUR MONTH -->
+    <div class="sec-head">
+      <span class="sec-icon">📤</span>
+      <span class="sec-title">Submitting Your Month</span>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Tap <b>"Submit Month"</b> tab at end of month</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text"><b>Review the list</b> — make sure everything is logged</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Tap <b>"Submit Month"</b> and confirm</div>
+      </div>
+    </div>
+    <div class="callout callout-red">
+      <span class="callout-icon">🚨</span>
+      <div><b>Don't skip this</b>If you don't submit, your upsells won't be processed for payment. Logging is only half — submitting closes it out.</div>
+    </div>
+
+    <!-- QUICK REF -->
+    <div class="sec-head" style="margin-top:4px">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">Quick Reference</span>
+    </div>
+    <div class="qr-grid">
+      <div class="qr-item">
+        <div class="qr-label">Access</div>
+        <div class="qr-val">QR Code → Employee Page → Track Your Commission</div>
+      </div>
+      <div class="qr-item">
+        <div class="qr-label">Login</div>
+        <div class="qr-val">Your name + 4-digit PIN</div>
+      </div>
+      <div class="qr-item">
+        <div class="qr-label">Log upsell</div>
+        <div class="qr-val">Log Upsell tab → fill in → tap Log</div>
+      </div>
+      <div class="qr-item">
+        <div class="qr-label">End of month</div>
+        <div class="qr-val">Submit Month tab → review → Submit</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">New England Aquatic Landscaping · Commission Tracker Field Reference Card 2026 · For internal use only</div>
+    <div class="footer-contact">Questions? Text Sean — (413) 658-5495</div>
+  </div>
+
+</div>
+</body>
+</html>

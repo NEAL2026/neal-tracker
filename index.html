@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NEAL Tracker">
+<meta name="theme-color" content="#1a3a52">
+<link rel="manifest" href="manifest.json">
 <title>Commission Tracker — New England Aquatic Landscaping</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -1285,6 +1290,7 @@ body.dark-mode .prod-autocomplete-item:hover { background: #162840; }
           <div class="page-title">Log New Upsell</div>
         </div>
         <div id="motivation-bar-wrap"></div>
+        <div id="eom-banner-wrap"></div>
         <div class="quick-log-section" id="quick-log-section">
           <div class="quick-log-title">⚡ Quick Log — repeat last upsell</div>
           <div id="quick-log-items"></div>
@@ -1352,8 +1358,8 @@ body.dark-mode .prod-autocomplete-item:hover { background: #162840; }
         <div class="page-title-row" style="margin-bottom:16px">
           <div class="page-title">My Upsells</div>
           <div style="display:flex;align-items:center;gap:10px">
-            <span style="font-size:11px;color:var(--text-dim);font-weight:600;letter-spacing:1px;text-transform:uppercase">My Goal</span>
-            <input type="number" id="personal-goal-input" placeholder="$0" min="0" style="width:90px;font-size:13px;padding:6px 10px" oninput="renderMemberTable()">
+            <span style="font-size:11px;color:var(--text-dim);font-weight:600;letter-spacing:1px;text-transform:uppercase">My 2026 Goal</span>
+            <input type="number" id="personal-goal-input" placeholder="$0" min="0" style="width:90px;font-size:13px;padding:6px 10px" oninput="savePersonalGoal();renderMemberTable()">
           </div>
         </div>
         <div id="personal-goal-bar-wrap" style="display:none;margin-bottom:16px"></div>
@@ -2502,6 +2508,7 @@ function submitMonth() {
     status:'pending', submittedAt: new Date().toISOString()
   };
   apiWrite({action:'addSubmission', ...sub});
+  notifyManagerOnSubmission(state.currentUser.name, month, sub.totalSales, sub.totalCommission);
   state.submissions.push(sub);
   renderSubmitPreview();
   alert('Submitted '+toSubmit.length+' upsells for '+monthLabel(month)+'!\n\nYour manager has been notified by email.');
@@ -2868,6 +2875,7 @@ function renderMembersConfig() {
     rows += '<div class="config-item-rule">' + emailTxt + '</div></div>';
     rows += '<div style="display:flex;gap:6px">';
     rows += '<button class="btn btn-outline btn-sm" onclick="openEditMember(\'' + m.id + '\')">Edit</button>';
+    rows += '<button class="btn btn-outline btn-sm" onclick="resetMemberPin(\'' + m.id + '\')">🔑 Reset PIN</button>';
     rows += '<button class="btn btn-ghost btn-sm" onclick="deleteMember(\'' + m.id + '\')">Remove</button>';
     rows += '</div></div>';
   }
@@ -4562,7 +4570,8 @@ function renderMaterialRows() {
       + '<input type="number" value="'+row.qty+'" min="1" oninput="updateMaterialQty('+ridJson+',this.value)" style="width:100%">'
       + '<button onclick="removeMaterialRow('+ridJson+')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px;padding:0">✕</button>'
       + '</div>';
-  }).join('')
+  }).join('');
+}
 
 function filterProducts(input, rowId) {
   var query = input.value.toLowerCase().trim();
@@ -4961,6 +4970,7 @@ function deleteCalNote(ds) {
 var _editingJobId = null;
 
 function openEditJobModal(jobId) {
+  try {
   var jobs = getJobs();
   var job  = jobs.find(function(j){ return j.id === jobId; });
   if (!job) return;
@@ -5029,6 +5039,7 @@ function openEditJobModal(jobId) {
    'modal-employee-history','modal-log-hours'].forEach(function(id) {
     var el = document.getElementById(id); if (el) el.classList.add('hidden');
   });
+  } catch(err) { console.error("openEditJobModal error:", err); alert("Edit error — please try again. Details: " + err.message); }
 }
 
 function saveEditJob() {
@@ -5103,7 +5114,54 @@ function saveEditJob() {
   renderJobTracker();
 }
 
+// ── END OF MONTH REMINDER BANNER ─────────────────────────────────────────────
+function renderEOMBanner() {
+  var el = document.getElementById('eom-banner-wrap');
+  if (!el) return;
+  var now = new Date();
+  var lastDay = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  var daysLeft = lastDay - now.getDate();
+  var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var month = MONTHS[now.getMonth()];
+  if (daysLeft > 5) { el.innerHTML = ''; return; }
+  var thisMonth = now.toISOString().slice(0,7);
+  var submitted = state.submissions && state.submissions.some(function(s) {
+    return s.memberId === state.currentUser.id && s.month === thisMonth && s.status !== 'denied';
+  });
+  if (submitted) { el.innerHTML = ''; return; }
+  var color = daysLeft === 0 ? '#dc2626' : daysLeft <= 2 ? '#bf7825' : '#00aeef';
+  var icon  = daysLeft === 0 ? '🚨' : daysLeft <= 2 ? '⚠️' : '⏰';
+  var msg   = daysLeft === 0
+    ? 'Today is the last day of ' + month + ' - submit now to get paid!'
+    : daysLeft + ' day' + (daysLeft===1?'':'s') + ' left in ' + month + ' - submit your upsells before the month closes.';
+  el.innerHTML = '';
+  var div = document.createElement('div');
+  div.style.cssText = 'background:' + color + '22;border:1px solid ' + color + '55;border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;cursor:pointer';
+  div.onclick = function(){ showTab('submit'); };
+  div.innerHTML = '<span style="font-size:20px">' + icon + '</span>'
+    + '<div style="flex:1"><div style="font-size:13px;font-weight:700;color:' + color + '">Submit Your ' + month + ' Upsells</div>'
+    + '<div style="font-size:12px;color:var(--text-dim);margin-top:2px">' + msg + '</div></div>'
+    + '<div style="font-size:11px;font-weight:700;color:' + color + ';white-space:nowrap">Tap to submit &#8594;</div>';
+  el.appendChild(div);
 }
+
+// ── SUBMISSION NOTIFICATION ───────────────────────────────────────────────────
+function notifyManagerOnSubmission(memberName, month, totalSales, totalComm) {
+  try {
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      body: JSON.stringify({
+        action: 'notifySubmission',
+        memberName: memberName,
+        month: month,
+        totalSales: totalSales,
+        totalCommission: totalComm,
+        submittedAt: new Date().toISOString()
+      })
+    });
+  } catch(e) {}
+}
+
 </script>
 </body>
 </html>

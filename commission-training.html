@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commission Tracker — Field Staff Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#00aeef;--deep:#1a3a52;--copper:#bf7825;
+  --ink:#1a2e3e;--gray:#64748b;--light:#f1f5f9;--border:#e2e8f0;
+  --green:#059669;--green-light:#d1fae5;
+  --amber:#d97706;--amber-light:#fef3c7;
+  --red:#dc2626;--red-light:#fee2e2;
+  --teal-light:#e0f5fd;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#f1f5f9;color:var(--ink);font-size:15px;line-height:1.65}
+
+/* HERO */
+.hero{background:linear-gradient(140deg,#0f2030 0%,#1a3a52 50%,#00aeef 100%);padding:48px 24px 40px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.badge{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;padding:5px 16px;border-radius:20px;margin-bottom:18px}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,11vw,68px);color:white;letter-spacing:2px;line-height:1;margin-bottom:10px}
+.hero h1 span{color:#7dd3fc}
+.hero-sub{color:rgba(255,255,255,.6);font-size:15px;max-width:460px;margin:0 auto 22px;line-height:1.6}
+.company-pill{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);padding:7px 18px;border-radius:9px;color:white;font-size:13px;font-weight:600}
+.hero-money{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,6vw,40px);color:rgba(255,255,255,.15);letter-spacing:4px;margin-top:16px}
+
+/* TOC */
+.toc{background:white;border-radius:14px;border:1px solid var(--border);padding:18px 20px;margin:20px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.toc-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:12px}
+.toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.toc-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:var(--light);font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;text-decoration:none;transition:.15s}
+.toc-item:hover{background:var(--teal-light);color:var(--deep)}
+.toc-item .ti{font-size:16px}
+
+/* MAIN */
+.wrap{max-width:680px;margin:0 auto;padding:0 16px 40px}
+
+/* CARDS */
+.card{background:white;border-radius:14px;border:1px solid var(--border);margin-bottom:18px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card-head{padding:18px 20px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px}
+.card-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.bg-teal{background:var(--teal-light)} .bg-green{background:var(--green-light)}
+.bg-amber{background:var(--amber-light)} .bg-copper{background:#fef0d9}
+.card-num{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:2px}
+.card-title{font-size:18px;font-weight:700;color:var(--ink);line-height:1.2}
+.card-body{padding:18px 20px}
+
+/* CALLOUTS */
+.callout{border-radius:10px;padding:13px 15px;margin-bottom:14px;display:flex;gap:11px;align-items:flex-start}
+.c-green{background:var(--green-light);border-left:3px solid var(--green)}
+.c-amber{background:var(--amber-light);border-left:3px solid var(--amber)}
+.c-red{background:var(--red-light);border-left:3px solid var(--red)}
+.c-teal{background:var(--teal-light);border-left:3px solid var(--teal)}
+.c-copper{background:#fef0d9;border-left:3px solid var(--copper)}
+.callout-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.callout-text{font-size:14px;line-height:1.55}
+.callout-text strong{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+
+/* STEPS */
+.step{display:flex;gap:14px;padding:15px 0;border-bottom:1px solid var(--light)}
+.step:last-child{border-bottom:none;padding-bottom:0}
+.step-num{width:30px;height:30px;border-radius:50%;background:var(--teal);color:white;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.step-title{font-size:15px;font-weight:700;margin-bottom:3px}
+.step-desc{font-size:14px;color:var(--gray);line-height:1.5}
+.step-tip{margin-top:8px;background:var(--teal-light);border-radius:7px;padding:8px 12px;font-size:13px;color:var(--deep);font-weight:500}
+
+/* COMMISSION TYPES */
+.comm-types{display:flex;flex-direction:column;gap:10px}
+.comm-type{border-radius:10px;padding:14px;border:1px solid var(--border)}
+.comm-type-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.comm-badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.badge-pct{background:var(--teal-light);color:var(--deep)}
+.badge-flat{background:var(--green-light);color:#065f46}
+.badge-tier{background:var(--amber-light);color:#92400e}
+.comm-type-title{font-size:14px;font-weight:700}
+.comm-type-desc{font-size:13px;color:var(--gray);line-height:1.5}
+
+/* RULES */
+.rule{display:flex;gap:12px;padding:13px;border-radius:10px;border:1px solid var(--border);margin-bottom:10px;align-items:flex-start}
+.rule:last-child{margin-bottom:0}
+.rule-icon{font-size:22px;flex-shrink:0}
+.rule-text{font-size:14px;line-height:1.5}
+.rule-text b{font-weight:700;color:var(--ink)}
+
+/* QUICK REF */
+.qr-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.qr-item{border-radius:10px;padding:13px;border:1px solid var(--border);background:var(--light)}
+.qr-item .qi{font-size:22px;margin-bottom:6px}
+.qr-item .ql{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gray);margin-bottom:3px}
+.qr-item .qv{font-size:14px;font-weight:600;color:var(--ink);line-height:1.4}
+
+/* MONEY HIGHLIGHT */
+.money-box{background:linear-gradient(135deg,var(--deep),#1a5580);border-radius:12px;padding:20px;text-align:center;color:white;margin-bottom:14px}
+.money-box .mb-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;opacity:.6;margin-bottom:6px}
+.money-box .mb-val{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--teal);letter-spacing:2px;line-height:1}
+.money-box .mb-sub{font-size:13px;opacity:.7;margin-top:4px}
+
+/* PRINT */
+.print-btn{display:block;background:var(--teal);color:white;border:none;border-radius:10px;padding:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-bottom:20px;text-align:center}
+.print-btn:hover{background:#009fd6}
+
+/* FOOTER */
+.foot{text-align:center;font-size:12px;color:var(--gray);padding:20px 0 10px;border-top:1px solid var(--border);margin-top:10px}
+
+/* ACCESS */
+.access-path{background:var(--light);border-radius:10px;padding:14px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:14px;margin-bottom:14px}
+.ap-step{background:white;border:1px solid var(--border);border-radius:7px;padding:5px 12px;font-weight:600}
+.ap-arrow{color:var(--gray);font-size:18px}
+
+@media print{
+  .hero{padding:20px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .hero h1{font-size:40px}
+  .print-btn,.toc{display:none}
+  .card{break-inside:avoid;margin-bottom:12px;box-shadow:none}
+  body{background:white}
+  .wrap{padding:0 8px}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">New England Aquatic Landscaping · 2026</div>
+  <h1>Commission<br><span>Tracker</span><br>Training Guide</h1>
+  <p class="hero-sub">How to log your upsells, check your commissions, and get paid. Takes 5 minutes to read — saves you from leaving money on the table.</p>
+  <div class="company-pill">🌊 iloveponds.com</div>
+  <div class="hero-money">💰 LOG IT · EARN IT · GET PAID 💰</div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <div class="toc-title">What's in this guide</div>
+  <div class="toc-grid">
+    <a class="toc-item" href="#what"><span class="ti">💰</span> What is this?</a>
+    <a class="toc-item" href="#access"><span class="ti">🔗</span> How to access it</a>
+    <a class="toc-item" href="#login"><span class="ti">🔑</span> Logging in</a>
+    <a class="toc-item" href="#log"><span class="ti">➕</span> Logging an upsell</a>
+    <a class="toc-item" href="#check"><span class="ti">📊</span> Checking your commissions</a>
+    <a class="toc-item" href="#submit"><span class="ti">📤</span> Submitting your month</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+<button class="print-btn" onclick="window.print()">🖨 Print This Guide</button>
+
+<!-- SECTION 1: WHAT IS IT -->
+<div class="card" id="what">
+  <div class="card-head">
+    <div class="card-icon bg-teal">💰</div>
+    <div>
+      <div class="card-num">Section 1</div>
+      <div class="card-title">What is the Commission Tracker?</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="callout c-teal">
+      <div class="callout-icon">📢</div>
+      <div class="callout-text">
+        <strong>The short version</strong>
+        Any time you upsell a product or service to a client — a water treatment, aeration system, lighting, fish, plants, anything — you log it here and earn a commission on top of your regular pay. The more you log, the more you earn.
+      </div>
+    </div>
+
+    <div class="comm-types">
+      <div class="comm-type">
+        <div class="comm-type-head">
+          <span class="comm-badge badge-pct">% Commission</span>
+          <span class="comm-type-title">Percentage of the sale</span>
+        </div>
+        <div class="comm-type-desc">You earn a set percentage of whatever the sale price is. Sell a $200 treatment system at 10% → you earn $20.</div>
+      </div>
+      <div class="comm-type">
+        <div class="comm-type-head">
+          <span class="comm-badge badge-flat">Flat Rate</span>
+          <span class="comm-type-title">Fixed dollar amount</span>
+        </div>
+        <div class="comm-type-desc">Some products pay a fixed amount regardless of price. Sell a Koi package → you earn $30 flat.</div>
+      </div>
+
+    </div>
+
+    <div class="callout c-copper" style="margin-top:14px;margin-bottom:0">
+      <div class="callout-icon">🏆</div>
+      <div class="callout-text"><strong>Leaderboard</strong>Your commissions appear on the team leaderboard. Top earners get recognized. This is real money — don't leave it on the table by forgetting to log.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: HOW TO ACCESS -->
+<div class="card" id="access">
+  <div class="card-head">
+    <div class="card-icon bg-teal">🔗</div>
+    <div>
+      <div class="card-num">Section 2</div>
+      <div class="card-title">How to Access It</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <p style="font-size:14px;color:var(--gray);margin-bottom:14px">The Commission Tracker is on your Employee Landing Page — the same page you access through the QR code for dosing info, handbooks, and time-off requests.</p>
+
+    <div class="access-path">
+      <div class="ap-step">📱 Scan QR Code</div>
+      <div class="ap-arrow">→</div>
+      <div class="ap-step">Employee Landing Page</div>
+      <div class="ap-arrow">→</div>
+      <div class="ap-step">🏆 Track Your Commission</div>
+    </div>
+
+    <div class="callout c-teal" style="margin-bottom:0">
+      <div class="callout-icon">💡</div>
+      <div class="callout-text"><strong>Save it to your home screen</strong>Open the Commission Tracker, tap the Share button in your browser, and tap "Add to Home Screen." It'll work like an app — one tap to open, no QR code needed every time.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3: LOGGING IN -->
+<div class="card" id="login">
+  <div class="card-head">
+    <div class="card-icon bg-teal">🔑</div>
+    <div>
+      <div class="card-num">Section 3</div>
+      <div class="card-title">Logging In</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Select Your Name</div>
+        <div class="step-desc">Tap the dropdown at the top of the login screen and pick your name from the list.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Enter Your PIN</div>
+        <div class="step-desc">Type in your 4-digit PIN. Sean gave this to you — if you don't have it or forgot it, ask him.</div>
+        <div class="step-tip">🔒 First time logging in? You'll be asked to set a new PIN. Choose something you'll remember — your last 4 digits, a year, whatever works for you.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Tap Sign In</div>
+        <div class="step-desc">You'll land on your personal dashboard showing your commissions, stats, and the Log Upsell tab.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: LOGGING AN UPSELL -->
+<div class="card" id="log">
+  <div class="card-head">
+    <div class="card-icon bg-green">➕</div>
+    <div>
+      <div class="card-num">Section 4 — The Most Important Part</div>
+      <div class="card-title">How to Log an Upsell</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="callout c-green">
+      <div class="callout-icon">⭐</div>
+      <div class="callout-text"><strong>Log it the same day</strong>Log your upsells while you're still at the job or on your way home. Don't wait — you'll forget the details and that's money lost.</div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Tap "Log Upsell" tab</div>
+        <div class="step-desc">It's the first tab when you log in. You'll see the upsell form below it.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Enter the Date</div>
+        <div class="step-desc">It defaults to today — just confirm it's the right date.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Select the Product</div>
+        <div class="step-desc">Choose from the dropdown — all the products Sean has set up with commission rates are listed here.</div>
+        <div class="step-tip">⚡ Quick Log: If you sold the same thing recently, it appears at the top as a Quick Log button. One tap pre-fills everything.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div>
+        <div class="step-title">Enter Customer Name & Sale Price</div>
+        <div class="step-desc">Type the client's name or property address. Then enter the sale price — the commission calculates automatically so you can see exactly what you're earning before you submit.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div>
+        <div class="step-title">Add Invoice Number</div>
+        <div class="step-desc">Enter the Jobber invoice number so everything ties together.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div>
+        <div class="step-title">Tap "Log Upsell"</div>
+        <div class="step-desc">Done. Your commission is recorded and shows up in My Upsells immediately.</div>
+      </div>
+    </div>
+
+    <div class="callout c-amber" style="margin-top:6px;margin-bottom:0">
+      <div class="callout-icon">💡</div>
+      <div class="callout-text"><strong>What counts as an upsell?</strong>Anything you recommend and the client says yes to — water treatments, aeration, lighting, fish, plants, auto dosers, filters, anything on the product list. If you mention it and they buy it, log it.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: CHECKING YOUR COMMISSIONS -->
+<div class="card" id="check">
+  <div class="card-head">
+    <div class="card-icon bg-teal">📊</div>
+    <div>
+      <div class="card-num">Section 5</div>
+      <div class="card-title">Checking Your Commissions</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="rule">
+      <div class="rule-icon">📋</div>
+      <div class="rule-text"><b>My Upsells tab</b> — shows every upsell you've logged this month, the sale price, commission earned, and the status (pending → approved → paid).</div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon">📈</div>
+      <div class="rule-text"><b>Your dashboard</b> — shows your total commissions, how you're tracking against your goal, and a 6-month history chart.</div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon">🏆</div>
+      <div class="rule-text"><b>Leaderboard</b> — tap the leaderboard button at the top of the screen to see where you stand against the team this month.</div>
+    </div>
+
+    <div class="callout c-teal" style="margin-top:14px;margin-bottom:0">
+      <div class="callout-icon">✅</div>
+      <div class="callout-text"><strong>Status meanings</strong>
+        <b>Pending</b> — logged but not yet reviewed by manager.<br>
+        <b>Approved</b> — confirmed and will be in your next payout.<br>
+        <b>Denied</b> — something was off, check with Sean.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: SUBMITTING YOUR MONTH -->
+<div class="card" id="submit">
+  <div class="card-head">
+    <div class="card-icon bg-copper">📤</div>
+    <div>
+      <div class="card-num">Section 6</div>
+      <div class="card-title">Submitting Your Month</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="callout c-amber">
+      <div class="callout-icon">📅</div>
+      <div class="callout-text"><strong>Do this at the end of every month</strong>Before the month closes out, you need to officially submit your upsells for that month. This tells management your list is complete and ready for review and payment.</div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Tap "Submit Month" tab</div>
+        <div class="step-desc">You'll see a summary of all your upsells for the current month and the total commission amount.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Review the List</div>
+        <div class="step-desc">Make sure everything is there. If something is missing, go back to Log Upsell and add it before submitting.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Tap "Submit Month"</div>
+        <div class="step-desc">Confirm when prompted. Your submission goes to Sean and Kristina for review. Once approved, your commission gets processed for payout.</div>
+        <div class="step-tip">⚠️ Once submitted you can't add more upsells to that month. Make sure you've logged everything first.</div>
+      </div>
+    </div>
+
+    <div class="callout c-red" style="margin-top:6px;margin-bottom:0">
+      <div class="callout-icon">🚨</div>
+      <div class="callout-text"><strong>Don't forget to submit</strong>If you don't hit Submit Month, your upsells won't be processed for payment. Logging them is only half — submitting closes it out.</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK REFERENCE -->
+<div class="card">
+  <div class="card-head">
+    <div class="card-icon bg-teal">🖨</div>
+    <div>
+      <div class="card-num">Quick Reference</div>
+      <div class="card-title">Print This for Your Truck</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="qr-grid">
+      <div class="qr-item">
+        <div class="qi">🔗</div>
+        <div class="ql">How to access</div>
+        <div class="qv">QR Code → Employee Page → Track Your Commission</div>
+      </div>
+      <div class="qr-item">
+        <div class="qi">🔑</div>
+        <div class="ql">Login</div>
+        <div class="qv">Select your name + enter your 4-digit PIN</div>
+      </div>
+      <div class="qr-item">
+        <div class="qi">➕</div>
+        <div class="ql">Log an upsell</div>
+        <div class="qv">Log Upsell tab → fill in date, product, customer, price → tap Log</div>
+      </div>
+      <div class="qr-item">
+        <div class="qi">⚡</div>
+        <div class="ql">Quick log</div>
+        <div class="qv">Repeat products appear at the top — one tap to pre-fill</div>
+      </div>
+      <div class="qr-item">
+        <div class="qi">📤</div>
+        <div class="ql">End of month</div>
+        <div class="qv">Submit Month tab → review list → tap Submit</div>
+      </div>
+      <div class="qr-item">
+        <div class="qi">❓</div>
+        <div class="ql">Questions?</div>
+        <div class="qv">Ask Sean — 774-437-1160</div>
+      </div>
+    </div>
+
+    <div class="callout c-green" style="margin-top:16px;margin-bottom:0">
+      <div class="callout-icon">💰</div>
+      <div class="callout-text"><strong>Remember</strong>Every upsell you log is extra money in your pocket on top of your regular pay. If you recommend it and they say yes — LOG IT. Takes 30 seconds.</div>
+    </div>
+  </div>
+</div>
+
+<button class="print-btn" onclick="window.print()">🖨 Print This Guide</button>
+
+<div class="foot">
+  New England Aquatic Landscaping · iloveponds.com · 774-437-1160<br>
+  Commission Tracker Training Guide 2026 · For internal use only
+</div>
+
+</div>
+</body>
+</html>

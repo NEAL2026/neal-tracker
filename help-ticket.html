@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f1f2e">
+<title>Report a Problem — I Love Ponds</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --deep: #0f1f2e;
+  --navy: #1a3a52;
+  --teal: #00aeef;
+  --teal-dark: #0090c8;
+  --copper: #bf7825;
+  --white: #ffffff;
+  --off-white: #f0f4f8;
+  --gray: #64748b;
+  --border: #e2e8f0;
+  --red: #dc2626;
+  --green: #059669;
+  --card: rgba(255,255,255,.06);
+  --card-border: rgba(255,255,255,.1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--deep);
+  color: white;
+  min-height: 100vh;
+}
+
+.bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(0,174,239,.15) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(191,120,37,.1) 0%, transparent 50%),
+    linear-gradient(180deg, #0f1f2e 0%, #0a1520 100%);
+}
+
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 480px; margin: 0 auto;
+  padding: 40px 20px 60px;
+}
+
+/* HEADER */
+.header { text-align: center; margin-bottom: 32px; }
+.header-icon {
+  width: 60px; height: 60px; border-radius: 16px;
+  background: rgba(220,38,38,.15);
+  border: 1px solid rgba(220,38,38,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; margin: 0 auto 16px;
+}
+.header h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px; font-weight: 700;
+  margin-bottom: 6px;
+}
+.header h1 span { color: var(--teal); font-style: italic; }
+.header p { font-size: 13px; color: rgba(255,255,255,.5); line-height: 1.5; }
+
+/* FORM CARD */
+.form-card {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 18px;
+  padding: 24px 20px;
+  backdrop-filter: blur(10px);
+}
+
+.field { margin-bottom: 18px; }
+.field label {
+  display: block;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(255,255,255,.5);
+  margin-bottom: 8px;
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  color: white;
+  outline: none;
+  transition: border-color .2s;
+  -webkit-appearance: none;
+}
+.field input::placeholder,
+.field textarea::placeholder { color: rgba(255,255,255,.3); }
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--teal);
+  background: rgba(0,174,239,.08);
+}
+.field select option { background: #1a3a52; color: white; }
+.field textarea { resize: none; min-height: 100px; line-height: 1.5; }
+
+/* URGENCY BUTTONS */
+.urgency-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+.urgency-btn {
+  padding: 10px 8px; border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  color: rgba(255,255,255,.6);
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; text-align: center;
+  transition: all .2s;
+}
+.urgency-btn:hover { border-color: rgba(255,255,255,.3); }
+.urgency-btn.selected-low { background: rgba(5,150,105,.2); border-color: #059669; color: #34d399; }
+.urgency-btn.selected-medium { background: rgba(217,119,6,.2); border-color: #d97706; color: #fbbf24; }
+.urgency-btn.selected-high { background: rgba(220,38,38,.2); border-color: #dc2626; color: #f87171; }
+
+/* SUBMIT */
+.submit-btn {
+  width: 100%; padding: 16px;
+  background: var(--teal);
+  border: none; border-radius: 12px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px; font-weight: 700;
+  color: white; cursor: pointer;
+  transition: all .2s;
+  margin-top: 8px;
+}
+.submit-btn:hover { background: var(--teal-dark); transform: translateY(-1px); }
+.submit-btn:disabled { background: rgba(255,255,255,.15); cursor: not-allowed; transform: none; }
+
+/* SUCCESS STATE */
+.success {
+  display: none;
+  text-align: center;
+  padding: 40px 20px;
+}
+.success-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: rgba(5,150,105,.2);
+  border: 2px solid #059669;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; margin: 0 auto 20px;
+}
+.success h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px; font-weight: 700;
+  margin-bottom: 8px;
+}
+.success p { font-size: 13px; color: rgba(255,255,255,.5); line-height: 1.6; }
+.ticket-num {
+  display: inline-block;
+  background: rgba(0,174,239,.15);
+  border: 1px solid rgba(0,174,239,.3);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 13px; font-weight: 700;
+  color: var(--teal);
+  margin: 12px 0;
+}
+.back-btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 24px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  font-size: 14px; font-weight: 600;
+  color: rgba(255,255,255,.7);
+  cursor: pointer; text-decoration: none;
+}
+
+/* ERROR */
+.error-msg {
+  background: rgba(220,38,38,.15);
+  border: 1px solid rgba(220,38,38,.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px; color: #f87171;
+  margin-bottom: 14px;
+  display: none;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 11px;
+  color: rgba(255,255,255,.2);
+}
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-icon">🛠</div>
+    <h1>Report a <span>Problem</span></h1>
+    <p>Something not working? Fill this out and Sean gets notified right away.</p>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-card" id="form-section">
+    <div class="error-msg" id="error-msg"></div>
+
+    <div class="field">
+      <label>Your Name</label>
+      <input type="text" id="f-name" placeholder="Your full name">
+    </div>
+
+    <div class="field">
+      <label>Which Tool Has the Problem?</label>
+      <select id="f-tool">
+        <option value="">— Select a tool —</option>
+        <option value="Commission Tracker">Commission Tracker</option>
+        <option value="Leaderboard">Leaderboard</option>
+        <option value="Job Cost Form">Job Cost Form</option>
+        <option value="FieldStockPro">FieldStockPro</option>
+        <option value="Employee Hub / App">Employee Hub / App</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>What Were You Trying to Do?</label>
+      <input type="text" id="f-action" placeholder="e.g. Log an upsell, open the job form...">
+    </div>
+
+    <div class="field">
+      <label>What Happened?</label>
+      <textarea id="f-description" placeholder="Describe the problem — the more detail the better..."></textarea>
+    </div>
+
+    <div class="field">
+      <label>How Urgent Is This?</label>
+      <div class="urgency-grid">
+        <button class="urgency-btn" data-val="low" onclick="selectUrgency('low', this)">🟢 Can Wait</button>
+        <button class="urgency-btn" data-val="medium" onclick="selectUrgency('medium', this)">🟡 Blocking Me</button>
+        <button class="urgency-btn" data-val="high" onclick="selectUrgency('high', this)">🔴 Critical</button>
+      </div>
+      <input type="hidden" id="f-urgency" value="">
+    </div>
+
+    <div class="field">
+      <label>Your Phone # (optional — so Sean can text back)</label>
+      <input type="tel" id="f-phone" placeholder="(555) 555-5555">
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="submitTicket()">Submit Problem Report</button>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success" id="success-section">
+    <div class="success-icon">✅</div>
+    <h2>Got it — thanks!</h2>
+    <div class="ticket-num" id="ticket-num">Ticket #—</div>
+    <p>Sean has been notified and will look into it. You'll hear back as soon as possible.</p>
+    <a class="back-btn" href="index.html">← Back to App</a>
+  </div>
+
+  <div class="footer">New England Aquatic Landscaping · iloveponds.com</div>
+
+</div>
+
+<script>
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxJo-zKm7nQ6q02ayzpO-duQ3mFDPNOUQhrIanGun3WrQXaXfxqYhjTaJlB1bEvIzN25g/exec';
+
+var selectedUrgency = '';
+
+function selectUrgency(val, btn) {
+  selectedUrgency = val;
+  document.getElementById('f-urgency').value = val;
+  document.querySelectorAll('.urgency-btn').forEach(function(b) {
+    b.className = 'urgency-btn';
+  });
+  btn.className = 'urgency-btn selected-' + val;
+}
+
+function generateTicketNum() {
+  var now = new Date();
+  return 'TKT-' + now.getFullYear().toString().slice(-2)
+    + String(now.getMonth()+1).padStart(2,'0')
+    + String(now.getDate()).padStart(2,'0')
+    + '-' + Math.floor(Math.random()*9000+1000);
+}
+
+function showError(msg) {
+  var el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(function(){ el.style.display = 'none'; }, 4000);
+}
+
+function submitTicket() {
+  var name        = document.getElementById('f-name').value.trim();
+  var tool        = document.getElementById('f-tool').value;
+  var action      = document.getElementById('f-action').value.trim();
+  var description = document.getElementById('f-description').value.trim();
+  var urgency     = selectedUrgency;
+  var phone       = document.getElementById('f-phone').value.trim();
+
+  if (!name)        return showError('Please enter your name.');
+  if (!tool)        return showError('Please select which tool has the problem.');
+  if (!action)      return showError('Please describe what you were trying to do.');
+  if (!description) return showError('Please describe what happened.');
+  if (!urgency)     return showError('Please select how urgent this is.');
+
+  var ticketNum = generateTicketNum();
+  var btn = document.getElementById('submit-btn');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+
+  var payload = {
+    action:      'submitHelpTicket',
+    ticketNum:   ticketNum,
+    name:        name,
+    tool:        tool,
+    userAction:  action,
+    description: description,
+    urgency:     urgency,
+    phone:       phone,
+    submittedAt: new Date().toISOString()
+  };
+
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: JSON.stringify(payload)
+  }).catch(function(){});
+
+  // Save to localStorage as backup
+  try {
+    var tickets = JSON.parse(localStorage.getItem('neal-help-tickets') || '[]');
+    tickets.push(payload);
+    localStorage.setItem('neal-help-tickets', JSON.stringify(tickets));
+  } catch(e) {}
+
+  // Show success after short delay
+  setTimeout(function() {
+    document.getElementById('form-section').style.display = 'none';
+    document.getElementById('success-section').style.display = 'block';
+    document.getElementById('ticket-num').textContent = ticketNum;
+  }, 800);
+}
+</script>
+
+</body>
+</html>

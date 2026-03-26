@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FieldStockPro Field Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #e2e8f0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px;
+  min-height: 100vh;
+}
+
+.card {
+  width: 8.5in;
+  min-height: 11in;
+  background: white;
+  box-shadow: 0 4px 24px rgba(0,0,0,.15);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+}
+
+/* HEADER */
+.header {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, #0a1628 0%, #0f2d6b 50%, #1a56db 100%);
+  padding: 18px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-accent { width: 6px; height: 52px; background: #1a56db; border-radius: 3px; }
+.header-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: white; letter-spacing: 2px; line-height: 1; }
+.header-sub { font-size: 11px; color: rgba(255,255,255,.6); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
+.header-right { text-align: right; }
+.header-company { font-size: 11px; color: rgba(255,255,255,.5); font-weight: 600; letter-spacing: 1px; }
+.header-tagline { font-size: 10px; color: rgba(255,255,255,.35); margin-top: 2px; }
+
+/* COLUMNS */
+.col { padding: 20px 24px; }
+.col-left { border-right: 2px solid #e2e8f0; }
+
+/* SECTION HEADER */
+.sec-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 7px;
+  border-bottom: 2px solid #1a56db;
+}
+.sec-icon { font-size: 16px; }
+.sec-title { font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #0f2d6b; }
+
+/* STEP ROWS */
+.steps { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+.step { display: flex; gap: 10px; align-items: flex-start; }
+.step-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #1a56db; color: white;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.step-text { font-size: 12px; line-height: 1.45; color: #1a2e3e; }
+.step-text b { font-weight: 700; color: #0f1923; }
+.step-tip {
+  background: #dbeafe; border-radius: 5px;
+  padding: 5px 8px; margin-top: 4px;
+  font-size: 11px; color: #1e3a8a; line-height: 1.4;
+}
+
+/* FLOW */
+.flow { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.flow-box {
+  flex: 1; min-width: 80px;
+  border-radius: 7px; padding: 8px 10px;
+  text-align: center; font-size: 10px; font-weight: 700;
+  line-height: 1.3;
+}
+.flow-blue { background: #dbeafe; color: #1e3a8a; border: 1px solid #93c5fd; }
+.flow-green { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+.flow-amber { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.flow-arrow { color: #94a3b8; font-size: 14px; flex-shrink: 0; }
+.flow-label { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; opacity: .65; margin-bottom: 3px; }
+
+/* RULES */
+.rules { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.rule { display: flex; gap: 8px; align-items: flex-start; padding: 7px 10px; border-radius: 6px; font-size: 12px; line-height: 1.4; }
+.rule-do { background: #d1fae5; color: #065f46; }
+.rule-dont { background: #fee2e2; color: #7f1d1d; }
+.rule b { font-weight: 700; }
+
+/* CALLOUT */
+.callout {
+  border-radius: 7px; padding: 9px 12px;
+  margin-bottom: 14px; font-size: 12px; line-height: 1.45;
+  display: flex; gap: 8px; align-items: flex-start;
+}
+.callout-amber { background: #fef3c7; border-left: 3px solid #d97706; color: #92400e; }
+.callout-red { background: #fee2e2; border-left: 3px solid #dc2626; color: #7f1d1d; }
+.callout-green { background: #d1fae5; border-left: 3px solid #059669; color: #065f46; }
+.callout-blue { background: #dbeafe; border-left: 3px solid #1a56db; color: #1e3a8a; }
+.callout-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.callout b { font-weight: 700; display: block; font-size: 11px; letter-spacing: .3px; margin-bottom: 2px; text-transform: uppercase; }
+
+/* FOOTER */
+.footer {
+  grid-column: 1 / -1;
+  background: #0f1923;
+  padding: 10px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-left { font-size: 10px; color: rgba(255,255,255,.4); }
+.footer-contact { font-size: 12px; font-weight: 700; color: #60a5fa; }
+
+/* DIVIDER */
+.divider { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #94a3b8; margin: 14px 0 10px; display: flex; align-items: center; gap: 8px; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
+
+@media print {
+  body { background: white; padding: 0; }
+  .card { box-shadow: none; width: 100%; min-height: auto; }
+  @page { size: letter; margin: 0.4in; }
+}
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-accent"></div>
+      <div>
+        <div class="header-title">FieldStockPro</div>
+        <div class="header-sub">Field Reference Card · 2026</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-company">New England Aquatic Landscaping</div>
+      <div class="header-tagline">iloveponds.com · fieldstockpro.com</div>
+    </div>
+  </div>
+
+  <!-- LEFT COLUMN -->
+  <div class="col col-left">
+
+    <!-- HOW STOCK MOVES -->
+    <div class="sec-head">
+      <span class="sec-icon">🔄</span>
+      <span class="sec-title">How Stock Moves — 2 Ways Only</span>
+    </div>
+
+    <div class="divider">Way 1 — Standard Jobs</div>
+    <div class="flow">
+      <div class="flow-box flow-blue"><div class="flow-label">You do</div>Job in Jobber</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box flow-blue"><div class="flow-label">You do</div>Invoice in Jobber</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box flow-green"><div class="flow-label">Auto</div>Stock off van</div>
+    </div>
+    <div class="callout callout-green">
+      <span class="callout-icon">✅</span>
+      <div>Invoice in Jobber like always — FieldStockPro updates automatically. Nothing extra required.</div>
+    </div>
+
+    <div class="divider">Way 2 — Sean Issues Items to a Job</div>
+    <div class="flow">
+      <div class="flow-box flow-amber"><div class="flow-label">Sean does</div>Issues items + prints list</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box flow-blue"><div class="flow-label">You get</div>Physical printout</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box flow-green"><div class="flow-label">You do</div>Use those items only</div>
+    </div>
+    <div class="callout callout-amber">
+      <span class="callout-icon">⚠️</span>
+      <div><b>Do NOT invoice these in Jobber</b>They are already issued and accounted for. Check the physical printout first. No printout? Open FieldStockPro → Jobs → your job → Materials list.</div>
+    </div>
+
+    <!-- RULES -->
+    <div class="sec-head" style="margin-top:4px">
+      <span class="sec-icon">📋</span>
+      <span class="sec-title">The Rules</span>
+    </div>
+    <div class="rules">
+      <div class="rule rule-do"><span>✅</span><div>Restock your van in FieldStockPro the <b>same day</b> you use something</div></div>
+      <div class="rule rule-do"><span>✅</span><div>Check the printout before starting a job Sean issued materials for</div></div>
+      <div class="rule rule-do"><span>✅</span><div>Speak up if something isn't working — Sean wants to know</div></div>
+      <div class="rule rule-dont"><span>❌</span><div>Don't invoice items in Jobber that Sean already issued to the job</div></div>
+      <div class="rule rule-dont"><span>❌</span><div>Don't use van stock without logging the restock in FieldStockPro</div></div>
+      <div class="rule rule-dont"><span>❌</span><div>Don't move stock between vans on your own — that's Sean's job</div></div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="col">
+
+    <!-- RESTOCKING YOUR VAN -->
+    <div class="sec-head">
+      <span class="sec-icon">📦</span>
+      <span class="sec-title">Restocking Your Van</span>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Open <b>fieldstockpro.com</b> on your phone</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">
+          Tap <b>Products</b> → search by name or tap the <b>barcode scanner icon</b> next to the search bar → point camera at the box
+          <div class="step-tip">📷 Scanner is the fastest — look for the icon right next to the search bar</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Tap on the product to open it</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">
+          Select <b>your vehicle</b>, enter the quantity, confirm
+          <div class="step-tip">🚐 Double-check you selected YOUR van — not another crew's</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-red">
+      <span class="callout-icon">🚨</span>
+      <div><b>Do it the same day</b>If you don't log it, your van shows more stock than you have — causes ordering problems and looks like missing product.</div>
+    </div>
+
+    <!-- CHECKING ISSUED ITEMS -->
+    <div class="sec-head">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">Checking Items Issued to Your Job</span>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text"><b>Check the physical printout first</b> — Sean leaves it with the materials or hands it to the team lead</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">No printout? Open FieldStockPro → <b>Jobs</b> → find your job → review the materials list</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Use only what's on the list. Need something extra? <b>Text Sean before pulling from your van</b></div>
+      </div>
+    </div>
+
+    <!-- QUICK REF -->
+    <div class="sec-head" style="margin-top:4px">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">Quick Reference</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+      <div style="background:#f1f5f9;border-radius:7px;padding:8px 10px">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:3px">Website</div>
+        <div style="font-size:12px;font-weight:700;color:#0f1923">fieldstockpro.com</div>
+      </div>
+      <div style="background:#f1f5f9;border-radius:7px;padding:8px 10px">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:3px">Your Login</div>
+        <div style="font-size:12px;font-weight:700;color:#0f1923">Your work email</div>
+      </div>
+      <div style="background:#f1f5f9;border-radius:7px;padding:8px 10px">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:3px">Used something?</div>
+        <div style="font-size:11px;font-weight:600;color:#0f1923">Products → Scan → Your van</div>
+      </div>
+      <div style="background:#f1f5f9;border-radius:7px;padding:8px 10px">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:3px">Job issued by Sean?</div>
+        <div style="font-size:11px;font-weight:600;color:#0f1923">Check printout first</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">New England Aquatic Landscaping · FieldStockPro Field Reference Card 2026 · For internal use only</div>
+    <div class="footer-contact">Questions? Text Sean — (413) 658-5495</div>
+  </div>
+
+</div>
+<script>
+  // Auto-print trigger (optional — comment out if not desired)
+  // window.onload = () => window.print();
+</script>
+</body>
+</html>
