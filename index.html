@@ -2124,6 +2124,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   } else {
     // API unreachable — load from localStorage cache if available
     try {
+      // Clear any corrupted cache from duplicate seeding
+      localStorage.removeItem('neal-data-cache');
       var cached = localStorage.getItem('neal-data-cache');
       if (cached) {
         var c = JSON.parse(cached);
@@ -2145,18 +2147,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Members added manually through Setup tab
 
-  // Seed default products if sheet is empty
-  if (!state.products.length) {
-    const defaults = [
-      {id:'p1',name:'Aeration System', type:'percent',percent:10,fixed:0,tiers:[]},
-      {id:'p2',name:'Koi Fish Package',type:'fixed',  percent:0, fixed:30,tiers:[]},
-      {id:'p3',name:'Pond Cleanout',   type:'tiered', percent:0, fixed:0, tiers:[{max:500,pct:5},{max:1500,pct:8},{pct:12}]},
-      {id:'p4',name:'Water Treatment', type:'percent',percent:8, fixed:0, tiers:[]},
-      {id:'p5',name:'Aquatic Plants',  type:'fixed',  percent:0, fixed:15,tiers:[]},
-      {id:'p6',name:'Liner Repair',    type:'percent',percent:7, fixed:0, tiers:[]},
-    ];
-    defaults.forEach(p => { apiWrite({action:'addProduct',...p}); state.products.push(p); });
-  }
+    // Products added through Setup tab
 
   setLoading(false);
   populateLoginSelect();
