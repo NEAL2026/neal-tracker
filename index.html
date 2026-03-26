@@ -2124,8 +2124,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   } else {
     // API unreachable — load from localStorage cache if available
     try {
-      // Clear any corrupted cache from duplicate seeding
-      localStorage.removeItem('neal-data-cache');
       var cached = localStorage.getItem('neal-data-cache');
       if (cached) {
         var c = JSON.parse(cached);
@@ -2163,6 +2161,11 @@ window.addEventListener('DOMContentLoaded', async () => {
       var sess = JSON.parse(saved);
       if (sess.isManager) {
         var mgr = state.managers.find(function(m){ return m.id === sess.userId; });
+        // If not found in sheet yet, use saved session data directly
+        if (!mgr && sess.name) {
+          mgr = {id: sess.userId, name: sess.name, password: sess.password || ''};
+          state.managers.push(mgr);
+        }
         if (mgr) {
           state.currentUser = {name: mgr.name, id: mgr.id};
           state.isManager = true;
@@ -2172,6 +2175,10 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
       } else {
         var mem = state.members.find(function(m){ return m.id === sess.userId; });
+        if (!mem && sess.name) {
+          mem = {id: sess.userId, name: sess.name, pin: sess.pin || ''};
+          state.members.push(mem);
+        }
         if (mem) {
           state.currentUser = mem;
           state.isManager = false;
@@ -2235,7 +2242,7 @@ function doLogin() {
   const member = state.members.find(m => m.id===userId);
   if (!member || String(member.pin) !== String(pin)) return showLoginAlert('Incorrect PIN.','error');
   state.currentUser = member; state.isManager = false;
-  localStorage.setItem('neal-session', JSON.stringify({userId: member.id, isManager: false}));
+  localStorage.setItem('neal-session', JSON.stringify({userId: member.id, isManager: false, name: member.name, pin: member.pin}));
   if (member.mustChangePin) {
     showPinChangeScreen();
   } else {
@@ -2249,7 +2256,7 @@ function doManagerLogin() {
   var mgr = state.managers.find(function(m){ return m.id === mgrId; });
   if (!mgr || mgr.password !== pass) return showLoginAlert('Incorrect password.','error');
   state.currentUser = {name: mgr.name, id: mgr.id}; state.isManager = true;
-  localStorage.setItem('neal-session', JSON.stringify({userId: mgr.id, isManager: true}));
+  localStorage.setItem('neal-session', JSON.stringify({userId: mgr.id, isManager: true, name: mgr.name, password: mgr.password}));
   enterApp();
 }
 function showLoginAlert(msg, type) {
