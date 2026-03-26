@@ -2035,17 +2035,38 @@ function parseRows(rows, fn) {
   return rows.slice(1).filter(r => r[0] !== '' && r[0] !== undefined && r[0] !== null).map(fn);
 }
 function parseMembers(rows) {
-  return parseRows(rows, r => ({ id:String(r[0]), name:String(r[1]), pin:String(r[2]), email:String(r[3]||''), mustChangePin: String(r[4]||'') === 'true' }));
+  if (!rows || !rows.length) return [];
+  return rows.filter(r => r && (r.id || r[0])).map(r => {
+    if (typeof r === 'object' && !Array.isArray(r)) {
+      return { id: String(r.id||''), name: String(r.name||''), pin: String(r.pin||''), email: String(r.email||''), mustChangePin: r.mustChangePin||false, goal: parseFloat(r.goal)||0 };
+    }
+    return { id: String(r[0]), name: String(r[1]), pin: String(r[2]), email: String(r[3]||''), mustChangePin: r[4]||false, goal: parseFloat(r[5])||0 };
+  });
 }
 function parseManagers(rows) {
-  return parseRows(rows, r => ({ id:String(r[0]), name:String(r[1]), password:String(r[2]), email:String(r[3]||'') }));
+  if (!rows || !rows.length) return [];
+  // Handle object format (new Apps Script) or array format (old)
+  return rows.filter(r => r && (r.id || r[0])).map(r => {
+    if (typeof r === 'object' && !Array.isArray(r)) {
+      return { id: String(r.id||''), name: String(r.name||''), password: String(r.password||''), email: String(r.email||'') };
+    }
+    return { id: String(r[0]), name: String(r[1]), password: String(r[2]), email: String(r[3]||'') };
+  });
 }
 function parseProducts(rows) {
-  return parseRows(rows, r => ({
-    id:String(r[0]), name:String(r[1]), type:String(r[2]),
-    percent:parseFloat(r[3])||0, fixed:parseFloat(r[4])||0,
-    tiers: r[5] ? (typeof r[5]==='string' && r[5].trim() ? JSON.parse(r[5]) : []) : []
-  }));
+  if (!rows || !rows.length) return [];
+  return rows.filter(r => r && (r.id || r[0])).map(r => {
+    if (typeof r === 'object' && !Array.isArray(r)) {
+      return { id: String(r.id||''), name: String(r.name||''), type: String(r.type||'percent'),
+        percent: parseFloat(r.percent)||0, fixed: parseFloat(r.fixed)||0,
+        tiers: r.tiers ? (typeof r.tiers === 'string' ? JSON.parse(r.tiers||'[]') : r.tiers) : [],
+        reqPaid: r.reqPaid||false, reqCallback: r.reqCallback||false, reqProfit: r.reqProfit||false };
+    }
+    return { id: String(r[0]), name: String(r[1]), type: String(r[2]),
+      percent: parseFloat(r[3])||0, fixed: parseFloat(r[4])||0,
+      tiers: r[5] ? (typeof r[5]==='string' && r[5].trim() ? JSON.parse(r[5]) : []) : [],
+      reqPaid: r[6]||false, reqCallback: r[7]||false, reqProfit: r[8]||false };
+  });
 }
 function cleanDate(val) {
   if (!val) return '';
@@ -2065,26 +2086,38 @@ function cleanDate(val) {
   return s.slice(0,10);
 }
 function parseUpsells(rows) {
-  return parseRows(rows, r => ({
-    id:String(r[0]), memberId:String(r[1]), memberName:String(r[2]),
-    date:cleanDate(r[3]), customer:String(r[4]),
-    productId:String(r[5]), productName:String(r[6]),
-    price:parseFloat(r[7])||0, commission:parseFloat(r[8])||0,
-    status:String(r[9]||'pending'),
-    submitted: r[10]===true||r[10]==='TRUE'||r[10]==='true'||r[10]===1,
-    submittedMonth:String(r[11]||''),
-    invoice:String(r[13]||''),
-    quantity:parseInt(r[14])||1
-  }));
+  if (!rows || !rows.length) return [];
+  return rows.filter(r => r && (r.id || r[0])).map(r => {
+    if (typeof r === 'object' && !Array.isArray(r)) {
+      return { id: String(r.id||''), memberId: String(r.memberId||''), productId: String(r.productId||''),
+        date: String(r.date||''), customer: String(r.customer||''), price: parseFloat(r.price)||0,
+        commission: parseFloat(r.commission)||0, invoiceNum: String(r.invoiceNum||''),
+        condPaid: r.condPaid||false, condCallback: r.condCallback||false, condProfit: r.condProfit||false,
+        status: String(r.status||'pending'), note: String(r.note||''), submitted: r.submitted||false,
+        submittedMonth: String(r.submittedMonth||''), createdAt: String(r.createdAt||'') };
+    }
+    return { id: String(r[0]), memberId: String(r[1]), productId: String(r[2]),
+      date: String(r[3]||''), customer: String(r[4]||''), price: parseFloat(r[5])||0,
+      commission: parseFloat(r[6])||0, invoiceNum: String(r[7]||''),
+      condPaid: r[8]||false, condCallback: r[9]||false, condProfit: r[10]||false,
+      status: String(r[11]||'pending'), note: String(r[12]||''), submitted: false,
+      submittedMonth: '', createdAt: String(r[13]||'') };
+  });
 }
 function parseSubmissions(rows) {
-  return parseRows(rows, r => ({
-    id:String(r[0]), memberId:String(r[1]), memberName:String(r[2]),
-    month:String(r[3]),
-    upsellIds: r[4] ? (typeof r[4]==='string' && r[4].trim() ? JSON.parse(r[4]) : []) : [],
-    totalCommission:parseFloat(r[5])||0, totalSales:parseFloat(r[6])||0,
-    status:String(r[7]||'pending'), submittedAt:String(r[8]||'')
-  }));
+  if (!rows || !rows.length) return [];
+  return rows.filter(r => r && (r.id || r[0])).map(r => {
+    if (typeof r === 'object' && !Array.isArray(r)) {
+      return { id: String(r.id||''), memberId: String(r.memberId||''), memberName: String(r.memberName||''),
+        month: String(r.month||''), upsellIds: r.upsellIds ? (typeof r.upsellIds==='string' ? JSON.parse(r.upsellIds||'[]') : r.upsellIds) : [],
+        totalCommission: parseFloat(r.totalCommission)||0, totalSales: parseFloat(r.totalSales)||0,
+        status: String(r.status||'pending'), submittedAt: String(r.submittedAt||''), note: String(r.note||'') };
+    }
+    return { id: String(r[0]), memberId: String(r[1]), memberName: String(r[2]||''),
+      month: String(r[3]||''), upsellIds: [],
+      totalCommission: parseFloat(r[5])||0, totalSales: parseFloat(r[4])||0,
+      status: String(r[6]||'pending'), submittedAt: String(r[7]||''), note: '' };
+  });
 }
 
 // ── LOADING OVERLAY ───────────────────────────────────────────────────────────
