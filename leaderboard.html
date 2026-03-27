@@ -540,6 +540,90 @@ body {
   font-size: 11px; color: rgba(255,255,255,.4);
 }
 
+/* ── TEAM BATTLE ── */
+.teams-wrap {
+  max-width: 1100px; margin: 0 auto 24px; padding: 0 24px;
+}
+.teams-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
+}
+.teams-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: rgba(255,255,255,.4);
+  display: flex; align-items: center; gap: 10px;
+}
+.teams-title::after {
+  content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.1); min-width: 60px;
+}
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width: 768px) {
+  .teams-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .teams-grid { grid-template-columns: 1fr; }
+}
+.team-card {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px; padding: 16px 18px;
+  position: relative; overflow: hidden;
+  transition: transform .2s, border-color .2s;
+}
+.team-card:hover { transform: translateY(-2px); border-color: rgba(0,174,239,.35); }
+.team-card.team-rank-1 {
+  border-color: rgba(232,160,48,.4);
+  background: rgba(232,160,48,.07);
+}
+.team-card.team-rank-1::before {
+  content: '🏆';
+  position: absolute; top: 10px; right: 14px; font-size: 18px; opacity: .6;
+}
+.team-card .team-rank-badge {
+  font-size: 10px; font-weight: 800; letter-spacing: 2px;
+  text-transform: uppercase; color: rgba(255,255,255,.3);
+  margin-bottom: 6px;
+}
+.team-card .team-name {
+  font-size: 16px; font-weight: 800; color: white;
+  margin-bottom: 4px; letter-spacing: .5px;
+}
+.team-card .team-members {
+  font-size: 11px; color: rgba(255,255,255,.4);
+  margin-bottom: 12px; line-height: 1.5;
+}
+.team-card .team-sales {
+  font-size: 24px; font-weight: 800;
+  color: var(--teal); font-family: 'Outfit', sans-serif;
+  line-height: 1;
+}
+.team-card.team-rank-1 .team-sales { color: var(--copper); }
+.team-card .team-comm {
+  font-size: 11px; color: rgba(255,255,255,.4); margin-top: 3px;
+}
+.team-card .team-bar-wrap {
+  height: 4px; background: rgba(255,255,255,.1);
+  border-radius: 4px; margin-top: 12px; overflow: hidden;
+}
+.team-card .team-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), #7dd3fc);
+  border-radius: 4px; transition: width .8s ease;
+}
+.team-card.team-rank-1 .team-bar-fill {
+  background: linear-gradient(90deg, var(--copper), #ffc04a);
+}
+.team-setup-msg {
+  text-align: center; padding: 32px 20px;
+  color: rgba(255,255,255,.3); font-size: 13px;
+  background: rgba(255,255,255,.03);
+  border: 1px dashed rgba(255,255,255,.1);
+  border-radius: 14px; font-style: italic;
+}
+
 </style>
 </head>
 <body>
@@ -596,6 +680,14 @@ body {
         <span id="challenge-foot-right"></span>
       </div>
     </div>
+  </div>
+
+  <!-- TEAM BATTLE -->
+  <div class="teams-wrap" id="teams-wrap" style="display:none">
+    <div class="teams-header">
+      <div class="teams-title">⚔️ Team Battle</div>
+    </div>
+    <div class="teams-grid" id="teams-grid"></div>
   </div>
 
   <!-- PODIUM -->
@@ -788,6 +880,7 @@ async function loadData() {
     const month = document.getElementById('month-select').value;
     const standings = buildStandings(data, month);
     renderTeamChallenge(standings);
+    renderTeamBattle(standings);
     render(standings);
     document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
   } catch(e) {
@@ -891,8 +984,84 @@ function getMilestoneBadges(p) {
   return badges;
 }
 
-// ── TEAM CHALLENGE ────────────────────────────────────────────────────────────
+// ── TEAM GOAL ─────────────────────────────────────────────────────────────────
 var TEAM_GOAL = 5000; // update this to your season target
+
+// ── TEAM CONFIG ───────────────────────────────────────────────────────────────
+// Edit team names and member lists here (or leave PLACEHOLDER until reveal)
+// memberNames must match exactly what is in the Members sheet
+var TEAMS = [
+  { name: 'Team A', emoji: '🔵', members: [] },
+  { name: 'Team B', emoji: '🔴', members: [] },
+  { name: 'Team C', emoji: '🟢', members: [] },
+  { name: 'Team D', emoji: '🟡', members: [] },
+  { name: 'Team E', emoji: '🟣', members: [] },
+  { name: 'Team F', emoji: '🟠', members: [] }
+];
+// To configure after reveal, replace the above with something like:
+// var TEAMS = [
+//   { name: 'Pondmonsters', emoji: '🐉', members: ['Jake','Maria','Chris'] },
+//   { name: 'Ripple Squad', emoji: '🌊', members: ['Sam','Taylor','Jordan'] },
+//   ...
+// ];
+
+function renderTeamBattle(standings) {
+  var wrap = document.getElementById('teams-wrap');
+  var grid = document.getElementById('teams-grid');
+  if (!wrap || !grid) return;
+
+  // Check if any team has members configured
+  var hasTeams = TEAMS.some(function(t) { return t.members && t.members.length > 0; });
+
+  if (!hasTeams) {
+    wrap.style.display = 'block';
+    grid.innerHTML = '<div class="team-setup-msg" style="grid-column:1/-1">Teams will be revealed soon — check back after the kickoff! 🚀</div>';
+    return;
+  }
+
+  // Build totals per team
+  var teamData = TEAMS.map(function(team) {
+    var totalSales = 0, totalComm = 0, memberCount = 0;
+    standings.forEach(function(p) {
+      if (team.members.indexOf(p.memberName) !== -1) {
+        totalSales += p.totalSales || 0;
+        totalComm  += p.totalCommission || 0;
+        memberCount++;
+      }
+    });
+    return {
+      name:        team.name,
+      emoji:       team.emoji,
+      members:     team.members,
+      totalSales:  totalSales,
+      totalComm:   totalComm,
+      memberCount: memberCount
+    };
+  });
+
+  // Sort descending by sales
+  teamData.sort(function(a, b) { return b.totalSales - a.totalSales; });
+
+  var maxSales = teamData[0].totalSales || 1;
+
+  wrap.style.display = 'block';
+  grid.innerHTML = teamData.map(function(team, i) {
+    var pct = maxSales > 0 ? Math.round((team.totalSales / maxSales) * 100) : 0;
+    var rankClass = i === 0 && team.totalSales > 0 ? 'team-rank-1' : '';
+    var rankLabel = i === 0 ? '🥇 1st Place' : i === 1 ? '🥈 2nd Place' : i === 2 ? '🥉 3rd Place' : '#' + (i+1);
+    var memberList = team.members.length > 0 ? team.members.join(' · ') : 'No members assigned';
+    return '<div class="team-card ' + rankClass + '">'
+      + '<div class="team-rank-badge">' + rankLabel + '</div>'
+      + '<div class="team-name">' + team.emoji + ' ' + team.name + '</div>'
+      + '<div class="team-members">' + memberList + '</div>'
+      + '<div class="team-sales">$' + team.totalSales.toFixed(0) + '</div>'
+      + '<div class="team-comm">$' + team.totalComm.toFixed(0) + ' commission</div>'
+      + '<div class="team-bar-wrap"><div class="team-bar-fill" style="width:' + pct + '%"></div></div>'
+      + '</div>';
+  }).join('');
+}
+
+
 
 function renderTeamChallenge(standings) {
   var wrap = document.getElementById('challenge-bar-wrap');

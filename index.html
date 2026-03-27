@@ -1411,6 +1411,7 @@ body.dark-mode .prod-autocomplete-item:hover { background: #162840; }
         <button class="tab" onclick="showManagerTab('reports')">Reports</button>
         <button class="tab" onclick="showManagerTab('config')">Setup</button>
         <button class="tab" id="super-admin-tab" style="display:none;background:linear-gradient(135deg,rgba(191,120,37,0.2),rgba(191,120,37,0.05));border-color:rgba(191,120,37,0.4);color:var(--copper)" onclick="showManagerTab('superadmin')">⭐ My Dashboard</button>
+        <button class="tab" id="my-rates-tab" style="display:none;background:linear-gradient(135deg,rgba(0,174,239,0.12),rgba(0,174,239,0.04));border-color:rgba(0,174,239,0.35);color:var(--teal)" onclick="showManagerTab('myrates')">💰 My Commission</button>
       </div>
 
       <!-- OVERVIEW -->
@@ -1607,6 +1608,54 @@ body.dark-mode .prod-autocomplete-item:hover { background: #162840; }
           </div>
         </div>
       </div>
+
+      <!-- MY COMMISSION (for managers with custom rates, e.g. Zak) -->
+      <div id="mgr-tab-myrates" class="hidden">
+        <div class="page-title-row" style="margin-bottom:8px">
+          <div class="page-title">My Commission</div>
+          <button class="btn btn-primary" onclick="saveMyRates()">💾 Save My Rates</button>
+        </div>
+        <div style="margin-bottom:22px;padding:12px 16px;background:var(--teal-glow);border:1px solid rgba(0,174,239,0.25);border-radius:8px;font-size:13px;color:var(--text-mid)">
+          Set your personal commission rate (%) for each product below. These rates apply only to your account and override the team defaults when you log an upsell here.
+        </div>
+
+        <div class="section-label" style="margin-bottom:12px">My Product Rates</div>
+        <div id="my-rates-list" style="margin-bottom:32px"></div>
+
+        <div class="section-label" style="margin-bottom:14px">Log My Upsell</div>
+        <div class="form-section" style="margin-bottom:24px">
+          <div class="field-row">
+            <div class="field"><label>Date of Sale</label><input type="date" id="mgr-sale-date"></div>
+            <div class="field"><label>Customer / Job Site</label><input type="text" id="mgr-sale-customer" placeholder="e.g. Smith Residence"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Invoice #</label><input type="text" id="mgr-sale-invoice" placeholder="e.g. INV-2026-001"></div>
+            <div class="field"><label>Product / Service</label><select id="mgr-sale-product" onchange="calcMgrCommission()"><option value="">— Select product —</option></select></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Sale Price ($)</label><input type="number" id="mgr-sale-price" min="0" step="0.01" oninput="calcMgrCommission()" placeholder="0.00"></div>
+            <div class="field" id="mgr-comm-preview-field" style="display:none">
+              <label>My Commission</label>
+              <div style="padding:10px 14px;background:var(--teal-glow);border:1px solid rgba(0,174,239,0.3);border-radius:6px;font-weight:700;font-size:18px;color:var(--teal)" id="mgr-comm-preview">$0.00</div>
+            </div>
+          </div>
+          <div id="mgr-log-alert"></div>
+          <button class="btn btn-primary" onclick="logMgrUpsell()" style="width:100%;justify-content:center;padding:12px">Log My Upsell →</button>
+        </div>
+
+        <div class="section-label" style="margin-bottom:14px">My Commission History</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+          <div class="stat-card" style="padding:14px 18px"><div class="stat-label">Total Sales</div><div class="stat-value blue" id="mgr-my-total-sales">$0</div></div>
+          <div class="stat-card" style="padding:14px 18px;--accent:var(--copper)"><div class="stat-label">My Commission</div><div class="stat-value gold" id="mgr-my-total-comm">$0</div></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Customer / Site</th><th>Product</th><th>Sale Price</th><th>My Commission</th><th>Status</th><th></th></tr></thead>
+            <tbody id="mgr-upsell-history"></tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
 
   </div>
@@ -2176,10 +2225,18 @@ window.addEventListener('DOMContentLoaded', async () => {
     } catch(e) {}
   }
 
-  // Seed default manager only if truly empty
+  // Seed default managers only if truly empty
   if (!state.managers.length) {
-    var defaultMgr = {id:'mgr-default', name:'Manager', password:'pondpro2024', email:''};
-    state.managers.push(defaultMgr);
+    state.managers.push({id:'mgr-default', name:'Manager', password:'pondpro2024', email:''});
+    state.managers.push({id:'mgr-zak', name:'Zak DeLaura', password:'1234', email:''});
+  } else {
+    // Ensure Zak exists — add if not found (safe to run every load)
+    var zakExists = state.managers.some(function(m){ return m.id === 'mgr-zak'; });
+    if (!zakExists) {
+      state.managers.push({id:'mgr-zak', name:'Zak DeLaura', password:'1234', email:''});
+      // Also write him to the sheet so he persists permanently
+      apiWrite({action:'addManager', id:'mgr-zak', name:'Zak DeLaura', password:'1234', email:''});
+    }
   }
 
   // Members added manually through Setup tab
@@ -2328,6 +2385,15 @@ function enterApp() {
         saTab.style.display = 'none';
       }
     }
+    // My Commission tab — visible to all managers EXCEPT Sean Sawicki
+    var mrTab = document.getElementById('my-rates-tab');
+    if (mrTab) {
+      if (state.currentUser && state.currentUser.name.toLowerCase().trim() !== 'sean sawicki') {
+        mrTab.style.display = '';
+      } else {
+        mrTab.style.display = 'none';
+      }
+    }
     resetAutoLogout();
   } else {
     document.getElementById('member-view').classList.remove('hidden');
@@ -2357,12 +2423,13 @@ function showTab(name) {
   if (name==='log') { renderQuickLog(); renderMotivationBar(); }
 }
 function showManagerTab(name) {
-  ['overview','review','reports','config','superadmin'].forEach(t => { var el = document.getElementById('mgr-tab-'+t); if(el) el.classList.toggle('hidden', t!==name); });
+  ['overview','review','reports','config','superadmin','myrates'].forEach(t => { var el = document.getElementById('mgr-tab-'+t); if(el) el.classList.toggle('hidden', t!==name); });
   document.querySelectorAll('#manager-view .tab').forEach((tab,i) => tab.classList.toggle('active',['overview','review','reports','config'][i]===name));
   if (name==='overview') renderManagerOverview();
   if (name==='review') renderReview();
   if (name==='reports') renderReports();
   if (name==='config') { renderProductConfig(); renderMembersConfig(); renderManagersConfig(); }
+  if (name==='myrates') renderMyRates();
 }
 
 // ── PRODUCTS ──────────────────────────────────────────────────────────────────
@@ -5176,8 +5243,176 @@ function renderEOMBanner() {
   el.appendChild(div);
 }
 
-// ── SUBMISSION NOTIFICATION ───────────────────────────────────────────────────
-function notifyManagerOnSubmission(memberName, month, totalSales, totalComm) {
+// ── MANAGER CUSTOM COMMISSION RATES ──────────────────────────────────────────
+function getMgrRatesKey() {
+  return 'neal-mgr-rates-' + (state.currentUser ? state.currentUser.id : 'unknown');
+}
+function loadMgrRates() {
+  try { return JSON.parse(localStorage.getItem(getMgrRatesKey()) || '{}'); } catch(e) { return {}; }
+}
+function saveMyRates() {
+  var products = state.products || [];
+  var rates = {};
+  products.forEach(function(p) {
+    var el = document.getElementById('mgr-rate-' + p.id);
+    if (el && el.value !== '') rates[p.id] = parseFloat(el.value) || 0;
+  });
+  localStorage.setItem(getMgrRatesKey(), JSON.stringify(rates));
+  // Visual feedback on the Save button
+  var btns = document.querySelectorAll('#mgr-tab-myrates .btn-primary');
+  var saveBtn = btns[0];
+  if (saveBtn) {
+    var orig = saveBtn.textContent;
+    saveBtn.textContent = '✓ Saved!';
+    saveBtn.style.background = 'var(--success)';
+    setTimeout(function(){ saveBtn.textContent = orig; saveBtn.style.background = ''; }, 2000);
+  }
+}
+function getMgrCommissionForProduct(productId, price) {
+  var rates = loadMgrRates();
+  if (rates[productId] !== undefined) {
+    return price * (rates[productId] / 100);
+  }
+  // Fall back to product default
+  var product = state.products.find(function(p){ return p.id === productId; });
+  if (product) return getCommission(product, price);
+  return 0;
+}
+function calcMgrCommission() {
+  var prodId = document.getElementById('mgr-sale-product') ? document.getElementById('mgr-sale-product').value : '';
+  var price  = parseFloat(document.getElementById('mgr-sale-price') ? document.getElementById('mgr-sale-price').value : 0) || 0;
+  var field  = document.getElementById('mgr-comm-preview-field');
+  var prev   = document.getElementById('mgr-comm-preview');
+  if (!prodId || price <= 0) { if (field) field.style.display = 'none'; return; }
+  var comm = getMgrCommissionForProduct(prodId, price);
+  if (prev) prev.textContent = '$' + comm.toFixed(2);
+  if (field) field.style.display = '';
+}
+function getMgrUpsells() {
+  try {
+    return JSON.parse(localStorage.getItem('neal-mgr-upsells-' + (state.currentUser ? state.currentUser.id : 'x')) || '[]');
+  } catch(e) { return []; }
+}
+function saveMgrUpsells(arr) {
+  localStorage.setItem('neal-mgr-upsells-' + (state.currentUser ? state.currentUser.id : 'x'), JSON.stringify(arr));
+}
+function logMgrUpsell() {
+  var date     = document.getElementById('mgr-sale-date') ? document.getElementById('mgr-sale-date').value : '';
+  var customer = document.getElementById('mgr-sale-customer') ? document.getElementById('mgr-sale-customer').value.trim() : '';
+  var invoice  = document.getElementById('mgr-sale-invoice') ? document.getElementById('mgr-sale-invoice').value.trim() : '';
+  var prodId   = document.getElementById('mgr-sale-product') ? document.getElementById('mgr-sale-product').value : '';
+  var price    = parseFloat(document.getElementById('mgr-sale-price') ? document.getElementById('mgr-sale-price').value : 0);
+  if (!date || !customer || !invoice || !prodId || !price || price <= 0) {
+    return showAlert('mgr-log-alert', 'Please fill in all fields.', 'error');
+  }
+  var product = state.products.find(function(p){ return p.id === prodId; });
+  if (!product) return showAlert('mgr-log-alert', 'Product not found.', 'error');
+  var comm = getMgrCommissionForProduct(prodId, price);
+  var upsell = {
+    id: 'mu' + Date.now(),
+    date: date, customer: customer, invoice: invoice,
+    productId: prodId, productName: product.name,
+    price: price, commission: comm, status: 'pending',
+    createdAt: new Date().toISOString()
+  };
+  var arr = getMgrUpsells();
+  arr.unshift(upsell);
+  saveMgrUpsells(arr);
+  // Clear form fields
+  ['mgr-sale-customer','mgr-sale-invoice','mgr-sale-price'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.value = '';
+  });
+  var sel = document.getElementById('mgr-sale-product'); if(sel) sel.value = '';
+  var field = document.getElementById('mgr-comm-preview-field'); if(field) field.style.display = 'none';
+  showAlert('mgr-log-alert', '✓ Upsell logged!', 'success');
+  renderMgrUpsellHistory();
+}
+function approveMgrUpsell(id) {
+  var arr = getMgrUpsells();
+  var u = arr.find(function(x){ return x.id === id; });
+  if (u) { u.status = 'approved'; saveMgrUpsells(arr); renderMgrUpsellHistory(); }
+}
+function deleteMgrUpsell(id) {
+  if (!confirm('Remove this upsell?')) return;
+  var arr = getMgrUpsells().filter(function(u){ return u.id !== id; });
+  saveMgrUpsells(arr);
+  renderMgrUpsellHistory();
+}
+function renderMgrUpsellHistory() {
+  var tbody       = document.getElementById('mgr-upsell-history');
+  var totalSalesEl = document.getElementById('mgr-my-total-sales');
+  var totalCommEl  = document.getElementById('mgr-my-total-comm');
+  if (!tbody) return;
+  var arr = getMgrUpsells();
+  var totalSales = 0, totalComm = 0;
+  arr.forEach(function(u){ totalSales += u.price || 0; totalComm += u.commission || 0; });
+  if (totalSalesEl) totalSalesEl.textContent = '$' + totalSales.toFixed(2);
+  if (totalCommEl)  totalCommEl.textContent  = '$' + totalComm.toFixed(2);
+  if (!arr.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:20px;font-style:italic">No upsells logged yet.</td></tr>';
+    return;
+  }
+  var STATUS_BG   = { pending:'var(--warn-bg)',    approved:'var(--success-bg)', denied:'var(--danger-bg)' };
+  var STATUS_FG   = { pending:'var(--warn)',        approved:'var(--success)',    denied:'var(--danger)' };
+  tbody.innerHTML = arr.map(function(u) {
+    var sc = STATUS_BG[u.status] || 'var(--warn-bg)';
+    var st = STATUS_FG[u.status] || 'var(--warn)';
+    var appBtn = u.status === 'pending'
+      ? '<button class="btn btn-approve" onclick="approveMgrUpsell(\'' + u.id + '\')" style="margin-right:4px">Approve</button>'
+      : '';
+    return '<tr>'
+      + '<td>' + (u.date || '') + '</td>'
+      + '<td>' + (u.customer || '') + '</td>'
+      + '<td>' + (u.productName || '') + '</td>'
+      + '<td>$' + (u.price || 0).toFixed(2) + '</td>'
+      + '<td style="color:var(--teal);font-weight:700">$' + (u.commission || 0).toFixed(2) + '</td>'
+      + '<td><span style="background:' + sc + ';color:' + st + ';border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700;text-transform:uppercase">' + (u.status || 'pending') + '</span></td>'
+      + '<td>' + appBtn + '<button class="btn btn-ghost" onclick="deleteMgrUpsell(\'' + u.id + '\')" style="font-size:10px;padding:3px 8px">✕</button></td>'
+      + '</tr>';
+  }).join('');
+}
+function renderMyRates() {
+  var rates    = loadMgrRates();
+  var products = state.products || [];
+  // Populate product select in upsell logger
+  var sel = document.getElementById('mgr-sale-product');
+  if (sel) {
+    sel.innerHTML = '<option value="">— Select product —</option>';
+    products.forEach(function(p) {
+      var o = document.createElement('option'); o.value = p.id; o.textContent = p.name; sel.appendChild(o);
+    });
+  }
+  // Default today's date
+  var dateEl = document.getElementById('mgr-sale-date');
+  if (dateEl && !dateEl.value) dateEl.value = today();
+  // Render rate cards
+  var list = document.getElementById('my-rates-list');
+  if (!list) return;
+  if (!products.length) {
+    list.innerHTML = '<div style="color:var(--text-dim);font-size:13px;padding:14px;background:white;border-radius:8px;border:1px solid var(--sand-mid)">No products configured yet — ask Sean to add products in Setup first.</div>';
+  } else {
+    list.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">'
+      + products.map(function(p) {
+          var savedRate   = rates[p.id];
+          var teamDefault = p.type === 'percent' ? p.percent + '%' : p.type === 'fixed' ? '$' + p.fixed + ' flat' : 'tiered';
+          var inputVal    = savedRate !== undefined ? savedRate : '';
+          return '<div style="background:white;border:1.5px solid ' + (inputVal !== '' ? 'rgba(0,174,239,0.4)' : 'var(--sand-mid)') + ';border-radius:8px;padding:14px 16px">'
+            + '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px">' + p.name + '</div>'
+            + '<div style="font-size:10px;color:var(--text-dim);letter-spacing:0.5px;margin-bottom:10px">Team default: ' + teamDefault + '</div>'
+            + '<div style="display:flex;align-items:center;gap:8px">'
+            + '<input type="number" id="mgr-rate-' + p.id + '" placeholder="e.g. 12" min="0" max="100" step="0.1" '
+            + 'style="width:80px;font-size:14px;font-weight:600;padding:6px 10px;border:1.5px solid var(--sand-dark);border-radius:6px" '
+            + 'value="' + inputVal + '" oninput="this.parentElement.parentElement.style.borderColor=this.value?\'rgba(0,174,239,0.5)\":\'var(--sand-mid)\'">'
+            + '<span style="font-size:13px;font-weight:600;color:var(--text-mid)">% commission</span>'
+            + '</div>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+  }
+  renderMgrUpsellHistory();
+}
+
+
   try {
     fetch(APPS_SCRIPT_URL, {
       method: 'POST', mode: 'no-cors',
