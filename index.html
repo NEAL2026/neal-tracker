@@ -1198,6 +1198,7 @@ body.dark-mode .prod-autocomplete-item:hover { background: #162840; }
 
 <!-- LOGIN -->
 <div id="login-screen">
+  <div id="maintenance-banner" style="display:none"></div>
   <div class="lb-ticker-wrap" id="lb-ticker-wrap"><div class="lb-ticker-track" id="lb-ticker">
     <span>🏆 Commission Leaderboard</span><span class="lb-ticker-sep">·</span>
     <span>Loading…</span><span class="lb-ticker-sep">·</span>
@@ -1311,15 +1312,21 @@ body.dark-mode .prod-autocomplete-item:hover { background: #162840; }
           </div>
           <div class="field">
             <label>Customer Name / Job Site</label>
-            <input type="text" id="sale-customer" placeholder="e.g. Johnson Residence · Maple Pond Rd">
+            <input type="text" id="sale-customer" placeholder="e.g. Johnson Residence · Maple Pond Rd" autocapitalize="words">
           </div>
-          <div class="field">
-            <label>Sale Price ($)</label>
-            <input type="number" id="sale-price" placeholder="0.00" min="0" step="0.01" oninput="calcCommission()">
+          <div class="field-row">
+            <div class="field">
+              <label>Sale Price ($)</label>
+              <input type="number" id="sale-price" placeholder="0.00" min="0" step="0.01" oninput="calcCommission()">
+            </div>
+            <div class="field">
+              <label>Quantity</label>
+              <input type="number" id="sale-quantity" placeholder="1" min="1" step="1" value="1" oninput="calcCommission()">
+            </div>
           </div>
           <div class="field">
             <label>Invoice #</label>
-            <input type="text" id="sale-invoice" placeholder="e.g. INV-2026-001">
+            <input type="text" id="sale-invoice" placeholder="e.g. INV-2026-001" inputmode="text" autocapitalize="characters">
           </div>
           <div class="commission-preview" id="commission-preview-box" style="display:none">
             <div>
@@ -1349,7 +1356,32 @@ body.dark-mode .prod-autocomplete-item:hover { background: #162840; }
               </label>
             </div>
           </div>
-          <button class="btn btn-primary" onclick="logUpsell()" style="padding:10px 24px">+ Add Upsell</button>
+
+          <div class="field">
+            <label>Note <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-dim)">(optional — e.g. add-on during cleanout)</span></label>
+            <input type="text" id="sale-note" placeholder="Any context for the manager…" autocapitalize="sentences">
+          </div>
+
+          <!-- SPLIT WITH TEAMMATES -->
+          <div style="margin-bottom:14px">
+            <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;user-select:none">
+              <input type="checkbox" id="chk-split" style="width:16px;height:16px;cursor:pointer" onchange="toggleSplitPanel()">
+              <span style="font-weight:600;color:var(--text)">🤝 Split commission with teammates</span>
+              <span id="split-active-badge" style="display:none;align-items:center;gap:4px;background:rgba(0,174,239,0.12);border:1px solid rgba(0,174,239,0.35);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;color:var(--teal);letter-spacing:0.5px">ACTIVE</span>
+            </label>
+            <div id="split-panel" style="display:none;margin-top:12px;background:var(--sand);border-radius:8px;padding:14px 16px">
+              <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px">Set each person's share — must total 100%</div>
+              <div id="split-member-list" style="display:flex;flex-direction:column;gap:8px"></div>
+              <div id="split-total-row" style="margin-top:10px;display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:12px;font-weight:700;color:var(--text-mid)">Total</span>
+                <span id="split-total-display" style="font-size:13px;font-weight:800;color:var(--teal)">0%</span>
+              </div>
+              <div id="split-preview" style="margin-top:10px;padding:10px 14px;background:var(--teal-glow);border:1px solid rgba(0,174,239,0.25);border-radius:6px;font-size:12px;color:var(--text-mid);display:none"></div>
+              <div id="split-error" style="margin-top:8px;font-size:12px;color:var(--danger);font-weight:600;display:none">⚠️ Percentages must add up to 100% before you can save.</div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="logUpsell()" style="padding:10px 24px;width:100%;justify-content:center">+ Add Upsell</button>
         </div>
       </div>
 
@@ -2052,6 +2084,14 @@ var AQUASCAPE_PRODUCTS = [{"n": "ULTRAKLEAN 3500 POND FILTER ELECTRONIC CONTROL 
 const API_URL = 'https://script.google.com/macros/s/AKfycbxtmKRUaeJwKxfGo6oUHY-x8cexBKVpoDARbFDyGSJjutt3JWrRRMtmuK5ei8bcHUQUSw/exec';
 const MANAGER_PASS = 'pondpro2024';
 
+// ── MAINTENANCE MODE ──────────────────────────────────────────────────────────
+// Set MAINTENANCE_MODE to true to show a banner (or full block) to all users.
+// Set MAINTENANCE_BLOCK to true to prevent login entirely until you're done.
+var MAINTENANCE_MODE    = false;
+var MAINTENANCE_BLOCK   = false;
+var MAINTENANCE_MESSAGE = 'The app is currently undergoing maintenance. It will be back up shortly — check back in a few minutes.';
+// ─────────────────────────────────────────────────────────────────────────────
+
 let state = { currentUser:null, isManager:false, members:[], managers:[], products:[], upsells:[], submissions:[] };
 
 // ── API ───────────────────────────────────────────────────────────────────────
@@ -2249,6 +2289,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('sale-date').value = today();
   refreshLoginLeaderboard();
   setInterval(refreshLoginLeaderboard, 60000);
+
+  // Maintenance mode check
+  renderMaintenanceBanner();
 
   // Always restore session if one exists
   try {
@@ -2467,6 +2510,10 @@ function calcCommission() {
   } else if (condWrap) {
     condWrap.style.display = 'none';
   }
+  // Keep split preview in sync if panel is open
+  if (document.getElementById('chk-split') && document.getElementById('chk-split').checked) {
+    updateSplitPreview();
+  }
 }
 function getCommission(product, price) {
   if (product.type==='percent') return price*(product.percent/100);
@@ -2479,6 +2526,129 @@ function getCommission(product, price) {
   return 0;
 }
 
+// ── MAINTENANCE BANNER ────────────────────────────────────────────────────────
+function renderMaintenanceBanner() {
+  var el = document.getElementById('maintenance-banner');
+  if (!el) return;
+  if (!MAINTENANCE_MODE) { el.style.display = 'none'; return; }
+
+  if (MAINTENANCE_BLOCK) {
+    // Full block — covers the login form area with a wall
+    el.style.cssText = 'display:block;background:#1a3a52;border-bottom:3px solid #bf7825;padding:40px 24px;text-align:center;width:100%';
+    el.innerHTML = '<div style="font-size:40px;margin-bottom:16px">🔧</div>'
+      + '<div style="font-family:Cormorant Garamond,serif;font-size:28px;font-weight:700;color:white;margin-bottom:10px">App Temporarily Unavailable</div>'
+      + '<div style="font-size:15px;color:rgba(255,255,255,0.65);max-width:420px;margin:0 auto;line-height:1.6">' + MAINTENANCE_MESSAGE + '</div>'
+      + '<div style="margin-top:20px;font-size:12px;color:rgba(255,255,255,0.35);font-weight:600;letter-spacing:1px">NEW ENGLAND AQUATIC LANDSCAPING</div>';
+    // Hide login form
+    var loginWrap = document.querySelector('.login-wrap');
+    if (loginWrap) loginWrap.style.display = 'none';
+  } else {
+    // Banner only — warning strip above login
+    el.style.cssText = 'display:block;background:#bf7825;padding:10px 20px;text-align:center;width:100%';
+    el.innerHTML = '<span style="font-size:13px;font-weight:700;color:white;letter-spacing:0.3px">⚠️  ' + MAINTENANCE_MESSAGE + '</span>';
+  }
+}
+
+// ── SPLIT COMMISSION ──────────────────────────────────────────────────────────
+function toggleSplitPanel() {
+  var checked = document.getElementById('chk-split').checked;
+  document.getElementById('split-panel').style.display = checked ? 'block' : 'none';
+  // Show/hide active badge
+  var badge = document.getElementById('split-active-badge');
+  if (badge) badge.style.display = checked ? 'inline-flex' : 'none';
+  if (checked) renderSplitMemberList();
+}
+
+function renderSplitMemberList() {
+  var list = document.getElementById('split-member-list');
+  if (!list) return;
+  var others = state.members.filter(function(m){ return m.id !== state.currentUser.id; });
+  if (!others.length) {
+    list.innerHTML = '<div style="font-size:13px;color:var(--text-dim);font-style:italic">No other team members found.</div>';
+    return;
+  }
+  // Current user row first (always included)
+  var rows = '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--sand-dark)">'
+    + '<span style="flex:1;font-size:13px;font-weight:700;color:var(--text)">' + state.currentUser.name + ' <span style="font-size:11px;color:var(--teal);font-weight:600">(you)</span></span>'
+    + '<div style="display:flex;align-items:center;gap:6px">'
+    + '<input type="number" id="split-pct-me" min="0" max="100" step="1" value="100" '
+    + 'style="width:62px;font-size:14px;font-weight:700;padding:5px 8px;border:1.5px solid var(--sand-dark);border-radius:6px;text-align:center" '
+    + 'oninput="updateSplitPreview()">'
+    + '<span style="font-size:13px;font-weight:600;color:var(--text-mid)">%</span>'
+    + '</div></div>';
+
+  rows += others.map(function(m) {
+    return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--sand-dark)">'
+      + '<label style="flex:1;display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text)">'
+      + '<input type="checkbox" class="split-chk" data-id="' + m.id + '" data-name="' + m.name + '" '
+      + 'style="width:15px;height:15px;cursor:pointer" onchange="onSplitMemberToggle(this)">'
+      + m.name + '</label>'
+      + '<div style="display:flex;align-items:center;gap:6px">'
+      + '<input type="number" id="split-pct-' + m.id + '" min="0" max="100" step="1" value="0" '
+      + 'disabled style="width:62px;font-size:14px;font-weight:700;padding:5px 8px;border:1.5px solid var(--sand-dark);border-radius:6px;text-align:center;opacity:0.4" '
+      + 'oninput="updateSplitPreview()">'
+      + '<span style="font-size:13px;font-weight:600;color:var(--text-mid)">%</span>'
+      + '</div></div>';
+  }).join('');
+
+  list.innerHTML = rows;
+  updateSplitPreview();
+}
+
+function onSplitMemberToggle(chk) {
+  var id  = chk.getAttribute('data-id');
+  var inp = document.getElementById('split-pct-' + id);
+  if (!inp) return;
+  inp.disabled = !chk.checked;
+  inp.style.opacity = chk.checked ? '1' : '0.4';
+  if (!chk.checked) inp.value = '0';
+  updateSplitPreview();
+}
+
+function getSplitPeople() {
+  var people = [{ id: state.currentUser.id, name: state.currentUser.name, pct: parseFloat(document.getElementById('split-pct-me').value)||0 }];
+  document.querySelectorAll('.split-chk:checked').forEach(function(chk) {
+    var id  = chk.getAttribute('data-id');
+    var pct = parseFloat(document.getElementById('split-pct-' + id).value)||0;
+    people.push({ id, name: chk.getAttribute('data-name'), pct });
+  });
+  return people;
+}
+
+function updateSplitPreview() {
+  var people  = getSplitPeople();
+  var total   = people.reduce(function(s, p){ return s + p.pct; }, 0);
+  var totalEl = document.getElementById('split-total-display');
+  var preview = document.getElementById('split-preview');
+  var errEl   = document.getElementById('split-error');
+  if (totalEl) {
+    totalEl.textContent = total + '%';
+    totalEl.style.color = total === 100 ? 'var(--success)' : total > 100 ? 'var(--danger)' : 'var(--teal)';
+  }
+  // Calculate commission for preview
+  var price   = parseFloat(document.getElementById('sale-price') ? document.getElementById('sale-price').value : 0)||0;
+  var qty     = parseFloat(document.getElementById('sale-quantity') ? document.getElementById('sale-quantity').value : 1)||1;
+  var prodId  = document.getElementById('sale-product') ? document.getElementById('sale-product').value : '';
+  var product = state.products.find(function(p){ return p.id === prodId; });
+  var totalComm = product && price > 0 ? getCommission(product, price) * qty : 0;
+
+  if (total === 100 && people.length > 1 && totalComm > 0) {
+    if (preview) {
+      preview.style.display = 'block';
+      preview.innerHTML = people.map(function(p) {
+        return '<div style="display:flex;justify-content:space-between;padding:3px 0">'
+          + '<span style="font-weight:600">' + p.name + ' (' + p.pct + '%)</span>'
+          + '<span style="color:var(--teal);font-weight:700">$' + (totalComm * p.pct / 100).toFixed(2) + '</span>'
+          + '</div>';
+      }).join('');
+    }
+    if (errEl) errEl.style.display = 'none';
+  } else {
+    if (preview) preview.style.display = 'none';
+    if (errEl) errEl.style.display = total !== 100 && people.length > 1 ? 'block' : 'none';
+  }
+}
+
 // ── LOG UPSELL ────────────────────────────────────────────────────────────────
 function logUpsell() {
   const date     = document.getElementById('sale-date').value;
@@ -2487,38 +2657,82 @@ function logUpsell() {
   const prodId   = document.getElementById('sale-product').value;
   const price    = parseFloat(document.getElementById('sale-price').value);
   const qty      = parseInt(document.getElementById('sale-quantity') ? document.getElementById('sale-quantity').value : 1)||1;
+  const note     = document.getElementById('sale-note') ? document.getElementById('sale-note').value.trim() : '';
   if (!date||!customer||!invoice||!prodId||!price||price<=0) return showAlert('log-alert','Please fill in all fields including Invoice #.','error');
-  // Check required conditions
+  if (qty < 1) return showAlert('log-alert','Quantity must be at least 1.','error');
   var product2 = state.products.find(function(p){ return p.id===prodId; });
   if (product2) {
     if (product2.reqPaid && !document.getElementById('chk-paid').checked) return showAlert('log-alert','Please confirm the client invoice has been paid.','error');
     if (product2.reqCallback && !document.getElementById('chk-callback').checked) return showAlert('log-alert','Please confirm no callbacks in the last 30 days.','error');
     if (product2.reqProfit && !document.getElementById('chk-profit').checked) return showAlert('log-alert','Please confirm 50%+ gross profit for this job.','error');
   }
-  const product    = state.products.find(p=>p.id===prodId);
-  const commission = getCommission(product, price) * qty;
+  const product  = state.products.find(p=>p.id===prodId);
+  const totalComm = getCommission(product, price) * qty;
   var condPaid     = document.getElementById('chk-paid')     ? document.getElementById('chk-paid').checked     : false;
   var condCallback = document.getElementById('chk-callback') ? document.getElementById('chk-callback').checked : false;
   var condProfit   = document.getElementById('chk-profit')   ? document.getElementById('chk-profit').checked   : false;
-  const upsell = {
-    id:'u'+Date.now(), memberId:state.currentUser.id, memberName:state.currentUser.name,
-    date, customer, invoice, productId:prodId, productName:product.name,
-    price: price * qty, commission, quantity: qty, status:'pending', submitted:false, submittedMonth:'',
-    condPaid, condCallback, condProfit,
-    createdAt: new Date().toISOString()
-  };
-  apiWrite({action:'addUpsell', ...upsell});
-  state.upsells.push(upsell);
+
+  // Handle split
+  var splitting = document.getElementById('chk-split') && document.getElementById('chk-split').checked;
+  if (splitting) {
+    var people = getSplitPeople();
+    var pctTotal = people.reduce(function(s,p){ return s+p.pct; }, 0);
+    if (people.length < 2) return showAlert('log-alert','Select at least one teammate to split with.','error');
+    if (pctTotal !== 100) return showAlert('log-alert','Percentages must add up to 100% before saving.','error');
+    var ts = Date.now();
+    var splitNote = 'Split: ' + people.map(function(p){ return p.name + ' ' + p.pct + '%'; }).join(', ') + (note ? ' | ' + note : '');
+    people.forEach(function(person, i) {
+      var personComm  = totalComm * person.pct / 100;
+      var personPrice = (price * qty) * person.pct / 100;
+      var upsell = {
+        id: 'u' + ts + i,
+        memberId: person.id, memberName: person.name,
+        date, customer,
+        invoice: invoice + ' (split)',
+        productId: prodId, productName: product.name,
+        price: personPrice, commission: personComm,
+        quantity: qty, status: 'pending', submitted: false, submittedMonth: '',
+        condPaid, condCallback, condProfit,
+        note: splitNote,
+        createdAt: new Date().toISOString()
+      };
+      apiWrite({action:'addUpsell', ...upsell});
+      if (person.id === state.currentUser.id) state.upsells.push(upsell);
+    });
+    var myPct = people.find(function(p){ return p.id === state.currentUser.id; });
+    var myComm = totalComm * (myPct ? myPct.pct : 0) / 100;
+    showAlert('log-alert', 'Split upsell saved — your share: <strong>$' + myComm.toFixed(2) + '</strong>', 'success');
+  } else {
+    const commission = totalComm;
+    const upsell = {
+      id:'u'+Date.now(), memberId:state.currentUser.id, memberName:state.currentUser.name,
+      date, customer, invoice, productId:prodId, productName:product.name,
+      price: price * qty, commission, quantity: qty, status:'pending', submitted:false, submittedMonth:'',
+      condPaid, condCallback, condProfit,
+      note: note,
+      createdAt: new Date().toISOString()
+    };
+    apiWrite({action:'addUpsell', ...upsell});
+    state.upsells.push(upsell);
+    showAlert('log-alert','Upsell saved — est. commission: <strong>$'+commission.toFixed(2)+'</strong>','success');
+  }
+
+  // Reset form
   document.getElementById('sale-customer').value='';
   document.getElementById('sale-invoice').value='';
   document.getElementById('sale-price').value='';
   document.getElementById('sale-product').value='';
   if (document.getElementById('sale-quantity')) document.getElementById('sale-quantity').value='1';
+  if (document.getElementById('sale-note')) document.getElementById('sale-note').value='';
   ['chk-paid','chk-callback','chk-profit'].forEach(function(id){ var el=document.getElementById(id); if(el) el.checked=false; });
   var cw = document.getElementById('upsell-conditions'); if(cw) cw.style.display='none';
   document.getElementById('commission-preview-box').style.display='none';
+  // Reset split
+  var splitChk = document.getElementById('chk-split');
+  if (splitChk) { splitChk.checked=false; document.getElementById('split-panel').style.display='none'; }
+  var splitBadge = document.getElementById('split-active-badge');
+  if (splitBadge) splitBadge.style.display='none';
   checkFirstUpsellOfDay();
-  showAlert('log-alert','Upsell saved — est. commission: <strong>$'+commission.toFixed(2)+'</strong>','success');
   renderQuickLog();
   renderMotivationBar();
 }
