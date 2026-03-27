@@ -5412,7 +5412,8 @@ function renderMyRates() {
   renderMgrUpsellHistory();
 }
 
-
+// ── SUBMISSION NOTIFICATION ───────────────────────────────────────────────────
+function notifyManagerOnSubmission(memberName, month, totalSales, totalComm) {
   try {
     fetch(APPS_SCRIPT_URL, {
       method: 'POST', mode: 'no-cors',
