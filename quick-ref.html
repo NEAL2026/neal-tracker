@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a3a52">
+<title>NEAL Team Tools — Quick Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: #060f18;
+  color: #fff;
+  min-height: 100vh;
+  padding-bottom: 32px;
+}
+
+/* ── HEADER ── */
+.header {
+  background: #1a3a52;
+  padding: 20px 20px 16px;
+  border-bottom: 3px solid #00aeef;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.header-icon { font-size: 28px; flex-shrink: 0; }
+.header-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.15;
+  letter-spacing: 0.3px;
+}
+.header-sub {
+  font-size: 11px;
+  font-weight: 600;
+  color: #7a9db0;
+  margin-top: 2px;
+  letter-spacing: 0.5px;
+}
+
+/* ── SECTIONS ── */
+.section {
+  margin: 16px 16px 0;
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px 10px 0 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.section-head.teal    { background: #00aeef; color: #fff; }
+.section-head.copper  { background: #bf7825; color: #fff; }
+.section-head.green   { background: #1a6e48; color: #fff; }
+
+.section-body {
+  background: #0b1d2e;
+  border: 1px solid #1f4562;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  overflow: hidden;
+}
+
+/* ── ROWS ── */
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 14px;
+  border-bottom: 1px solid #1a3a52;
+}
+.row:last-child { border-bottom: none; }
+
+.row-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  width: 28px;
+  text-align: center;
+  margin-top: 1px;
+}
+.row-content { flex: 1; min-width: 0; }
+.row-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #7a9db0;
+  margin-bottom: 3px;
+}
+.row-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.4;
+}
+.row-value.teal   { color: #00aeef; }
+.row-value.copper { color: #e8a030; }
+.row-value.green  { color: #4caf82; }
+.row-value.dim    { color: #7a9db0; font-weight: 500; font-size: 13px; }
+
+/* step tags */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.step-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #255070;
+  color: #00aeef;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.step-text {
+  font-size: 13px;
+  color: #e0eaf0;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.step-text strong { color: #fff; font-weight: 700; }
+
+/* warn box */
+.warn-box {
+  background: #3a1a05;
+  border-left: 3px solid #bf7825;
+  margin: 0 14px 12px;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  color: #e8a030;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* ── CONTACT CARDS ── */
+.contacts {
+  margin: 16px 16px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.contact-card {
+  background: #0b1d2e;
+  border: 1px solid #1f4562;
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+}
+.contact-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.contact-role {
+  font-size: 10px;
+  font-weight: 600;
+  color: #7a9db0;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.contact-phone {
+  display: block;
+  background: #1a3a52;
+  border-radius: 6px;
+  padding: 7px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #00aeef;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
+.contact-phone:active { background: #255070; }
+
+/* ── FOOTER ── */
+.footer {
+  margin: 20px 16px 0;
+  text-align: center;
+  font-size: 11px;
+  color: #3a5870;
+  font-weight: 500;
+  line-height: 1.6;
+}
+.footer a { color: #255070; text-decoration: none; }
+
+/* ── HUB BUTTON ── */
+.hub-btn {
+  display: block;
+  margin: 16px 16px 0;
+  background: #00aeef;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+.hub-btn:active { background: #0095ce; }
+.hub-btn-sub {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.7);
+  margin-top: 3px;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-icon">🌊</div>
+  <div>
+    <div class="header-title">NEAL Team Tools</div>
+    <div class="header-sub">Quick Reference · 2026 Season</div>
+  </div>
+</div>
+
+<!-- HUB BUTTON -->
+<a class="hub-btn" href="https://neal2026.github.io/neal-tracker/hub.html">
+  Open the I Love Ponds Hub
+  <div class="hub-btn-sub">Tap to open · works on any phone</div>
+</a>
+
+<!-- ── SECTION 1: TEAM APP ── -->
+<div class="section">
+  <div class="section-head teal">💰 &nbsp; Commission Tracker</div>
+  <div class="section-body">
+
+    <div class="row">
+      <div class="row-icon">🔐</div>
+      <div class="row-content">
+        <div class="row-label">Log In</div>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-text">Pick your name from the list</div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-text">Enter your PIN</div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-text">Tap <strong>Sign In</strong></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="row-icon">💰</div>
+      <div class="row-content">
+        <div class="row-label">Log an Upsell</div>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Date</strong> · <strong>Customer</strong> · <strong>Invoice #</strong></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-text">Select <strong>Product</strong> · Enter <strong>Price</strong></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-text">Tap <strong>Log Upsell</strong> — commission calculates automatically</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="row-icon">📤</div>
+      <div class="row-content">
+        <div class="row-label">Submit Monthly (End of Month)</div>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-text">Go to <strong>Submit</strong> tab</div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-text">Pick the month → review upsells</div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-text">Tap <strong>Submit Claim</strong> → manager approves → you get paid</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="row-icon">📱</div>
+      <div class="row-content">
+        <div class="row-label">Tip — Add to Home Screen</div>
+        <div class="row-value dim">Safari/Chrome → Share → Add to Home Screen → one-tap access like a real app</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── SECTION 2: KAERU ── -->
+<div class="section">
+  <div class="section-head copper">🌿 &nbsp; Kaeru — Your Field Page</div>
+  <div class="section-body">
+
+    <div class="row">
+      <div class="row-icon">📲</div>
+      <div class="row-content">
+        <div class="row-label">QR Code in Every Vehicle</div>
+        <div class="row-value dim">A QR sticker is in your vehicle. When a client or contact scans it, they land on your Kaeru page — your name, contact info, and NEAL links. No business card needed.</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="row-icon">⭐</div>
+      <div class="row-content">
+        <div class="row-label">What It Has</div>
+        <div class="row-value dim">Your info · iloveponds.com links · customer review links · NEAL branding</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── SECTION 3: FIELDSTOCKPRO ── -->
+<div class="section">
+  <div class="section-head green">📦 &nbsp; FieldStockPro — Van Inventory</div>
+  <div class="section-body">
+
+    <div class="row">
+      <div class="row-icon">🌐</div>
+      <div class="row-content">
+        <div class="row-label">Website</div>
+        <div class="row-value green">fieldstockpro.com</div>
+        <div class="row-value dim" style="margin-top:2px">Log in with your work email</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="row-icon">🔄</div>
+      <div class="row-content">
+        <div class="row-label">Used Something? Restock Your Van</div>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Products</strong> → search by name or scan barcode</div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-text">Select <strong>your vehicle</strong> → enter quantity → confirm</div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-text">Do it <strong>same day</strong> — no exceptions</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="row-icon">✅</div>
+      <div class="row-content">
+        <div class="row-label">Standard Job (Jobber)</div>
+        <div class="row-value dim">Invoice in Jobber like always — FieldStockPro auto-updates your van stock. Nothing extra to do.</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="row-icon">📄</div>
+      <div class="row-content">
+        <div class="row-label">Sean Issued Items for Your Job</div>
+        <div class="row-value dim">Check the printed list he left with the materials.<br>
+        <strong style="color:#e8a030">Do NOT invoice these in Jobber</strong> — they're already tracked. Invoicing them double-counts.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- help ticket -->
+<div class="section" style="margin-top:12px">
+  <div class="section-body" style="border-radius:10px;border:1px solid #1f4562">
+    <div class="row">
+      <div class="row-icon">🛠️</div>
+      <div class="row-content">
+        <div class="row-label">Something Broken or Confusing?</div>
+        <div class="row-value dim">Hub → Help Ticket → Submit. Sean gets an email immediately.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  New England Aquatic Landscaping · <a href="https://iloveponds.com">iloveponds.com</a><br>
+  2026 Season
+</div>
+
+</body>
+</html>
